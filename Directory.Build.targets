@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+    <CollectCoverage>true</CollectCoverage>
+    <CoverletOutputFormat>cobertura</CoverletOutputFormat>
+    <CoverletOutput>$(MSBuildProjectDirectory)\TestResults\coverage\</CoverletOutput>
+    <Threshold>70</Threshold>
+    <ThresholdType>line</ThresholdType>
+    <ThresholdStat>total</ThresholdStat>
+    <Include>[ProFootball.Application]*,[ProFootball.Domain]*</Include>
+  </PropertyGroup>
+</Project>

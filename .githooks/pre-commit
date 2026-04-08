@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! command -v dotnet >/dev/null 2>&1; then
+  echo "dotnet SDK is required"
+  exit 1
+fi
+
+dotnet format --verify-no-changes ProFootball.slnx
+dotnet build ProFootball.slnx --configuration Debug
+dotnet test ProFootball.slnx --configuration Debug --no-build

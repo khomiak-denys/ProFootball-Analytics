@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="src/ProFootball.Application/ProFootball.Application.csproj" />
+  <Project Path="src/ProFootball.Domain/ProFootball.Domain.csproj" />
+  <Project Path="src/ProFootball.Infrastructure/ProFootball.Infrastructure.csproj" />
+  <Project Path="src/ProFootball.Presentation/ProFootball.Presentation.csproj" />
+  <Project Path="tests/ProFootball.Application.Tests/ProFootball.Application.Tests.csproj" />
+</Solution>
