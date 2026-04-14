@@ -41,13 +41,15 @@ public partial class App : System.Windows.Application
 
     protected override async void OnExit(ExitEventArgs e)
     {
+        _uiScope?.Dispose();
+        _uiScope = null;
+
         if (_host is not null)
         {
             await _host.StopAsync(TimeSpan.FromSeconds(5));
             _host.Dispose();
+            _host = null;
         }
-
-        _uiScope?.Dispose();
 
         base.OnExit(e);
     }

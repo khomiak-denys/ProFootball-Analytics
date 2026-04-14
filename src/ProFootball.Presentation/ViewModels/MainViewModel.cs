@@ -5,6 +5,19 @@ namespace ProFootball.Presentation.ViewModels;
 
 public sealed class MainViewModel : ObservableObject
 {
+    public static class Tabs
+    {
+        public const int Dashboard = 0;
+        public const int CountriesLeagues = 1;
+        public const int Teams = 2;
+        public const int TeamDetails = 3;
+        public const int Players = 4;
+        public const int PlayerDetails = 5;
+        public const int Matches = 6;
+        public const int MatchDetails = 7;
+        public const int Analytics = 8;
+    }
+
     private int _selectedTabIndex;
 
     public MainViewModel(
@@ -70,20 +83,20 @@ public sealed class MainViewModel : ObservableObject
     {
         TeamDetails.SelectedTeamApiId = teamApiId;
         TeamDetails.LoadCommand.Execute(null);
-        SelectedTabIndex = 3;
+        SelectedTabIndex = Tabs.TeamDetails;
     }
 
     private void OpenPlayerDetails(int playerApiId)
     {
         PlayerDetails.SelectedPlayerApiId = playerApiId;
         PlayerDetails.LoadCommand.Execute(null);
-        SelectedTabIndex = 5;
+        SelectedTabIndex = Tabs.PlayerDetails;
     }
 
     private void OpenMatchDetails(int matchApiId)
     {
         MatchDetails.SelectedMatchApiId = matchApiId;
         MatchDetails.LoadCommand.Execute(null);
-        SelectedTabIndex = 7;
+        SelectedTabIndex = Tabs.MatchDetails;
     }
 }

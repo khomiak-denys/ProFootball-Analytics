@@ -8,6 +8,8 @@ namespace ProFootball.Presentation.ViewModels;
 public sealed class CountriesLeaguesViewModel : ObservableObject
 {
     private readonly ICountriesLeaguesQueryService _service;
+    private readonly SemaphoreSlim _loadLeaguesLock = new(1, 1);
+    private CancellationTokenSource? _loadLeaguesCts;
     private CountryDto? _selectedCountry;
 
     public CountriesLeaguesViewModel(ICountriesLeaguesQueryService service)
@@ -32,7 +34,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject
                 return;
             }
 
-            _ = LoadLeaguesAsync();
+            _ = ReloadLeaguesSafeAsync();
         }
     }
 
@@ -47,16 +49,48 @@ public sealed class CountriesLeaguesViewModel : ObservableObject
             Countries.Add(country);
         }
 
-        await LoadLeaguesAsync();
+        await ReloadLeaguesSafeAsync();
     }
 
-    private async Task LoadLeaguesAsync()
+    private async Task ReloadLeaguesSafeAsync()
     {
-        Leagues.Clear();
-        var leagues = await _service.GetLeaguesAsync(SelectedCountry?.Id);
-        foreach (var league in leagues)
+        var loadToken = ReplaceLoadToken();
+        var lockAcquired = false;
+
+        await _loadLeaguesLock.WaitAsync(loadToken);
+        lockAcquired = true;
+        try
         {
-            Leagues.Add(league);
+            loadToken.ThrowIfCancellationRequested();
+            var leagues = await _service.GetLeaguesAsync(SelectedCountry?.Id, loadToken);
+            loadToken.ThrowIfCancellationRequested();
+
+            Leagues.Clear();
+            foreach (var league in leagues)
+            {
+                Leagues.Add(league);
+            }
         }
+        catch (OperationCanceledException)
+        {
+        }
+        catch (Exception)
+        {
+        }
+        finally
+        {
+            if (lockAcquired)
+            {
+                _loadLeaguesLock.Release();
+            }
+        }
+    }
+
+    private CancellationToken ReplaceLoadToken()
+    {
+        _loadLeaguesCts?.Cancel();
+        _loadLeaguesCts?.Dispose();
+        _loadLeaguesCts = new CancellationTokenSource();
+        return _loadLeaguesCts.Token;
     }
 }
