@@ -22,7 +22,6 @@ public sealed class TeamConfiguration : IEntityTypeConfiguration<Team>
             .HasMaxLength(20);
 
         builder.HasIndex(team => team.LongName);
-        builder.HasIndex(team => team.TeamApiId).IsUnique();
         builder.HasIndex(team => team.TeamFifaApiId);
     }
 }

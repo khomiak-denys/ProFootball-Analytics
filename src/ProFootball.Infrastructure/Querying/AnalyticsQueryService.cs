@@ -48,10 +48,10 @@ public sealed class AnalyticsQueryService(ProFootballDbContext dbContext) : IAna
 
         if (!string.IsNullOrWhiteSpace(query.PreferredFoot))
         {
-            var foot = query.PreferredFoot.Trim().ToLowerInvariant();
+            var footPattern = LikePattern.Exact(query.PreferredFoot.Trim());
             attributesQuery = attributesQuery.Where(attribute =>
                 attribute.PreferredFoot != null &&
-                attribute.PreferredFoot.ToLower() == foot);
+                EF.Functions.ILike(attribute.PreferredFoot, footPattern));
         }
 
         var groupedQuery = from attribute in attributesQuery
