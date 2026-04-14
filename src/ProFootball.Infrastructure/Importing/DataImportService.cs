@@ -29,32 +29,45 @@ public sealed class DataImportService(
         var stopwatch = Stopwatch.StartNew();
 
         await dbContext.Database.MigrateAsync(cancellationToken);
-        await ClearExistingDataAsync(cancellationToken);
 
-        await using var sqliteConnection = new SqliteConnection($"Data Source={request.SqlitePath};Mode=ReadOnly;Cache=Shared");
-        await sqliteConnection.OpenAsync(cancellationToken);
+        await using var importTransaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
-        var skipped = 0;
-        var countries = await ImportCountriesAsync(sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-        var leagues = await ImportLeaguesAsync(sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-        var teams = await ImportTeamsAsync(sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-        var players = await ImportPlayersAsync(sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-        var matches = await ImportMatchesAsync(sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-        var teamAttributes = await ImportTeamAttributesAsync(sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-        var playerAttributes = await ImportPlayerAttributesAsync(sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+        try
+        {
+            await ClearExistingDataAsync(cancellationToken);
 
-        stopwatch.Stop();
+            await using var sqliteConnection = new SqliteConnection($"Data Source={request.SqlitePath};Mode=ReadOnly;Cache=Shared");
+            await sqliteConnection.OpenAsync(cancellationToken);
 
-        return new DataImportResult(
-            countries,
-            leagues,
-            teams,
-            players,
-            matches,
-            teamAttributes,
-            playerAttributes,
-            skipped,
-            stopwatch.Elapsed);
+            var skipped = 0;
+            var countries = await ImportCountriesAsync(sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+            var leagues = await ImportLeaguesAsync(sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+            var teams = await ImportTeamsAsync(sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+            var players = await ImportPlayersAsync(sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+            var matches = await ImportMatchesAsync(sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+            var teamAttributes = await ImportTeamAttributesAsync(sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+            var playerAttributes = await ImportPlayerAttributesAsync(sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+
+            await importTransaction.CommitAsync(cancellationToken);
+
+            stopwatch.Stop();
+
+            return new DataImportResult(
+                countries,
+                leagues,
+                teams,
+                players,
+                matches,
+                teamAttributes,
+                playerAttributes,
+                skipped,
+                stopwatch.Elapsed);
+        }
+        catch
+        {
+            await importTransaction.RollbackAsync(cancellationToken);
+            throw;
+        }
     }
 
     private async Task ClearExistingDataAsync(CancellationToken cancellationToken)
