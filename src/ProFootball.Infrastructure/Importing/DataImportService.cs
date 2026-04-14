@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Globalization;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -28,7 +27,7 @@ public sealed class DataImportService(
         var batchSize = request.BatchSize < 100 ? 100 : request.BatchSize;
         var stopwatch = Stopwatch.StartNew();
 
-        await dbContext.Database.MigrateAsync(cancellationToken);
+        await PrepareDatabaseAsync(cancellationToken);
 
         await using var importTransaction = await dbContext.Database.BeginTransactionAsync(cancellationToken);
 
@@ -81,6 +80,18 @@ public sealed class DataImportService(
         await dbContext.Countries.ExecuteDeleteAsync(cancellationToken);
     }
 
+    private async Task PrepareDatabaseAsync(CancellationToken cancellationToken)
+    {
+        var providerName = dbContext.Database.ProviderName ?? string.Empty;
+        if (providerName.Contains("Npgsql", StringComparison.OrdinalIgnoreCase))
+        {
+            await dbContext.Database.MigrateAsync(cancellationToken);
+            return;
+        }
+
+        await dbContext.Database.EnsureCreatedAsync(cancellationToken);
+    }
+
     private async Task<int> ImportCountriesAsync(
         SqliteConnection sqliteConnection,
         int batchSize,
@@ -98,8 +109,8 @@ public sealed class DataImportService(
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
         {
-            var id = GetRequiredInt(reader, 0);
-            var name = GetRequiredString(reader, 1);
+            var id = SqliteValueParser.ReadInt32(reader, 0);
+            var name = SqliteValueParser.ReadString(reader, 1);
             if (!id.HasValue || string.IsNullOrWhiteSpace(name))
             {
                 skipped++;
@@ -137,9 +148,9 @@ public sealed class DataImportService(
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
         {
-            var id = GetRequiredInt(reader, 0);
-            var countryId = GetRequiredInt(reader, 1);
-            var name = GetRequiredString(reader, 2);
+            var id = SqliteValueParser.ReadInt32(reader, 0);
+            var countryId = SqliteValueParser.ReadInt32(reader, 1);
+            var name = SqliteValueParser.ReadString(reader, 2);
             if (!id.HasValue || !countryId.HasValue || string.IsNullOrWhiteSpace(name))
             {
                 skipped++;
@@ -177,11 +188,11 @@ public sealed class DataImportService(
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
         {
-            var id = GetRequiredInt(reader, 0);
-            var teamApiId = GetRequiredInt(reader, 1);
-            var teamFifaApiId = GetOptionalInt(reader, 2);
-            var longName = GetRequiredString(reader, 3);
-            var shortName = GetOptionalString(reader, 4);
+            var id = SqliteValueParser.ReadInt32(reader, 0);
+            var teamApiId = SqliteValueParser.ReadInt32(reader, 1);
+            var teamFifaApiId = SqliteValueParser.ReadInt32(reader, 2);
+            var longName = SqliteValueParser.ReadString(reader, 3);
+            var shortName = SqliteValueParser.ReadString(reader, 4);
             if (!id.HasValue || !teamApiId.HasValue || string.IsNullOrWhiteSpace(longName))
             {
                 skipped++;
@@ -219,13 +230,13 @@ public sealed class DataImportService(
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
         {
-            var id = GetRequiredInt(reader, 0);
-            var playerApiId = GetRequiredInt(reader, 1);
-            var playerFifaApiId = GetOptionalInt(reader, 2);
-            var name = GetRequiredString(reader, 3);
-            var birthday = GetOptionalDateTime(reader, 4);
-            var height = GetOptionalInt(reader, 5);
-            var weight = GetOptionalInt(reader, 6);
+            var id = SqliteValueParser.ReadInt32(reader, 0);
+            var playerApiId = SqliteValueParser.ReadInt32(reader, 1);
+            var playerFifaApiId = SqliteValueParser.ReadInt32(reader, 2);
+            var name = SqliteValueParser.ReadString(reader, 3);
+            var birthday = SqliteValueParser.ReadDateTime(reader, 4);
+            var height = SqliteValueParser.ReadInt32(reader, 5);
+            var weight = SqliteValueParser.ReadInt32(reader, 6);
             if (!id.HasValue || !playerApiId.HasValue || string.IsNullOrWhiteSpace(name))
             {
                 skipped++;
@@ -265,16 +276,16 @@ public sealed class DataImportService(
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
         {
-            var id = GetRequiredInt(reader, 0);
-            var countryId = GetRequiredInt(reader, 1);
-            var leagueId = GetRequiredInt(reader, 2);
-            var season = GetRequiredString(reader, 3);
-            var date = GetOptionalDateTime(reader, 4);
-            var matchApiId = GetRequiredInt(reader, 5);
-            var homeTeamApiId = GetRequiredInt(reader, 6);
-            var awayTeamApiId = GetRequiredInt(reader, 7);
-            var homeTeamGoal = GetOptionalInt(reader, 8);
-            var awayTeamGoal = GetOptionalInt(reader, 9);
+            var id = SqliteValueParser.ReadInt32(reader, 0);
+            var countryId = SqliteValueParser.ReadInt32(reader, 1);
+            var leagueId = SqliteValueParser.ReadInt32(reader, 2);
+            var season = SqliteValueParser.ReadString(reader, 3);
+            var date = SqliteValueParser.ReadDateTime(reader, 4);
+            var matchApiId = SqliteValueParser.ReadInt32(reader, 5);
+            var homeTeamApiId = SqliteValueParser.ReadInt32(reader, 6);
+            var awayTeamApiId = SqliteValueParser.ReadInt32(reader, 7);
+            var homeTeamGoal = SqliteValueParser.ReadInt32(reader, 8);
+            var awayTeamGoal = SqliteValueParser.ReadInt32(reader, 9);
 
             if (!id.HasValue
                 || !countryId.HasValue
@@ -333,14 +344,14 @@ public sealed class DataImportService(
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
         {
-            var id = GetRequiredInt(reader, 0);
-            var teamFifaApiId = GetOptionalInt(reader, 1);
-            var teamApiId = GetRequiredInt(reader, 2);
-            var date = GetOptionalDateTime(reader, 3);
-            var buildUpPlaySpeed = GetOptionalInt(reader, 4);
-            var buildUpPlayPassing = GetOptionalInt(reader, 5);
-            var chanceCreationPassing = GetOptionalInt(reader, 6);
-            var defencePressure = GetOptionalInt(reader, 7);
+            var id = SqliteValueParser.ReadInt32(reader, 0);
+            var teamFifaApiId = SqliteValueParser.ReadInt32(reader, 1);
+            var teamApiId = SqliteValueParser.ReadInt32(reader, 2);
+            var date = SqliteValueParser.ReadDateTime(reader, 3);
+            var buildUpPlaySpeed = SqliteValueParser.ReadInt32(reader, 4);
+            var buildUpPlayPassing = SqliteValueParser.ReadInt32(reader, 5);
+            var chanceCreationPassing = SqliteValueParser.ReadInt32(reader, 6);
+            var defencePressure = SqliteValueParser.ReadInt32(reader, 7);
 
             if (!id.HasValue || !teamApiId.HasValue || !date.HasValue)
             {
@@ -390,15 +401,15 @@ public sealed class DataImportService(
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
         {
-            var id = GetRequiredInt(reader, 0);
-            var playerFifaApiId = GetOptionalInt(reader, 1);
-            var playerApiId = GetRequiredInt(reader, 2);
-            var date = GetOptionalDateTime(reader, 3);
-            var overallRating = GetOptionalInt(reader, 4);
-            var potential = GetOptionalInt(reader, 5);
-            var preferredFoot = GetOptionalString(reader, 6);
-            var attackingWorkRate = GetOptionalString(reader, 7);
-            var defensiveWorkRate = GetOptionalString(reader, 8);
+            var id = SqliteValueParser.ReadInt32(reader, 0);
+            var playerFifaApiId = SqliteValueParser.ReadInt32(reader, 1);
+            var playerApiId = SqliteValueParser.ReadInt32(reader, 2);
+            var date = SqliteValueParser.ReadDateTime(reader, 3);
+            var overallRating = SqliteValueParser.ReadInt32(reader, 4);
+            var potential = SqliteValueParser.ReadInt32(reader, 5);
+            var preferredFoot = SqliteValueParser.ReadString(reader, 6);
+            var attackingWorkRate = SqliteValueParser.ReadString(reader, 7);
+            var defensiveWorkRate = SqliteValueParser.ReadString(reader, 8);
 
             if (!id.HasValue || !playerApiId.HasValue || !date.HasValue)
             {
@@ -449,63 +460,4 @@ public sealed class DataImportService(
         return persisted;
     }
 
-    private static int? GetRequiredInt(SqliteDataReader reader, int index)
-    {
-        if (reader.IsDBNull(index))
-        {
-            return null;
-        }
-
-        return reader.GetValue(index) switch
-        {
-            long value => checked((int)value),
-            int value => value,
-            double value => checked((int)value),
-            string text when int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) => parsed,
-            _ => null,
-        };
-    }
-
-    private static int? GetOptionalInt(SqliteDataReader reader, int index) => GetRequiredInt(reader, index);
-
-    private static string? GetRequiredString(SqliteDataReader reader, int index)
-    {
-        if (reader.IsDBNull(index))
-        {
-            return null;
-        }
-
-        return reader.GetString(index).Trim();
-    }
-
-    private static string? GetOptionalString(SqliteDataReader reader, int index)
-    {
-        if (reader.IsDBNull(index))
-        {
-            return null;
-        }
-
-        return reader.GetString(index).Trim();
-    }
-
-    private static DateTime? GetOptionalDateTime(SqliteDataReader reader, int index)
-    {
-        if (reader.IsDBNull(index))
-        {
-            return null;
-        }
-
-        var value = reader.GetValue(index);
-        if (value is DateTime dateTimeValue)
-        {
-            return dateTimeValue;
-        }
-
-        if (DateTime.TryParse(value.ToString(), CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var parsed))
-        {
-            return DateTime.SpecifyKind(parsed, DateTimeKind.Utc);
-        }
-
-        return null;
-    }
 }
