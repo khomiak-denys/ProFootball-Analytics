@@ -35,6 +35,12 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel>
                         <Button Width="120" Margin="0,0,0,8" Content="Refresh" Command="{Binding CountriesLeagues.RefreshCommand}" />
+                        <TextBlock Margin="0,0,0,6"
+                                   Foreground="#9CA3AF"
+                                   Text="{Binding CountriesLeagues.IsLoading, StringFormat=Loading: {0}}" />
+                        <TextBlock Margin="0,0,0,6"
+                                   Foreground="#EF4444"
+                                   Text="{Binding CountriesLeagues.ErrorMessage}" />
                         <DataGrid ItemsSource="{Binding CountriesLeagues.Countries}"
                                   SelectedItem="{Binding CountriesLeagues.SelectedCountry, Mode=TwoWay}"
                                   AutoGenerateColumns="False"

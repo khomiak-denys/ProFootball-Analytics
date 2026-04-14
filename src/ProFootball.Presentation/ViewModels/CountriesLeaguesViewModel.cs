@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Microsoft.Extensions.Logging;
 using ProFootball.Application.Abstractions.Querying;
 using ProFootball.Application.Contracts.Queries;
 using ProFootball.Presentation.Commands;
@@ -8,13 +9,19 @@ namespace ProFootball.Presentation.ViewModels;
 public sealed class CountriesLeaguesViewModel : ObservableObject
 {
     private readonly ICountriesLeaguesQueryService _service;
+    private readonly ILogger<CountriesLeaguesViewModel> _logger;
     private readonly SemaphoreSlim _loadLeaguesLock = new(1, 1);
     private CancellationTokenSource? _loadLeaguesCts;
     private CountryDto? _selectedCountry;
+    private bool _isLoading;
+    private string? _errorMessage;
 
-    public CountriesLeaguesViewModel(ICountriesLeaguesQueryService service)
+    public CountriesLeaguesViewModel(
+        ICountriesLeaguesQueryService service,
+        ILogger<CountriesLeaguesViewModel> logger)
     {
         _service = service;
+        _logger = logger;
         Countries = new ObservableCollection<CountryDto>();
         Leagues = new ObservableCollection<LeagueDto>();
         RefreshCommand = new AsyncRelayCommand(RefreshAsync);
@@ -40,16 +47,43 @@ public sealed class CountriesLeaguesViewModel : ObservableObject
 
     public AsyncRelayCommand RefreshCommand { get; }
 
+    public bool IsLoading
+    {
+        get => _isLoading;
+        private set => SetProperty(ref _isLoading, value);
+    }
+
+    public string? ErrorMessage
+    {
+        get => _errorMessage;
+        private set => SetProperty(ref _errorMessage, value);
+    }
+
     public async Task RefreshAsync()
     {
-        Countries.Clear();
-        var countries = await _service.GetCountriesAsync();
-        foreach (var country in countries)
+        try
         {
-            Countries.Add(country);
-        }
+            ErrorMessage = null;
+            IsLoading = true;
 
-        await ReloadLeaguesSafeAsync();
+            Countries.Clear();
+            var countries = await _service.GetCountriesAsync();
+            foreach (var country in countries)
+            {
+                Countries.Add(country);
+            }
+
+            await ReloadLeaguesSafeAsync();
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(exception, "Failed to load countries.");
+            ErrorMessage = "Failed to load countries and leagues.";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
     }
 
     private async Task ReloadLeaguesSafeAsync()
@@ -61,6 +95,8 @@ public sealed class CountriesLeaguesViewModel : ObservableObject
         lockAcquired = true;
         try
         {
+            ErrorMessage = null;
+            IsLoading = true;
             loadToken.ThrowIfCancellationRequested();
             var leagues = await _service.GetLeaguesAsync(SelectedCountry?.Id, loadToken);
             loadToken.ThrowIfCancellationRequested();
@@ -74,8 +110,10 @@ public sealed class CountriesLeaguesViewModel : ObservableObject
         catch (OperationCanceledException)
         {
         }
-        catch (Exception)
+        catch (Exception exception)
         {
+            _logger.LogError(exception, "Failed to load leagues for country {CountryId}.", SelectedCountry?.Id);
+            ErrorMessage = "Failed to load leagues.";
         }
         finally
         {
@@ -83,6 +121,8 @@ public sealed class CountriesLeaguesViewModel : ObservableObject
             {
                 _loadLeaguesLock.Release();
             }
+
+            IsLoading = false;
         }
     }
 

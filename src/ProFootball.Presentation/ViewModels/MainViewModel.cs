@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using ProFootball.Application.Abstractions.Querying;
 using ProFootball.Presentation.Commands;
 
@@ -19,6 +20,7 @@ public sealed class MainViewModel : ObservableObject
     }
 
     private int _selectedTabIndex;
+    private readonly ILogger<MainViewModel> _logger;
 
     public MainViewModel(
         IDashboardQueryService dashboardQueryService,
@@ -26,10 +28,14 @@ public sealed class MainViewModel : ObservableObject
         ITeamsQueryService teamsQueryService,
         IPlayersQueryService playersQueryService,
         IMatchesQueryService matchesQueryService,
-        IAnalyticsQueryService analyticsQueryService)
+        IAnalyticsQueryService analyticsQueryService,
+        ILoggerFactory loggerFactory)
     {
+        _logger = loggerFactory.CreateLogger<MainViewModel>();
         Dashboard = new DashboardViewModel(dashboardQueryService);
-        CountriesLeagues = new CountriesLeaguesViewModel(countriesLeaguesQueryService);
+        CountriesLeagues = new CountriesLeaguesViewModel(
+            countriesLeaguesQueryService,
+            loggerFactory.CreateLogger<CountriesLeaguesViewModel>());
         TeamDetails = new TeamDetailsViewModel(teamsQueryService);
         PlayerDetails = new PlayerDetailsViewModel(playersQueryService, analyticsQueryService);
         MatchDetails = new MatchDetailsViewModel(matchesQueryService);
@@ -39,7 +45,7 @@ public sealed class MainViewModel : ObservableObject
         Matches = new MatchesViewModel(matchesQueryService, countriesLeaguesQueryService, OpenMatchDetails);
         Analytics = new AnalyticsViewModel(analyticsQueryService);
 
-        LoadInitialDataCommand = new AsyncRelayCommand(LoadInitialDataAsync);
+        LoadInitialDataCommand = new AsyncRelayCommand(LoadInitialDataAsync, onException: OnBackgroundCommandException);
     }
 
     public DashboardViewModel Dashboard { get; }
@@ -98,5 +104,10 @@ public sealed class MainViewModel : ObservableObject
         MatchDetails.SelectedMatchApiId = matchApiId;
         MatchDetails.LoadCommand.Execute(null);
         SelectedTabIndex = Tabs.MatchDetails;
+    }
+
+    private void OnBackgroundCommandException(Exception exception)
+    {
+        _logger.LogError(exception, "Main view model command failed.");
     }
 }
