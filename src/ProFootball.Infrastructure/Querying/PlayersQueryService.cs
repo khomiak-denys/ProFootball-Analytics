@@ -14,30 +14,41 @@ public sealed class PlayersQueryService(ProFootballDbContext dbContext) : IPlaye
     {
         var (page, pageSize, skip) = Paging.Normalize(query.Page, query.PageSize);
 
-        var projectedQuery = dbContext.Players
+        var latestAttributesQuery = dbContext.PlayerAttributes
             .AsNoTracking()
-            .Select(player => new
+            .GroupBy(attribute => attribute.PlayerApiId)
+            .Select(group => group
+                .OrderByDescending(attribute => attribute.Date)
+                .ThenByDescending(attribute => attribute.Id)
+                .Select(attribute => new
+                {
+                    attribute.PlayerApiId,
+                    attribute.OverallRating,
+                    attribute.Potential,
+                    attribute.PreferredFoot,
+                })
+                .First());
+
+        var projectedQuery =
+            from player in dbContext.Players.AsNoTracking()
+            join latest in latestAttributesQuery
+                on player.PlayerApiId equals latest.PlayerApiId into latestJoin
+            from latest in latestJoin.DefaultIfEmpty()
+            select new
             {
                 player.PlayerApiId,
                 player.Name,
                 player.Height,
                 player.Weight,
-                LatestAttribute = dbContext.PlayerAttributes
-                    .Where(attribute => attribute.PlayerApiId == player.PlayerApiId)
-                    .OrderByDescending(attribute => attribute.Date)
-                    .Select(attribute => new
-                    {
-                        attribute.OverallRating,
-                        attribute.Potential,
-                        attribute.PreferredFoot,
-                    })
-                    .FirstOrDefault(),
-            });
+                OverallRating = latest == null ? null : latest.OverallRating,
+                Potential = latest == null ? null : latest.Potential,
+                PreferredFoot = latest == null ? null : latest.PreferredFoot,
+            };
 
         if (!string.IsNullOrWhiteSpace(query.Name))
         {
-            var normalizedName = query.Name.Trim().ToLowerInvariant();
-            projectedQuery = projectedQuery.Where(player => player.Name.ToLower().Contains(normalizedName));
+            var pattern = LikePattern.Contains(query.Name.Trim());
+            projectedQuery = projectedQuery.Where(player => EF.Functions.ILike(player.Name, pattern));
         }
 
         if (query.MinHeight.HasValue)
@@ -52,51 +63,46 @@ public sealed class PlayersQueryService(ProFootballDbContext dbContext) : IPlaye
 
         if (!string.IsNullOrWhiteSpace(query.PreferredFoot))
         {
-            var foot = query.PreferredFoot.Trim().ToLowerInvariant();
+            var footPattern = LikePattern.Exact(query.PreferredFoot.Trim());
             projectedQuery = projectedQuery.Where(player =>
-                player.LatestAttribute != null &&
-                player.LatestAttribute.PreferredFoot != null &&
-                player.LatestAttribute.PreferredFoot.ToLower() == foot);
+                player.PreferredFoot != null &&
+                EF.Functions.ILike(player.PreferredFoot, footPattern));
         }
 
         if (query.MinOverallRating.HasValue)
         {
             projectedQuery = projectedQuery.Where(player =>
-                player.LatestAttribute != null &&
-                player.LatestAttribute.OverallRating.HasValue &&
-                player.LatestAttribute.OverallRating.Value >= query.MinOverallRating.Value);
+                player.OverallRating.HasValue &&
+                player.OverallRating.Value >= query.MinOverallRating.Value);
         }
 
         if (query.MaxOverallRating.HasValue)
         {
             projectedQuery = projectedQuery.Where(player =>
-                player.LatestAttribute != null &&
-                player.LatestAttribute.OverallRating.HasValue &&
-                player.LatestAttribute.OverallRating.Value <= query.MaxOverallRating.Value);
+                player.OverallRating.HasValue &&
+                player.OverallRating.Value <= query.MaxOverallRating.Value);
         }
 
         if (query.MinPotential.HasValue)
         {
             projectedQuery = projectedQuery.Where(player =>
-                player.LatestAttribute != null &&
-                player.LatestAttribute.Potential.HasValue &&
-                player.LatestAttribute.Potential.Value >= query.MinPotential.Value);
+                player.Potential.HasValue &&
+                player.Potential.Value >= query.MinPotential.Value);
         }
 
         if (query.MaxPotential.HasValue)
         {
             projectedQuery = projectedQuery.Where(player =>
-                player.LatestAttribute != null &&
-                player.LatestAttribute.Potential.HasValue &&
-                player.LatestAttribute.Potential.Value <= query.MaxPotential.Value);
+                player.Potential.HasValue &&
+                player.Potential.Value <= query.MaxPotential.Value);
         }
 
         projectedQuery = (query.SortBy?.Trim().ToLowerInvariant(), query.SortDescending) switch
         {
-            ("overallrating", true) => projectedQuery.OrderByDescending(player => player.LatestAttribute!.OverallRating).ThenBy(player => player.Name),
-            ("overallrating", false) => projectedQuery.OrderBy(player => player.LatestAttribute!.OverallRating).ThenBy(player => player.Name),
-            ("potential", true) => projectedQuery.OrderByDescending(player => player.LatestAttribute!.Potential).ThenBy(player => player.Name),
-            ("potential", false) => projectedQuery.OrderBy(player => player.LatestAttribute!.Potential).ThenBy(player => player.Name),
+            ("overallrating", true) => projectedQuery.OrderByDescending(player => player.OverallRating).ThenBy(player => player.Name),
+            ("overallrating", false) => projectedQuery.OrderBy(player => player.OverallRating).ThenBy(player => player.Name),
+            ("potential", true) => projectedQuery.OrderByDescending(player => player.Potential).ThenBy(player => player.Name),
+            ("potential", false) => projectedQuery.OrderBy(player => player.Potential).ThenBy(player => player.Name),
             ("height", true) => projectedQuery.OrderByDescending(player => player.Height).ThenBy(player => player.Name),
             ("height", false) => projectedQuery.OrderBy(player => player.Height).ThenBy(player => player.Name),
             (_, true) => projectedQuery.OrderByDescending(player => player.Name),
@@ -112,9 +118,9 @@ public sealed class PlayersQueryService(ProFootballDbContext dbContext) : IPlaye
                 player.Name,
                 player.Height,
                 player.Weight,
-                player.LatestAttribute!.OverallRating,
-                player.LatestAttribute!.Potential,
-                player.LatestAttribute!.PreferredFoot))
+                player.OverallRating,
+                player.Potential,
+                player.PreferredFoot))
             .ToListAsync(cancellationToken);
 
         return new PagedResult<PlayerListItemDto>(items, totalCount, page, pageSize);

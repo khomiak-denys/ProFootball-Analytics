@@ -19,8 +19,8 @@ public sealed class TeamsQueryService(ProFootballDbContext dbContext) : ITeamsQu
 
         if (!string.IsNullOrWhiteSpace(query.Name))
         {
-            var normalizedName = query.Name.Trim().ToLowerInvariant();
-            teamsQuery = teamsQuery.Where(team => team.LongName.ToLower().Contains(normalizedName));
+            var pattern = LikePattern.Contains(query.Name.Trim());
+            teamsQuery = teamsQuery.Where(team => EF.Functions.ILike(team.LongName, pattern));
         }
 
         teamsQuery = ApplySorting(teamsQuery, query.SortBy, query.SortDescending);
