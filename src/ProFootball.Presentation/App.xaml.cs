@@ -2,15 +2,15 @@ using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ProFootball.Application.Abstractions.Auth;
-using ProFootball.Application.Services.Auth;
 using ProFootball.Infrastructure;
+using ProFootball.Presentation.ViewModels;
 
 namespace ProFootball.Presentation;
 
 public partial class App : System.Windows.Application
 {
     private IHost? _host;
+    private IServiceScope? _uiScope;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -24,14 +24,15 @@ public partial class App : System.Windows.Application
             .ConfigureServices((context, services) =>
             {
                 services.AddInfrastructure(context.Configuration);
-                services.AddSingleton<ISessionService, InMemorySessionService>();
-                services.AddSingleton<MainWindow>();
+                services.AddScoped<MainViewModel>();
+                services.AddScoped<MainWindow>();
             })
             .Build();
 
         _host.Start();
 
-        var mainWindow = _host.Services.GetRequiredService<MainWindow>();
+        _uiScope = _host.Services.CreateScope();
+        var mainWindow = _uiScope.ServiceProvider.GetRequiredService<MainWindow>();
         MainWindow = mainWindow;
         mainWindow.Show();
 
@@ -45,6 +46,8 @@ public partial class App : System.Windows.Application
             await _host.StopAsync(TimeSpan.FromSeconds(5));
             _host.Dispose();
         }
+
+        _uiScope?.Dispose();
 
         base.OnExit(e);
     }

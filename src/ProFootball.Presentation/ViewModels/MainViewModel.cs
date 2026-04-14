@@ -1,0 +1,89 @@
+using ProFootball.Application.Abstractions.Querying;
+using ProFootball.Presentation.Commands;
+
+namespace ProFootball.Presentation.ViewModels;
+
+public sealed class MainViewModel : ObservableObject
+{
+    private int _selectedTabIndex;
+
+    public MainViewModel(
+        IDashboardQueryService dashboardQueryService,
+        ICountriesLeaguesQueryService countriesLeaguesQueryService,
+        ITeamsQueryService teamsQueryService,
+        IPlayersQueryService playersQueryService,
+        IMatchesQueryService matchesQueryService,
+        IAnalyticsQueryService analyticsQueryService)
+    {
+        Dashboard = new DashboardViewModel(dashboardQueryService);
+        CountriesLeagues = new CountriesLeaguesViewModel(countriesLeaguesQueryService);
+        TeamDetails = new TeamDetailsViewModel(teamsQueryService);
+        PlayerDetails = new PlayerDetailsViewModel(playersQueryService, analyticsQueryService);
+        MatchDetails = new MatchDetailsViewModel(matchesQueryService);
+
+        Teams = new TeamsViewModel(teamsQueryService, OpenTeamDetails);
+        Players = new PlayersViewModel(playersQueryService, OpenPlayerDetails);
+        Matches = new MatchesViewModel(matchesQueryService, countriesLeaguesQueryService, OpenMatchDetails);
+        Analytics = new AnalyticsViewModel(analyticsQueryService);
+
+        LoadInitialDataCommand = new AsyncRelayCommand(LoadInitialDataAsync);
+    }
+
+    public DashboardViewModel Dashboard { get; }
+
+    public CountriesLeaguesViewModel CountriesLeagues { get; }
+
+    public TeamsViewModel Teams { get; }
+
+    public TeamDetailsViewModel TeamDetails { get; }
+
+    public PlayersViewModel Players { get; }
+
+    public PlayerDetailsViewModel PlayerDetails { get; }
+
+    public MatchesViewModel Matches { get; }
+
+    public MatchDetailsViewModel MatchDetails { get; }
+
+    public AnalyticsViewModel Analytics { get; }
+
+    public int SelectedTabIndex
+    {
+        get => _selectedTabIndex;
+        set => SetProperty(ref _selectedTabIndex, value);
+    }
+
+    public AsyncRelayCommand LoadInitialDataCommand { get; }
+
+    public async Task LoadInitialDataAsync()
+    {
+        await Dashboard.RefreshAsync();
+        await CountriesLeagues.RefreshAsync();
+        await Teams.SearchAsync();
+        await Players.SearchAsync();
+        await Matches.LoadLeaguesAsync();
+        await Matches.SearchAsync();
+        await Analytics.RefreshAllAsync();
+    }
+
+    private void OpenTeamDetails(int teamApiId)
+    {
+        TeamDetails.SelectedTeamApiId = teamApiId;
+        TeamDetails.LoadCommand.Execute(null);
+        SelectedTabIndex = 3;
+    }
+
+    private void OpenPlayerDetails(int playerApiId)
+    {
+        PlayerDetails.SelectedPlayerApiId = playerApiId;
+        PlayerDetails.LoadCommand.Execute(null);
+        SelectedTabIndex = 5;
+    }
+
+    private void OpenMatchDetails(int matchApiId)
+    {
+        MatchDetails.SelectedMatchApiId = matchApiId;
+        MatchDetails.LoadCommand.Execute(null);
+        SelectedTabIndex = 7;
+    }
+}
