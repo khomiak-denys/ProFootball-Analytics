@@ -6,11 +6,12 @@ using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
 
-public sealed class CountriesLeaguesViewModel : ObservableObject
+public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
 {
     private readonly ICountriesLeaguesQueryService _service;
     private readonly ILogger<CountriesLeaguesViewModel> _logger;
     private readonly SemaphoreSlim _loadLeaguesLock = new(1, 1);
+    private readonly List<CancellationTokenSource> _retiredLoadCts = [];
     private CancellationTokenSource? _loadLeaguesCts;
     private CountryDto? _selectedCountry;
     private bool _isLoading;
@@ -128,9 +129,29 @@ public sealed class CountriesLeaguesViewModel : ObservableObject
 
     private CancellationToken ReplaceLoadToken()
     {
-        _loadLeaguesCts?.Cancel();
-        _loadLeaguesCts?.Dispose();
+        var previousSource = _loadLeaguesCts;
+        previousSource?.Cancel();
+        if (previousSource is not null)
+        {
+            _retiredLoadCts.Add(previousSource);
+        }
+
         _loadLeaguesCts = new CancellationTokenSource();
         return _loadLeaguesCts.Token;
+    }
+
+    public void Dispose()
+    {
+        _loadLeaguesCts?.Cancel();
+        _loadLeaguesCts?.Dispose();
+        _loadLeaguesCts = null;
+
+        foreach (var tokenSource in _retiredLoadCts)
+        {
+            tokenSource.Dispose();
+        }
+
+        _retiredLoadCts.Clear();
+        _loadLeaguesLock.Dispose();
     }
 }

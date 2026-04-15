@@ -4,7 +4,7 @@ using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
 
-public sealed class MainViewModel : ObservableObject
+public sealed class MainViewModel : ObservableObject, IDisposable
 {
     public static class Tabs
     {
@@ -109,5 +109,10 @@ public sealed class MainViewModel : ObservableObject
     private void OnBackgroundCommandException(Exception exception)
     {
         _logger.LogError(exception, "Main view model command failed.");
+    }
+
+    public void Dispose()
+    {
+        CountriesLeagues.Dispose();
     }
 }
