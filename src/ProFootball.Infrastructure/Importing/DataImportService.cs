@@ -35,7 +35,7 @@ public sealed class DataImportService(
         {
             await ClearExistingDataAsync(cancellationToken);
 
-            await using var sqliteConnection = new SqliteConnection($"Data Source={request.SqlitePath};Mode=ReadOnly;Cache=Shared");
+            await using var sqliteConnection = new SqliteConnection($"Data Source={request.SqlitePath};Mode=ReadOnly;Cache=Shared;Pooling=False");
             await sqliteConnection.OpenAsync(cancellationToken);
 
             var skipped = 0;
