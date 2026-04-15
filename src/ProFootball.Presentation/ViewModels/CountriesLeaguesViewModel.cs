@@ -16,6 +16,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     private CountryDto? _selectedCountry;
     private bool _isLoading;
     private string? _errorMessage;
+    private long _lastLoadingOperationId;
 
     public CountriesLeaguesViewModel(
         ICountriesLeaguesQueryService service,
@@ -62,10 +63,11 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
 
     public async Task RefreshAsync()
     {
+        var loadingOperationId = BeginLoading();
+
         try
         {
             ErrorMessage = null;
-            IsLoading = true;
 
             Countries.Clear();
             var countries = await _service.GetCountriesAsync();
@@ -83,12 +85,13 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         }
         finally
         {
-            IsLoading = false;
+            EndLoading(loadingOperationId);
         }
     }
 
     private async Task ReloadLeaguesSafeAsync()
     {
+        var loadingOperationId = BeginLoading();
         var loadToken = ReplaceLoadToken();
         var lockAcquired = false;
 
@@ -99,7 +102,6 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
             DisposeRetiredLoadSources();
 
             ErrorMessage = null;
-            IsLoading = true;
             loadToken.ThrowIfCancellationRequested();
             var leagues = await _service.GetLeaguesAsync(SelectedCountry?.Id, loadToken);
             loadToken.ThrowIfCancellationRequested();
@@ -125,6 +127,21 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
                 _loadLeaguesLock.Release();
             }
 
+            EndLoading(loadingOperationId);
+        }
+    }
+
+    private long BeginLoading()
+    {
+        var operationId = Interlocked.Increment(ref _lastLoadingOperationId);
+        IsLoading = true;
+        return operationId;
+    }
+
+    private void EndLoading(long operationId)
+    {
+        if (operationId == Volatile.Read(ref _lastLoadingOperationId))
+        {
             IsLoading = false;
         }
     }
