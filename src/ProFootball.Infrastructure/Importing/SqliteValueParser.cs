@@ -14,10 +14,15 @@ internal static class SqliteValueParser
 
         return reader.GetValue(index) switch
         {
-            long value => checked((int)value),
+            long value when value >= int.MinValue && value <= int.MaxValue => (int)value,
+            long _ => null,
             int value => value,
-            double value => checked((int)value),
-            string text when int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed) => parsed,
+            double value when value >= int.MinValue && value <= int.MaxValue => (int)value,
+            double _ => null,
+            string text
+                when long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
+                     && parsed >= int.MinValue
+                     && parsed <= int.MaxValue => (int)parsed,
             _ => null,
         };
     }
@@ -42,7 +47,12 @@ internal static class SqliteValueParser
         var value = reader.GetValue(index);
         if (value is DateTime dateTimeValue)
         {
-            return dateTimeValue;
+            return dateTimeValue.Kind switch
+            {
+                DateTimeKind.Utc => dateTimeValue,
+                DateTimeKind.Local => dateTimeValue.ToUniversalTime(),
+                _ => DateTime.SpecifyKind(dateTimeValue, DateTimeKind.Utc),
+            };
         }
 
         if (DateTime.TryParse(
