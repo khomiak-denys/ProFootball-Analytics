@@ -29,10 +29,10 @@ public sealed class MatchesViewModel : ObservableObject
 
         Matches = new ObservableCollection<MatchListItemDto>();
         Leagues = new ObservableCollection<LeagueDto>();
-        SearchCommand = new AsyncRelayCommand(StartSearchAsync);
-        LoadLeaguesCommand = new AsyncRelayCommand(LoadLeaguesAsync);
-        NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => HasNextPage);
-        PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => HasPreviousPage);
+        SearchCommand = new AsyncRelayCommand(StartSearchAsync, CommandExceptionHandler.Handle);
+        LoadLeaguesCommand = new AsyncRelayCommand(LoadLeaguesAsync, CommandExceptionHandler.Handle);
+        NextPageCommand = new AsyncRelayCommand(NextPageAsync, CommandExceptionHandler.Handle, () => HasNextPage);
+        PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, CommandExceptionHandler.Handle, () => HasPreviousPage);
         OpenDetailsCommand = new RelayCommand(OpenDetails, () => SelectedMatch is not null);
     }
 

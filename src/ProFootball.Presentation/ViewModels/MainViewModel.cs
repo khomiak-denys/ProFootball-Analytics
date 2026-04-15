@@ -45,7 +45,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Matches = new MatchesViewModel(matchesQueryService, countriesLeaguesQueryService, OpenMatchDetails);
         Analytics = new AnalyticsViewModel(analyticsQueryService);
 
-        LoadInitialDataCommand = new AsyncRelayCommand(LoadInitialDataAsync, onException: OnBackgroundCommandException);
+        LoadInitialDataCommand = new AsyncRelayCommand(LoadInitialDataAsync, OnBackgroundCommandException);
     }
 
     public DashboardViewModel Dashboard { get; }

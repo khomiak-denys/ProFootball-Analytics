@@ -4,8 +4,8 @@ namespace ProFootball.Presentation.Commands;
 
 public sealed class AsyncRelayCommand(
     Func<Task> executeAsync,
-    Func<bool>? canExecute = null,
-    Action<Exception>? onException = null) : ICommand
+    Action<Exception> onException,
+    Func<bool>? canExecute = null) : ICommand
 {
     private bool _isRunning;
 
@@ -28,14 +28,7 @@ public sealed class AsyncRelayCommand(
         }
         catch (Exception exception)
         {
-            if (onException is not null)
-            {
-                onException(exception);
-            }
-            else
-            {
-                System.Diagnostics.Trace.TraceError(exception.ToString());
-            }
+            onException(exception);
         }
         finally
         {

@@ -21,7 +21,7 @@ public sealed class PlayerDetailsViewModel : ObservableObject
         _analyticsQueryService = analyticsQueryService;
         Attributes = new ObservableCollection<PlayerAttributeDto>();
         TrendPoints = new ObservableCollection<PlayerTrendPointDto>();
-        LoadCommand = new AsyncRelayCommand(LoadAsync, () => SelectedPlayerApiId.HasValue);
+        LoadCommand = new AsyncRelayCommand(LoadAsync, CommandExceptionHandler.Handle, () => SelectedPlayerApiId.HasValue);
     }
 
     public int? SelectedPlayerApiId

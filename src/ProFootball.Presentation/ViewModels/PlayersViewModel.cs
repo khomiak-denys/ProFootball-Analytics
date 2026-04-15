@@ -24,9 +24,9 @@ public sealed class PlayersViewModel : ObservableObject
         _openDetails = openDetails;
 
         Players = new ObservableCollection<PlayerListItemDto>();
-        SearchCommand = new AsyncRelayCommand(StartSearchAsync);
-        NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => HasNextPage);
-        PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => HasPreviousPage);
+        SearchCommand = new AsyncRelayCommand(StartSearchAsync, CommandExceptionHandler.Handle);
+        NextPageCommand = new AsyncRelayCommand(NextPageAsync, CommandExceptionHandler.Handle, () => HasNextPage);
+        PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, CommandExceptionHandler.Handle, () => HasPreviousPage);
         OpenDetailsCommand = new RelayCommand(OpenDetails, () => SelectedPlayer is not null);
     }
 

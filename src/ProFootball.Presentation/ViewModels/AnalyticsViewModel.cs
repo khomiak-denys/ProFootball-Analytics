@@ -22,10 +22,10 @@ public sealed class AnalyticsViewModel : ObservableObject
         TopPlayers = new ObservableCollection<TopPlayerDto>();
         MatchesBySeason = new ObservableCollection<MatchesBySeasonDto>();
 
-        LoadTrendCommand = new AsyncRelayCommand(LoadTrendAsync);
-        LoadTopPlayersCommand = new AsyncRelayCommand(LoadTopPlayersAsync);
-        LoadMatchesBySeasonCommand = new AsyncRelayCommand(LoadMatchesBySeasonAsync);
-        RefreshAllCommand = new AsyncRelayCommand(RefreshAllAsync);
+        LoadTrendCommand = new AsyncRelayCommand(LoadTrendAsync, CommandExceptionHandler.Handle);
+        LoadTopPlayersCommand = new AsyncRelayCommand(LoadTopPlayersAsync, CommandExceptionHandler.Handle);
+        LoadMatchesBySeasonCommand = new AsyncRelayCommand(LoadMatchesBySeasonAsync, CommandExceptionHandler.Handle);
+        RefreshAllCommand = new AsyncRelayCommand(RefreshAllAsync, CommandExceptionHandler.Handle);
     }
 
     public ObservableCollection<PlayerTrendPointDto> TrendPoints { get; }

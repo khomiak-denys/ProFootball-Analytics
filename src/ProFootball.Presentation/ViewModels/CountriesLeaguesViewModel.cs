@@ -25,7 +25,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         _logger = logger;
         Countries = new ObservableCollection<CountryDto>();
         Leagues = new ObservableCollection<LeagueDto>();
-        RefreshCommand = new AsyncRelayCommand(RefreshAsync);
+        RefreshCommand = new AsyncRelayCommand(RefreshAsync, CommandExceptionHandler.Handle);
     }
 
     public ObservableCollection<CountryDto> Countries { get; }

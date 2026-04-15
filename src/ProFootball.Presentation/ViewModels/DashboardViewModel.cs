@@ -16,7 +16,7 @@ public sealed class DashboardViewModel : ObservableObject
     public DashboardViewModel(IDashboardQueryService dashboardQueryService)
     {
         _dashboardQueryService = dashboardQueryService;
-        RefreshCommand = new AsyncRelayCommand(RefreshAsync);
+        RefreshCommand = new AsyncRelayCommand(RefreshAsync, CommandExceptionHandler.Handle);
     }
 
     public int Countries

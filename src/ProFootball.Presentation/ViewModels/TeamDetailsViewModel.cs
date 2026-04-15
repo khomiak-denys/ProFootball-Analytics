@@ -15,7 +15,7 @@ public sealed class TeamDetailsViewModel : ObservableObject
     {
         _teamsQueryService = teamsQueryService;
         Attributes = new ObservableCollection<TeamAttributeDto>();
-        LoadCommand = new AsyncRelayCommand(LoadAsync, () => SelectedTeamApiId.HasValue);
+        LoadCommand = new AsyncRelayCommand(LoadAsync, CommandExceptionHandler.Handle, () => SelectedTeamApiId.HasValue);
     }
 
     public int? SelectedTeamApiId

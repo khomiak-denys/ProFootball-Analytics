@@ -13,7 +13,7 @@ public sealed class MatchDetailsViewModel : ObservableObject
     public MatchDetailsViewModel(IMatchesQueryService matchesQueryService)
     {
         _matchesQueryService = matchesQueryService;
-        LoadCommand = new AsyncRelayCommand(LoadAsync, () => SelectedMatchApiId.HasValue);
+        LoadCommand = new AsyncRelayCommand(LoadAsync, CommandExceptionHandler.Handle, () => SelectedMatchApiId.HasValue);
     }
 
     public int? SelectedMatchApiId
