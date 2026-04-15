@@ -11,7 +11,6 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     private readonly ICountriesLeaguesQueryService _service;
     private readonly ILogger<CountriesLeaguesViewModel> _logger;
     private readonly SemaphoreSlim _loadLeaguesLock = new(1, 1);
-    private readonly List<CancellationTokenSource> _retiredLoadCts = [];
     private CancellationTokenSource? _loadLeaguesCts;
     private CountryDto? _selectedCountry;
     private bool _isLoading;
@@ -92,14 +91,14 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     private async Task ReloadLeaguesSafeAsync()
     {
         var loadingOperationId = BeginLoading();
-        var loadToken = ReplaceLoadToken();
+        var loadSource = ReplaceLoadSource();
+        var loadToken = loadSource.Token;
         var lockAcquired = false;
 
         try
         {
             await _loadLeaguesLock.WaitAsync(loadToken);
             lockAcquired = true;
-            DisposeRetiredLoadSources();
 
             ErrorMessage = null;
             loadToken.ThrowIfCancellationRequested();
@@ -127,6 +126,12 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
                 _loadLeaguesLock.Release();
             }
 
+            if (ReferenceEquals(_loadLeaguesCts, loadSource))
+            {
+                _loadLeaguesCts = null;
+            }
+
+            loadSource.Dispose();
             EndLoading(loadingOperationId);
         }
     }
@@ -146,32 +151,12 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         }
     }
 
-    private CancellationToken ReplaceLoadToken()
+    private CancellationTokenSource ReplaceLoadSource()
     {
-        var previousSource = _loadLeaguesCts;
+        var newSource = new CancellationTokenSource();
+        var previousSource = Interlocked.Exchange(ref _loadLeaguesCts, newSource);
         previousSource?.Cancel();
-        if (previousSource is not null)
-        {
-            _retiredLoadCts.Add(previousSource);
-        }
-
-        _loadLeaguesCts = new CancellationTokenSource();
-        return _loadLeaguesCts.Token;
-    }
-
-    private void DisposeRetiredLoadSources()
-    {
-        if (_retiredLoadCts.Count == 0)
-        {
-            return;
-        }
-
-        foreach (var tokenSource in _retiredLoadCts)
-        {
-            tokenSource.Dispose();
-        }
-
-        _retiredLoadCts.Clear();
+        return newSource;
     }
 
     public void Dispose()
@@ -179,8 +164,6 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         _loadLeaguesCts?.Cancel();
         _loadLeaguesCts?.Dispose();
         _loadLeaguesCts = null;
-
-        DisposeRetiredLoadSources();
         _loadLeaguesLock.Dispose();
     }
 }

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Data;
 
 namespace ProFootball.Presentation.Converters;
@@ -14,12 +15,13 @@ public sealed class NullableIntTextConverter : IValueConverter
         };
     }
 
+    [return: MaybeNull]
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         var text = value?.ToString();
         if (string.IsNullOrWhiteSpace(text))
         {
-            return null!;
+            return null;
         }
 
         return int.TryParse(text.Trim(), NumberStyles.Integer, culture, out var parsed)
