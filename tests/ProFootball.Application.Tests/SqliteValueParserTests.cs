@@ -14,24 +14,26 @@ public class SqliteValueParserTests
 
         await using (var command = connection.CreateCommand())
         {
-            command.CommandText = "CREATE TABLE parser_case (value_a INTEGER, value_b TEXT, value_c TEXT)";
+            command.CommandText = "CREATE TABLE parser_case (value_a INTEGER, value_b TEXT, value_c TEXT, value_d REAL, value_e REAL)";
             await command.ExecuteNonQueryAsync();
         }
 
         await using (var insert = connection.CreateCommand())
         {
-            insert.CommandText = "INSERT INTO parser_case (value_a, value_b, value_c) VALUES (42, ' 17 ', 'abc')";
+            insert.CommandText = "INSERT INTO parser_case (value_a, value_b, value_c, value_d, value_e) VALUES (42, ' 17 ', 'abc', 1.9, 18.0)";
             await insert.ExecuteNonQueryAsync();
         }
 
         await using var select = connection.CreateCommand();
-        select.CommandText = "SELECT value_a, value_b, value_c FROM parser_case";
+        select.CommandText = "SELECT value_a, value_b, value_c, value_d, value_e FROM parser_case";
         await using var reader = await select.ExecuteReaderAsync();
         Assert.True(await reader.ReadAsync());
 
         Assert.Equal(42, SqliteValueParser.ReadInt32(reader, 0));
         Assert.Equal(17, SqliteValueParser.ReadInt32(reader, 1));
         Assert.Null(SqliteValueParser.ReadInt32(reader, 2));
+        Assert.Null(SqliteValueParser.ReadInt32(reader, 3));
+        Assert.Equal(18, SqliteValueParser.ReadInt32(reader, 4));
     }
 
     [Fact]
