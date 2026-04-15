@@ -21,7 +21,7 @@ public sealed class TeamsViewModel : ObservableObject
         _openDetails = openDetails;
 
         Teams = new ObservableCollection<TeamListItemDto>();
-        SearchCommand = new AsyncRelayCommand(SearchAsync);
+        SearchCommand = new AsyncRelayCommand(StartSearchAsync);
         NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => HasNextPage);
         PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => HasPreviousPage);
         OpenDetailsCommand = new RelayCommand(OpenDetails, () => SelectedTeam is not null);
@@ -91,6 +91,12 @@ public sealed class TeamsViewModel : ObservableObject
     public AsyncRelayCommand PreviousPageCommand { get; }
 
     public RelayCommand OpenDetailsCommand { get; }
+
+    private async Task StartSearchAsync()
+    {
+        Page = 1;
+        await SearchAsync();
+    }
 
     public async Task SearchAsync()
     {

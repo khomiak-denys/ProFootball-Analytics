@@ -29,7 +29,7 @@ public sealed class MatchesViewModel : ObservableObject
 
         Matches = new ObservableCollection<MatchListItemDto>();
         Leagues = new ObservableCollection<LeagueDto>();
-        SearchCommand = new AsyncRelayCommand(SearchAsync);
+        SearchCommand = new AsyncRelayCommand(StartSearchAsync);
         LoadLeaguesCommand = new AsyncRelayCommand(LoadLeaguesAsync);
         NextPageCommand = new AsyncRelayCommand(NextPageAsync, () => HasNextPage);
         PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, () => HasPreviousPage);
@@ -116,6 +116,12 @@ public sealed class MatchesViewModel : ObservableObject
     public AsyncRelayCommand PreviousPageCommand { get; }
 
     public RelayCommand OpenDetailsCommand { get; }
+
+    private async Task StartSearchAsync()
+    {
+        Page = 1;
+        await SearchAsync();
+    }
 
     public async Task LoadLeaguesAsync()
     {
