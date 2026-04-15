@@ -7,9 +7,13 @@ public sealed class ProFootballDbContextFactory : IDesignTimeDbContextFactory<Pr
 {
     public ProFootballDbContext CreateDbContext(string[] args)
     {
-        var connectionString =
-            Environment.GetEnvironmentVariable("PROFOOTBALL_DB_CONNECTION_STRING")
-            ?? "Host=localhost;Port=5432;Database=profootball;Username=postgres;Password=postgres";
+        var connectionString = Environment.GetEnvironmentVariable(DependencyInjection.ConnectionStringEnvironmentVariable);
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            throw new InvalidOperationException(
+                "Design-time DbContext requires an explicit connection string. " +
+                $"Set environment variable '{DependencyInjection.ConnectionStringEnvironmentVariable}'.");
+        }
 
         var optionsBuilder = new DbContextOptionsBuilder<ProFootballDbContext>();
         optionsBuilder.UseNpgsql(connectionString);
