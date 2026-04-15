@@ -106,21 +106,28 @@ public class DataImportServiceTests
             return;
         }
 
-        for (var attempt = 0; attempt < 5; attempt++)
+        IOException? lastException = null;
+        const int maxAttempts = 20;
+        for (var attempt = 0; attempt < maxAttempts; attempt++)
         {
             try
             {
                 File.Delete(path);
                 return;
             }
-            catch (IOException) when (attempt < 4)
+            catch (IOException exception) when (attempt < maxAttempts - 1)
             {
-                await Task.Delay(50);
+                lastException = exception;
+                await Task.Delay(100);
             }
-            catch (IOException)
+            catch (IOException exception)
             {
-                return;
+                lastException = exception;
             }
         }
+
+        Console.Error.WriteLine(
+            $"[DataImportServiceTests] Failed to delete temporary SQLite file '{path}' after retries. " +
+            $"Last error: {lastException?.Message}");
     }
 }
