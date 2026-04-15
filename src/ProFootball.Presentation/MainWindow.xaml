@@ -10,6 +10,7 @@
         Width="1280">
     <Window.Resources>
         <converters:TrendToPointCollectionConverter x:Key="TrendToPointsConverter" />
+        <converters:NullableIntTextConverter x:Key="NullableIntTextConverter" />
     </Window.Resources>
     <Grid Margin="10">
         <TabControl SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
@@ -93,7 +94,7 @@
                 <DockPanel Margin="8">
                     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
                         <TextBlock Margin="0,6,6,0" Text="TeamApiId:" />
-                        <TextBox Width="120" Margin="0,0,8,0" Text="{Binding TeamDetails.SelectedTeamApiId, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Width="120" Margin="0,0,8,0" Text="{Binding TeamDetails.SelectedTeamApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
                         <Button Width="100" Content="Load" Command="{Binding TeamDetails.LoadCommand}" />
                     </StackPanel>
                     <StackPanel>
@@ -117,9 +118,9 @@
                         <TextBlock Margin="0,6,6,0" Text="Name:" />
                         <TextBox Width="180" Margin="0,0,8,0" Text="{Binding Players.NameFilter, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Margin="0,6,6,0" Text="Min Overall:" />
-                        <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Players.MinOverall, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Players.MinOverall, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Margin="0,6,6,0" Text="Min Potential:" />
-                        <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Players.MinPotential, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Players.MinPotential, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Margin="0,6,6,0" Text="Foot:" />
                         <TextBox Width="80" Margin="0,0,8,0" Text="{Binding Players.PreferredFoot, UpdateSourceTrigger=PropertyChanged}" />
                         <Button Width="100" Margin="0,0,8,0" Content="Search" Command="{Binding Players.SearchCommand}" />
@@ -151,7 +152,7 @@
                     </Grid.RowDefinitions>
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                         <TextBlock Margin="0,6,6,0" Text="PlayerApiId:" />
-                        <TextBox Width="120" Margin="0,0,8,0" Text="{Binding PlayerDetails.SelectedPlayerApiId, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Width="120" Margin="0,0,8,0" Text="{Binding PlayerDetails.SelectedPlayerApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
                         <Button Width="100" Content="Load" Command="{Binding PlayerDetails.LoadCommand}" />
                     </StackPanel>
                     <TextBlock Grid.Row="1" FontSize="18" FontWeight="SemiBold" Text="{Binding PlayerDetails.Details.Name}" />
@@ -197,7 +198,7 @@
                         <TextBlock Margin="0,6,6,0" Text="Season:" />
                         <TextBox Width="100" Margin="0,0,8,0" Text="{Binding Matches.Season, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Margin="0,6,6,0" Text="TeamApiId:" />
-                        <TextBox Width="80" Margin="0,0,8,0" Text="{Binding Matches.TeamApiId, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Width="80" Margin="0,0,8,0" Text="{Binding Matches.TeamApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
                         <Button Width="100" Margin="0,0,8,0" Content="Search" Command="{Binding Matches.SearchCommand}" />
                         <Button Width="130" Margin="0,0,8,0" Content="Open Details" Command="{Binding Matches.OpenDetailsCommand}" />
                         <Button Width="80" Margin="0,0,8,0" Content="Prev" Command="{Binding Matches.PreviousPageCommand}" />
@@ -223,7 +224,7 @@
                 <StackPanel Margin="8">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Margin="0,6,6,0" Text="MatchApiId:" />
-                        <TextBox Width="120" Margin="0,0,8,0" Text="{Binding MatchDetails.SelectedMatchApiId, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Width="120" Margin="0,0,8,0" Text="{Binding MatchDetails.SelectedMatchApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
                         <Button Width="100" Content="Load" Command="{Binding MatchDetails.LoadCommand}" />
                     </StackPanel>
                     <TextBlock Margin="0,10,0,0" FontSize="18" FontWeight="SemiBold" Text="{Binding MatchDetails.Details.LeagueName}" />
@@ -244,12 +245,12 @@
                     </Grid.RowDefinitions>
                     <WrapPanel Margin="0,0,0,8">
                         <TextBlock Margin="0,6,6,0" Text="Trend PlayerApiId:" />
-                        <TextBox Width="100" Margin="0,0,8,0" Text="{Binding Analytics.TrendPlayerApiId, UpdateSourceTrigger=LostFocus}" />
+                        <TextBox Width="100" Margin="0,0,8,0" Text="{Binding Analytics.TrendPlayerApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=LostFocus}" />
                         <Button Width="100" Margin="0,0,8,0" Content="Load Trend" Command="{Binding Analytics.LoadTrendCommand}" />
                         <TextBlock Margin="0,6,6,0" Text="Min Overall:" />
-                        <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Analytics.MinOverall, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Analytics.MinOverall, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Margin="0,6,6,0" Text="Min Potential:" />
-                        <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Analytics.MinPotential, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Analytics.MinPotential, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock Margin="0,6,6,0" Text="Foot:" />
                         <TextBox Width="80" Margin="0,0,8,0" Text="{Binding Analytics.PreferredFoot, UpdateSourceTrigger=PropertyChanged}" />
                         <Button Width="120" Margin="0,0,8,0" Content="Top Players" Command="{Binding Analytics.LoadTopPlayersCommand}" />
