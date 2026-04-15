@@ -56,7 +56,7 @@ public class DataImportServiceTests
 
     private static async Task CreateSourceSqliteAsync(string sourcePath)
     {
-        await using var sourceConnection = new SqliteConnection($"Data Source={sourcePath}");
+        await using var sourceConnection = new SqliteConnection($"Data Source={sourcePath};Pooling=False");
         await sourceConnection.OpenAsync();
 
         var statements = new[]
@@ -126,8 +126,9 @@ public class DataImportServiceTests
             }
         }
 
-        Console.Error.WriteLine(
+        throw new IOException(
             $"[DataImportServiceTests] Failed to delete temporary SQLite file '{path}' after retries. " +
-            $"Last error: {lastException?.Message}");
+            $"Last error: {lastException?.Message}",
+            lastException);
     }
 }
