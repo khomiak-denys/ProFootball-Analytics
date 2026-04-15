@@ -244,7 +244,7 @@
                     </Grid.RowDefinitions>
                     <WrapPanel Margin="0,0,0,8">
                         <TextBlock Margin="0,6,6,0" Text="Trend PlayerApiId:" />
-                        <TextBox Width="100" Margin="0,0,8,0" Text="{Binding Analytics.TrendPlayerApiId, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBox Width="100" Margin="0,0,8,0" Text="{Binding Analytics.TrendPlayerApiId, UpdateSourceTrigger=LostFocus}" />
                         <Button Width="100" Margin="0,0,8,0" Content="Load Trend" Command="{Binding Analytics.LoadTrendCommand}" />
                         <TextBlock Margin="0,6,6,0" Text="Min Overall:" />
                         <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Analytics.MinOverall, UpdateSourceTrigger=PropertyChanged}" />

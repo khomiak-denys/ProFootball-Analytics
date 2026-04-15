@@ -8,7 +8,7 @@ namespace ProFootball.Presentation.ViewModels;
 public sealed class AnalyticsViewModel : ObservableObject
 {
     private readonly IAnalyticsQueryService _analyticsQueryService;
-    private int _trendPlayerApiId;
+    private int? _trendPlayerApiId;
     private int? _minOverall;
     private int? _minPotential;
     private string? _preferredFoot;
@@ -34,7 +34,7 @@ public sealed class AnalyticsViewModel : ObservableObject
 
     public ObservableCollection<MatchesBySeasonDto> MatchesBySeason { get; }
 
-    public int TrendPlayerApiId
+    public int? TrendPlayerApiId
     {
         get => _trendPlayerApiId;
         set => SetProperty(ref _trendPlayerApiId, value);
@@ -82,7 +82,7 @@ public sealed class AnalyticsViewModel : ObservableObject
     {
         await LoadTopPlayersAsync();
         await LoadMatchesBySeasonAsync();
-        if (TrendPlayerApiId > 0)
+        if (TrendPlayerApiId.GetValueOrDefault() > 0)
         {
             await LoadTrendAsync();
         }
@@ -91,12 +91,13 @@ public sealed class AnalyticsViewModel : ObservableObject
     public async Task LoadTrendAsync()
     {
         TrendPoints.Clear();
-        if (TrendPlayerApiId <= 0)
+        var playerApiId = TrendPlayerApiId.GetValueOrDefault();
+        if (playerApiId <= 0)
         {
             return;
         }
 
-        var trend = await _analyticsQueryService.GetPlayerTrendAsync(TrendPlayerApiId);
+        var trend = await _analyticsQueryService.GetPlayerTrendAsync(playerApiId);
         foreach (var point in trend)
         {
             TrendPoints.Add(point);
