@@ -102,7 +102,7 @@ public sealed class TeamsViewModel : ObservableObject
     {
         var result = await _teamsQueryService.SearchTeamsAsync(new TeamSearchQuery(
             NameFilter,
-            "LongName",
+            null,
             false,
             Page,
             PageSize));

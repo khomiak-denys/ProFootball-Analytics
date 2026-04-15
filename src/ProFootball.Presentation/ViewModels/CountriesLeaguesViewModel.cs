@@ -92,10 +92,12 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         var loadToken = ReplaceLoadToken();
         var lockAcquired = false;
 
-        await _loadLeaguesLock.WaitAsync(loadToken);
-        lockAcquired = true;
         try
         {
+            await _loadLeaguesLock.WaitAsync(loadToken);
+            lockAcquired = true;
+            DisposeRetiredLoadSources();
+
             ErrorMessage = null;
             IsLoading = true;
             loadToken.ThrowIfCancellationRequested();
@@ -140,11 +142,12 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         return _loadLeaguesCts.Token;
     }
 
-    public void Dispose()
+    private void DisposeRetiredLoadSources()
     {
-        _loadLeaguesCts?.Cancel();
-        _loadLeaguesCts?.Dispose();
-        _loadLeaguesCts = null;
+        if (_retiredLoadCts.Count == 0)
+        {
+            return;
+        }
 
         foreach (var tokenSource in _retiredLoadCts)
         {
@@ -152,6 +155,15 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         }
 
         _retiredLoadCts.Clear();
+    }
+
+    public void Dispose()
+    {
+        _loadLeaguesCts?.Cancel();
+        _loadLeaguesCts?.Dispose();
+        _loadLeaguesCts = null;
+
+        DisposeRetiredLoadSources();
         _loadLeaguesLock.Dispose();
     }
 }
