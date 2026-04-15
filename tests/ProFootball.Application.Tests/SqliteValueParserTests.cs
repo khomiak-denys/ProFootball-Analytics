@@ -20,7 +20,7 @@ public class SqliteValueParserTests
 
         await using (var insert = connection.CreateCommand())
         {
-            insert.CommandText = "INSERT INTO parser_case (value_a, value_b, value_c) VALUES (42, '17', 'abc')";
+            insert.CommandText = "INSERT INTO parser_case (value_a, value_b, value_c) VALUES (42, ' 17 ', 'abc')";
             await insert.ExecuteNonQueryAsync();
         }
 

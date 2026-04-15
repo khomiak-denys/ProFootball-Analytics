@@ -20,7 +20,7 @@ internal static class SqliteValueParser
             double value when value >= int.MinValue && value <= int.MaxValue => (int)value,
             double _ => null,
             string text
-                when long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
+                when long.TryParse(text.AsSpan().Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out var parsed)
                      && parsed >= int.MinValue
                      && parsed <= int.MaxValue => (int)parsed,
             _ => null,
