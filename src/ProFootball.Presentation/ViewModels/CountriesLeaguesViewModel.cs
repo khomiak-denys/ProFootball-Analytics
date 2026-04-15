@@ -91,7 +91,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     private async Task ReloadLeaguesSafeAsync()
     {
         var loadingOperationId = BeginLoading();
-        var loadSource = ReplaceLoadSource();
+        var (loadSource, previousSource) = ReplaceLoadSource();
         var loadToken = loadSource.Token;
         var lockAcquired = false;
 
@@ -99,6 +99,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         {
             await _loadLeaguesLock.WaitAsync(loadToken);
             lockAcquired = true;
+            DisposeLoadSource(previousSource);
 
             ErrorMessage = null;
             loadToken.ThrowIfCancellationRequested();
@@ -131,7 +132,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
                 _loadLeaguesCts = null;
             }
 
-            loadSource.Dispose();
+            DisposeLoadSource(loadSource);
             EndLoading(loadingOperationId);
         }
     }
@@ -151,18 +152,34 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         }
     }
 
-    private CancellationTokenSource ReplaceLoadSource()
+    private (CancellationTokenSource Current, CancellationTokenSource? Previous) ReplaceLoadSource()
     {
         var newSource = new CancellationTokenSource();
         var previousSource = Interlocked.Exchange(ref _loadLeaguesCts, newSource);
         previousSource?.Cancel();
-        return newSource;
+        return (newSource, previousSource);
+    }
+
+    private static void DisposeLoadSource(CancellationTokenSource? loadSource)
+    {
+        if (loadSource is null)
+        {
+            return;
+        }
+
+        try
+        {
+            loadSource.Dispose();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
     }
 
     public void Dispose()
     {
         _loadLeaguesCts?.Cancel();
-        _loadLeaguesCts?.Dispose();
+        DisposeLoadSource(_loadLeaguesCts);
         _loadLeaguesCts = null;
         _loadLeaguesLock.Dispose();
     }
