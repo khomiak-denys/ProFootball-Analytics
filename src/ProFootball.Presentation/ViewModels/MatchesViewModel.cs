@@ -88,7 +88,16 @@ public sealed class MatchesViewModel : ObservableObject
     public int PageSize
     {
         get => _pageSize;
-        set => SetProperty(ref _pageSize, value);
+        set
+        {
+            if (SetProperty(ref _pageSize, value))
+            {
+                RaisePropertyChanged(nameof(HasPreviousPage));
+                RaisePropertyChanged(nameof(HasNextPage));
+                NextPageCommand.RaiseCanExecuteChanged();
+                PreviousPageCommand.RaiseCanExecuteChanged();
+            }
+        }
     }
 
     public int TotalCount
