@@ -7,12 +7,13 @@ using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
-public sealed class TeamsQueryService(ProFootballDbContext dbContext) : ITeamsQueryService
+public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) : ITeamsQueryService
 {
     public async Task<PagedResult<TeamListItemDto>> SearchTeamsAsync(
         TeamSearchQuery query,
         CancellationToken cancellationToken = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var (page, pageSize, skip) = Paging.Normalize(query.Page, query.PageSize);
 
         var teamsQuery = dbContext.Teams.AsNoTracking();
@@ -20,7 +21,7 @@ public sealed class TeamsQueryService(ProFootballDbContext dbContext) : ITeamsQu
         if (!string.IsNullOrWhiteSpace(query.Name))
         {
             var pattern = LikePattern.Contains(query.Name.Trim());
-            teamsQuery = teamsQuery.Where(team => EF.Functions.ILike(team.LongName, pattern));
+            teamsQuery = teamsQuery.Where(team => EF.Functions.ILike(team.LongName, pattern, "\\"));
         }
 
         teamsQuery = ApplySorting(teamsQuery, query.SortBy, query.SortDescending);
@@ -43,6 +44,7 @@ public sealed class TeamsQueryService(ProFootballDbContext dbContext) : ITeamsQu
         int teamApiId,
         CancellationToken cancellationToken = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var team = await dbContext.Teams
             .AsNoTracking()
             .Where(item => item.TeamApiId == teamApiId)

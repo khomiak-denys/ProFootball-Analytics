@@ -6,12 +6,13 @@ using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
-public sealed class PlayersQueryService(ProFootballDbContext dbContext) : IPlayersQueryService
+public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) : IPlayersQueryService
 {
     public async Task<PagedResult<PlayerListItemDto>> SearchPlayersAsync(
         PlayerSearchQuery query,
         CancellationToken cancellationToken = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var (page, pageSize, skip) = Paging.Normalize(query.Page, query.PageSize);
 
         var latestAttributesQuery = dbContext.PlayerAttributes
@@ -48,7 +49,7 @@ public sealed class PlayersQueryService(ProFootballDbContext dbContext) : IPlaye
         if (!string.IsNullOrWhiteSpace(query.Name))
         {
             var pattern = LikePattern.Contains(query.Name.Trim());
-            projectedQuery = projectedQuery.Where(player => EF.Functions.ILike(player.Name, pattern));
+            projectedQuery = projectedQuery.Where(player => EF.Functions.ILike(player.Name, pattern, "\\"));
         }
 
         if (query.MinHeight.HasValue)
@@ -66,7 +67,7 @@ public sealed class PlayersQueryService(ProFootballDbContext dbContext) : IPlaye
             var footPattern = LikePattern.Exact(query.PreferredFoot.Trim());
             projectedQuery = projectedQuery.Where(player =>
                 player.PreferredFoot != null &&
-                EF.Functions.ILike(player.PreferredFoot, footPattern));
+                EF.Functions.ILike(player.PreferredFoot, footPattern, "\\"));
         }
 
         if (query.MinOverallRating.HasValue)
@@ -130,6 +131,7 @@ public sealed class PlayersQueryService(ProFootballDbContext dbContext) : IPlaye
         int playerApiId,
         CancellationToken cancellationToken = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var player = await dbContext.Players
             .AsNoTracking()
             .Where(item => item.PlayerApiId == playerApiId)

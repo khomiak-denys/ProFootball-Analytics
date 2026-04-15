@@ -28,6 +28,7 @@ public static class DependencyInjection
         }
 
         services.AddDbContext<ProFootballDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddDbContextFactory<ProFootballDbContext>(options => options.UseNpgsql(connectionString));
         services.AddScoped<IClubRepository, EfClubRepository>();
         services.AddScoped<ICountriesLeaguesQueryService, CountriesLeaguesQueryService>();
         services.AddScoped<ITeamsQueryService, TeamsQueryService>();

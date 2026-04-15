@@ -6,12 +6,13 @@ using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
-public sealed class MatchesQueryService(ProFootballDbContext dbContext) : IMatchesQueryService
+public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) : IMatchesQueryService
 {
     public async Task<PagedResult<MatchListItemDto>> SearchMatchesAsync(
         MatchSearchQuery query,
         CancellationToken cancellationToken = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var (page, pageSize, skip) = Paging.Normalize(query.Page, query.PageSize);
 
         var projectedQuery = from match in dbContext.Matches.AsNoTracking()
@@ -99,6 +100,7 @@ public sealed class MatchesQueryService(ProFootballDbContext dbContext) : IMatch
         int matchApiId,
         CancellationToken cancellationToken = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var match = await (from item in dbContext.Matches.AsNoTracking()
                            where item.MatchApiId == matchApiId
                            join league in dbContext.Leagues.AsNoTracking() on item.LeagueId equals league.Id

@@ -5,12 +5,13 @@ using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
-public sealed class AnalyticsQueryService(ProFootballDbContext dbContext) : IAnalyticsQueryService
+public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) : IAnalyticsQueryService
 {
     public async Task<IReadOnlyList<PlayerTrendPointDto>> GetPlayerTrendAsync(
         int playerApiId,
         CancellationToken cancellationToken = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         return await dbContext.PlayerAttributes
             .AsNoTracking()
             .Where(attribute => attribute.PlayerApiId == playerApiId)
@@ -26,6 +27,7 @@ public sealed class AnalyticsQueryService(ProFootballDbContext dbContext) : IAna
         TopPlayersQuery query,
         CancellationToken cancellationToken = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var limit = query.Limit < 1 ? 20 : query.Limit;
         if (limit > 200)
         {
@@ -51,7 +53,7 @@ public sealed class AnalyticsQueryService(ProFootballDbContext dbContext) : IAna
             var footPattern = LikePattern.Exact(query.PreferredFoot.Trim());
             attributesQuery = attributesQuery.Where(attribute =>
                 attribute.PreferredFoot != null &&
-                EF.Functions.ILike(attribute.PreferredFoot, footPattern));
+                EF.Functions.ILike(attribute.PreferredFoot, footPattern, "\\"));
         }
 
         var groupedQuery = from attribute in attributesQuery
@@ -93,6 +95,7 @@ public sealed class AnalyticsQueryService(ProFootballDbContext dbContext) : IAna
         int? leagueId = null,
         CancellationToken cancellationToken = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var matchesQuery = dbContext.Matches.AsNoTracking();
 
         if (leagueId.HasValue)

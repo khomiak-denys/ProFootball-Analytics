@@ -5,10 +5,11 @@ using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
-public sealed class CountriesLeaguesQueryService(ProFootballDbContext dbContext) : ICountriesLeaguesQueryService
+public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) : ICountriesLeaguesQueryService
 {
     public async Task<IReadOnlyList<CountryDto>> GetCountriesAsync(CancellationToken cancellationToken = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         return await dbContext.Countries
             .AsNoTracking()
             .OrderBy(country => country.Name)
@@ -20,6 +21,7 @@ public sealed class CountriesLeaguesQueryService(ProFootballDbContext dbContext)
         int? countryId = null,
         CancellationToken cancellationToken = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var query = from league in dbContext.Leagues.AsNoTracking()
                     join country in dbContext.Countries.AsNoTracking() on league.CountryId equals country.Id
                     select new { league, country };
