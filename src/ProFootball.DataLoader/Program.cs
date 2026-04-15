@@ -19,7 +19,7 @@ if (!string.IsNullOrWhiteSpace(batchSizeText) && int.TryParse(batchSizeText, out
     batchSize = parsedBatchSize;
 }
 
-var host = Host.CreateDefaultBuilder(args)
+using var host = Host.CreateDefaultBuilder(args)
     .ConfigureAppConfiguration((_, configurationBuilder) =>
     {
         configurationBuilder.SetBasePath(AppContext.BaseDirectory);
@@ -32,25 +32,36 @@ var host = Host.CreateDefaultBuilder(args)
     })
     .Build();
 
-await host.StartAsync();
+var started = false;
+try
+{
+    await host.StartAsync();
+    started = true;
 
-using var scope = host.Services.CreateScope();
-var importer = scope.ServiceProvider.GetRequiredService<IDataImportService>();
-var result = await importer.ImportAsync(new DataImportRequest(sqlitePath, batchSize));
+    using var scope = host.Services.CreateScope();
+    var importer = scope.ServiceProvider.GetRequiredService<IDataImportService>();
+    var result = await importer.ImportAsync(new DataImportRequest(sqlitePath, batchSize));
 
-Console.WriteLine("Import completed.");
-Console.WriteLine($"Countries: {result.CountriesImported}");
-Console.WriteLine($"Leagues: {result.LeaguesImported}");
-Console.WriteLine($"Teams: {result.TeamsImported}");
-Console.WriteLine($"Players: {result.PlayersImported}");
-Console.WriteLine($"Matches: {result.MatchesImported}");
-Console.WriteLine($"TeamAttributes: {result.TeamAttributesImported}");
-Console.WriteLine($"PlayerAttributes: {result.PlayerAttributesImported}");
-Console.WriteLine($"SkippedRows: {result.SkippedRows}");
-Console.WriteLine($"Duration: {result.Duration}");
+    Console.WriteLine("Import completed.");
+    Console.WriteLine($"Countries: {result.CountriesImported}");
+    Console.WriteLine($"Leagues: {result.LeaguesImported}");
+    Console.WriteLine($"Teams: {result.TeamsImported}");
+    Console.WriteLine($"Players: {result.PlayersImported}");
+    Console.WriteLine($"Matches: {result.MatchesImported}");
+    Console.WriteLine($"TeamAttributes: {result.TeamAttributesImported}");
+    Console.WriteLine($"PlayerAttributes: {result.PlayerAttributesImported}");
+    Console.WriteLine($"SkippedRows: {result.SkippedRows}");
+    Console.WriteLine($"Duration: {result.Duration}");
 
-await host.StopAsync(TimeSpan.FromSeconds(5));
-return 0;
+    return 0;
+}
+finally
+{
+    if (started)
+    {
+        await host.StopAsync(TimeSpan.FromSeconds(5));
+    }
+}
 
 static string? GetArgument(IReadOnlyList<string> args, string key)
 {
