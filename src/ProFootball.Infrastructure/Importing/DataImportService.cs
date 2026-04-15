@@ -2,7 +2,7 @@ using System.Diagnostics;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using ProFootball.Application.Abstractions.Querying;
+using ProFootball.Application.Abstractions.Importing;
 using ProFootball.Application.Contracts.Importing;
 using ProFootball.Domain.Entities;
 using ProFootball.Infrastructure.Persistence;

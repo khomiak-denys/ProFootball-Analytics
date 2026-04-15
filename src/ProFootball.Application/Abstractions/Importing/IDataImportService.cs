@@ -1,6 +1,6 @@
 using ProFootball.Application.Contracts.Importing;
 
-namespace ProFootball.Application.Abstractions.Querying;
+namespace ProFootball.Application.Abstractions.Importing;
 
 public interface IDataImportService
 {

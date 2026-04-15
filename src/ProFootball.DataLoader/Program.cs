@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ProFootball.Application.Abstractions.Querying;
+using ProFootball.Application.Abstractions.Importing;
 using ProFootball.Application.Contracts.Importing;
 using ProFootball.Infrastructure;
 
