@@ -60,6 +60,7 @@ public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> db
             .AsNoTracking()
             .Where(attribute => attribute.TeamApiId == teamApiId)
             .OrderByDescending(attribute => attribute.Date)
+            .ThenByDescending(attribute => attribute.Id)
             .Take(200)
             .Select(attribute => new TeamAttributeDto(
                 attribute.Date,

@@ -100,11 +100,20 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
 
         projectedQuery = (query.SortBy?.Trim().ToLowerInvariant(), query.SortDescending) switch
         {
-            ("overallrating", true) => projectedQuery.OrderByDescending(player => player.OverallRating).ThenBy(player => player.Name),
+            ("overallrating", true) => projectedQuery
+                .OrderByDescending(player => player.OverallRating.HasValue)
+                .ThenByDescending(player => player.OverallRating)
+                .ThenBy(player => player.Name),
             ("overallrating", false) => projectedQuery.OrderBy(player => player.OverallRating).ThenBy(player => player.Name),
-            ("potential", true) => projectedQuery.OrderByDescending(player => player.Potential).ThenBy(player => player.Name),
+            ("potential", true) => projectedQuery
+                .OrderByDescending(player => player.Potential.HasValue)
+                .ThenByDescending(player => player.Potential)
+                .ThenBy(player => player.Name),
             ("potential", false) => projectedQuery.OrderBy(player => player.Potential).ThenBy(player => player.Name),
-            ("height", true) => projectedQuery.OrderByDescending(player => player.Height).ThenBy(player => player.Name),
+            ("height", true) => projectedQuery
+                .OrderByDescending(player => player.Height.HasValue)
+                .ThenByDescending(player => player.Height)
+                .ThenBy(player => player.Name),
             ("height", false) => projectedQuery.OrderBy(player => player.Height).ThenBy(player => player.Name),
             (_, true) => projectedQuery.OrderByDescending(player => player.Name),
             _ => projectedQuery.OrderBy(player => player.Name),
@@ -155,6 +164,7 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
             .AsNoTracking()
             .Where(attribute => attribute.PlayerApiId == playerApiId)
             .OrderByDescending(attribute => attribute.Date)
+            .ThenByDescending(attribute => attribute.Id)
             .Take(300)
             .Select(attribute => new PlayerAttributeDto(
                 attribute.Date,
