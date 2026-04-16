@@ -1,4 +1,6 @@
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using Microsoft.Extensions.Logging;
 using ProFootball.Presentation.ViewModels;
 
@@ -34,6 +36,19 @@ public partial class MainWindow : Window
                 "Startup Error",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
+        }
+    }
+
+    private void OnSidebarItemMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not ListBox listBox || e.OriginalSource is not DependencyObject source)
+        {
+            return;
+        }
+
+        if (ItemsControl.ContainerFromElement(listBox, source) is ListBoxItem { Tag: AppTab tab })
+        {
+            _viewModel.SelectedTab = tab;
         }
     }
 }
