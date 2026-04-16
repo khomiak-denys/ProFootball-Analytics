@@ -848,13 +848,15 @@
                                                    FontWeight="SemiBold"
                                                    Foreground="{StaticResource TitleForegroundBrush}"
                                                    Text="Team Attribute Trends" />
-                                        <Canvas Height="220" Margin="0,16,0,0" Background="{StaticResource SurfaceMutedBrush}">
-                                            <Line X1="30" Y1="20" X2="30" Y2="196" Stroke="{StaticResource ChartAxisBrush}" StrokeThickness="1" />
-                                            <Line X1="30" Y1="196" X2="742" Y2="196" Stroke="{StaticResource ChartAxisBrush}" StrokeThickness="1" />
-                                            <Polyline Stroke="{StaticResource SuccessForegroundBrush}"
-                                                      StrokeThickness="3"
-                                                      Points="{Binding Teams.TeamTrendPolylinePoints}" />
-                                        </Canvas>
+                                        <Viewbox Height="220" Margin="0,16,0,0" Stretch="Fill" StretchDirection="Both">
+                                            <Canvas Width="742" Height="220" Background="{StaticResource SurfaceMutedBrush}">
+                                                <Line X1="30" Y1="20" X2="30" Y2="196" Stroke="{StaticResource ChartAxisBrush}" StrokeThickness="1" />
+                                                <Line X1="30" Y1="196" X2="742" Y2="196" Stroke="{StaticResource ChartAxisBrush}" StrokeThickness="1" />
+                                                <Polyline Stroke="{StaticResource SuccessForegroundBrush}"
+                                                          StrokeThickness="3"
+                                                          Points="{Binding Teams.TeamTrendPolylinePoints}" />
+                                            </Canvas>
+                                        </Viewbox>
                                         <TextBlock Margin="0,8,0,0"
                                                    FontSize="16"
                                                    Foreground="{StaticResource DangerForegroundBrush}"

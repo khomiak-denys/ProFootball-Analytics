@@ -230,18 +230,13 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
 
         if (selectedTeam is null)
         {
-            _selectedTeamDetails = null;
-            TacticalMetrics.Clear();
-            BuildUpPlayScore = 0;
-            ChanceCreationScore = 0;
-            DefenceScore = 0;
-            TeamTrendPolylinePoints = string.Empty;
-            RaiseSelectedTeamPropertiesChanged();
+            ClearSelectedTeamDetailsState();
             return;
         }
 
         IsLoadingDetails = true;
         ErrorMessage = null;
+        ClearSelectedTeamDetailsState();
 
         try
         {
@@ -288,6 +283,17 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
                 IsLoadingDetails = false;
             }
         }
+    }
+
+    private void ClearSelectedTeamDetailsState()
+    {
+        _selectedTeamDetails = null;
+        TacticalMetrics.Clear();
+        BuildUpPlayScore = 0;
+        ChanceCreationScore = 0;
+        DefenceScore = 0;
+        TeamTrendPolylinePoints = string.Empty;
+        RaiseSelectedTeamPropertiesChanged();
     }
 
     private void UpdateTrendPolyline(IReadOnlyList<TeamAttributeDto>? attributes)

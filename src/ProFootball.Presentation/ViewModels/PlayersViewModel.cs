@@ -329,15 +329,13 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
 
         if (selectedPlayer is null)
         {
-            _selectedPlayerDetails = null;
-            SelectedPlayerHistory.Clear();
-            RadarPolygonPoints = string.Empty;
-            RaiseSelectedPlayerPropertiesChanged();
+            ClearSelectedPlayerDetailsState();
             return;
         }
 
         IsLoadingDetails = true;
         ErrorMessage = null;
+        ClearSelectedPlayerDetailsState();
 
         try
         {
@@ -376,6 +374,14 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
                 IsLoadingDetails = false;
             }
         }
+    }
+
+    private void ClearSelectedPlayerDetailsState()
+    {
+        _selectedPlayerDetails = null;
+        SelectedPlayerHistory.Clear();
+        RadarPolygonPoints = string.Empty;
+        RaiseSelectedPlayerPropertiesChanged();
     }
 
     private void OnNameSearchDebounceTimerTick(object? sender, EventArgs e)
