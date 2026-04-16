@@ -27,7 +27,7 @@ public class DataImportServiceTests
                 .Options;
 
             await using var destinationContext = new ProFootballDbContext(options);
-            var service = new DataImportService(destinationContext, NullLogger<DataImportService>.Instance);
+            var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
 
             var result = await service.ImportAsync(new DataImportRequest(sourcePath, BatchSize: 2));
 
@@ -71,7 +71,7 @@ public class DataImportServiceTests
                 .Options;
 
             await using var destinationContext = new ProFootballDbContext(options);
-            var service = new DataImportService(destinationContext, NullLogger<DataImportService>.Instance);
+            var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
 
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
                 service.ImportAsync(new DataImportRequest(sourcePath, BatchSize: 0)));
@@ -158,5 +158,10 @@ public class DataImportServiceTests
             $"[DataImportServiceTests] Failed to delete temporary SQLite file '{path}' after retries. " +
             $"Last error: {lastException?.Message}",
             lastException);
+    }
+
+    private sealed class TestDbContextFactory(DbContextOptions<ProFootballDbContext> options) : IDbContextFactory<ProFootballDbContext>
+    {
+        public ProFootballDbContext CreateDbContext() => new(options);
     }
 }

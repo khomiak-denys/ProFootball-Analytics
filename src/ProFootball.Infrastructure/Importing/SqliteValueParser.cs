@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using Microsoft.Data.Sqlite;
 
 namespace ProFootball.Infrastructure.Importing;
@@ -37,7 +38,14 @@ internal static class SqliteValueParser
             return null;
         }
 
-        return reader.GetString(index).Trim();
+        var value = reader.GetValue(index);
+        return value switch
+        {
+            string text => text.Trim(),
+            byte[] bytes => Encoding.UTF8.GetString(bytes).Trim(),
+            ReadOnlyMemory<byte> memory => Encoding.UTF8.GetString(memory.Span).Trim(),
+            _ => Convert.ToString(value, CultureInfo.InvariantCulture)?.Trim(),
+        };
     }
 
     public static DateTime? ReadDateTime(SqliteDataReader reader, int index)

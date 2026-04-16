@@ -63,4 +63,31 @@ public class SqliteValueParserTests
         Assert.Equal(new DateTime(2015, 1, 1, 0, 0, 0, DateTimeKind.Utc), SqliteValueParser.ReadDateTime(reader, 1));
         Assert.Null(SqliteValueParser.ReadDateTime(reader, 2));
     }
+
+    [Fact]
+    public async Task ReadString_ShouldHandleNonStringSQLiteValues()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "CREATE TABLE parser_case (value_numeric INTEGER, value_blob BLOB)";
+            await command.ExecuteNonQueryAsync();
+        }
+
+        await using (var insert = connection.CreateCommand())
+        {
+            insert.CommandText = "INSERT INTO parser_case (value_numeric, value_blob) VALUES (42, X'207465737420')";
+            await insert.ExecuteNonQueryAsync();
+        }
+
+        await using var select = connection.CreateCommand();
+        select.CommandText = "SELECT value_numeric, value_blob FROM parser_case";
+        await using var reader = await select.ExecuteReaderAsync();
+        Assert.True(await reader.ReadAsync());
+
+        Assert.Equal("42", SqliteValueParser.ReadString(reader, 0));
+        Assert.Equal("test", SqliteValueParser.ReadString(reader, 1));
+    }
 }
