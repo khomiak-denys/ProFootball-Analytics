@@ -11,6 +11,12 @@ internal static class Paging
             normalizedPageSize = maxPageSize;
         }
 
-        return (normalizedPage, normalizedPageSize, (normalizedPage - 1) * normalizedPageSize);
+        var skip = ((long)normalizedPage - 1L) * normalizedPageSize;
+        if (skip > int.MaxValue)
+        {
+            skip = int.MaxValue;
+        }
+
+        return (normalizedPage, normalizedPageSize, (int)skip);
     }
 }

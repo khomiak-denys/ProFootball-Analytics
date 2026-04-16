@@ -26,6 +26,6 @@ public sealed class NullableIntTextConverter : IValueConverter
 
         return int.TryParse(text.Trim(), NumberStyles.Integer, culture, out var parsed)
             ? parsed
-            : Binding.DoNothing;
+            : null;
     }
 }
