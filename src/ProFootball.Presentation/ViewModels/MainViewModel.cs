@@ -6,20 +6,7 @@ namespace ProFootball.Presentation.ViewModels;
 
 public sealed class MainViewModel : ObservableObject, IDisposable
 {
-    public static class Tabs
-    {
-        public const int Dashboard = 0;
-        public const int CountriesLeagues = 1;
-        public const int Teams = 2;
-        public const int TeamDetails = 3;
-        public const int Players = 4;
-        public const int PlayerDetails = 5;
-        public const int Matches = 6;
-        public const int MatchDetails = 7;
-        public const int Analytics = 8;
-    }
-
-    private int _selectedTabIndex;
+    private AppTab _selectedTab = AppTab.Dashboard;
     private readonly ILogger<MainViewModel> _logger;
 
     public MainViewModel(
@@ -66,29 +53,48 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public AnalyticsViewModel Analytics { get; }
 
-    public int SelectedTabIndex
+    public AppTab SelectedTab
     {
-        get => _selectedTabIndex;
+        get => _selectedTab;
         set
         {
-            if (SetProperty(ref _selectedTabIndex, value))
+            if (SetProperty(ref _selectedTab, value))
             {
                 RaisePropertyChanged(nameof(CurrentSectionTitle));
+                RaisePropertyChanged(nameof(SelectedSidebarTab));
             }
         }
     }
 
-    public string CurrentSectionTitle => SelectedTabIndex switch
+    public AppTab SelectedSidebarTab
     {
-        Tabs.Dashboard => "Dashboard",
-        Tabs.CountriesLeagues => "Leagues",
-        Tabs.Teams => "Teams",
-        Tabs.TeamDetails => "Team Details",
-        Tabs.Players => "Players",
-        Tabs.PlayerDetails => "Player Details",
-        Tabs.Matches => "Matches",
-        Tabs.MatchDetails => "Match Details",
-        Tabs.Analytics => "Analytics",
+        get => SelectedTab switch
+        {
+            AppTab.TeamDetails => AppTab.Teams,
+            AppTab.PlayerDetails => AppTab.Players,
+            AppTab.MatchDetails => AppTab.Matches,
+            _ => SelectedTab,
+        };
+        set
+        {
+            if (SelectedTab != value)
+            {
+                SelectedTab = value;
+            }
+        }
+    }
+
+    public string CurrentSectionTitle => SelectedTab switch
+    {
+        AppTab.Dashboard => "Dashboard",
+        AppTab.CountriesLeagues => "Leagues",
+        AppTab.Teams => "Teams",
+        AppTab.TeamDetails => "Team Details",
+        AppTab.Players => "Players",
+        AppTab.PlayerDetails => "Player Details",
+        AppTab.Matches => "Matches",
+        AppTab.MatchDetails => "Match Details",
+        AppTab.Analytics => "Analytics",
         _ => "Dashboard",
     };
 
@@ -109,21 +115,21 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         TeamDetails.SelectedTeamApiId = teamApiId;
         TeamDetails.LoadCommand.Execute(null);
-        SelectedTabIndex = Tabs.TeamDetails;
+        SelectedTab = AppTab.TeamDetails;
     }
 
     private void OpenPlayerDetails(int playerApiId)
     {
         PlayerDetails.SelectedPlayerApiId = playerApiId;
         PlayerDetails.LoadCommand.Execute(null);
-        SelectedTabIndex = Tabs.PlayerDetails;
+        SelectedTab = AppTab.PlayerDetails;
     }
 
     private void OpenMatchDetails(int matchApiId)
     {
         MatchDetails.SelectedMatchApiId = matchApiId;
         MatchDetails.LoadCommand.Execute(null);
-        SelectedTabIndex = Tabs.MatchDetails;
+        SelectedTab = AppTab.MatchDetails;
     }
 
     private void OnBackgroundCommandException(Exception exception)

@@ -23,6 +23,11 @@
         <SolidColorBrush x:Key="SuccessForegroundBrush" Color="#22C55E" />
         <SolidColorBrush x:Key="DangerForegroundBrush" Color="#EF4444" />
         <SolidColorBrush x:Key="SurfaceMutedBrush" Color="#F8FAFC" />
+        <SolidColorBrush x:Key="SidebarHoverBrush" Color="#1B2735" />
+        <SolidColorBrush x:Key="SidebarFocusBackgroundBrush" Color="#223244" />
+        <SolidColorBrush x:Key="SidebarFocusBorderBrush" Color="#93C5FD" />
+        <SolidColorBrush x:Key="SidebarSecondaryForegroundBrush" Color="#A3B3C7" />
+        <SolidColorBrush x:Key="SidebarDividerBrush" Color="#223244" />
 
         <Style x:Key="DashboardCardStyle" TargetType="Border">
             <Setter Property="Margin" Value="0,0,12,0" />
@@ -75,20 +80,20 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="NavItemBorder" Property="Background" Value="#1B2735" />
+                                <Setter TargetName="NavItemBorder" Property="Background" Value="{StaticResource SidebarHoverBrush}" />
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
-                                <Setter TargetName="NavItemBorder" Property="Background" Value="#22C55E" />
+                                <Setter TargetName="NavItemBorder" Property="Background" Value="{StaticResource SuccessForegroundBrush}" />
                             </Trigger>
                             <Trigger Property="IsKeyboardFocusWithin" Value="True">
-                                <Setter TargetName="NavItemBorder" Property="BorderBrush" Value="#93C5FD" />
+                                <Setter TargetName="NavItemBorder" Property="BorderBrush" Value="{StaticResource SidebarFocusBorderBrush}" />
                             </Trigger>
                             <MultiTrigger>
                                 <MultiTrigger.Conditions>
                                     <Condition Property="IsKeyboardFocusWithin" Value="True" />
                                     <Condition Property="IsSelected" Value="False" />
                                 </MultiTrigger.Conditions>
-                                <Setter TargetName="NavItemBorder" Property="Background" Value="#223244" />
+                                <Setter TargetName="NavItemBorder" Property="Background" Value="{StaticResource SidebarFocusBackgroundBrush}" />
                             </MultiTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -132,7 +137,7 @@
                                Text="ProFootball Analytics" />
                     <TextBlock Margin="0,8,0,0"
                                FontSize="14"
-                               Foreground="#A3B3C7"
+                               Foreground="{StaticResource SidebarSecondaryForegroundBrush}"
                                Text="Data Analysis Platform" />
                 </StackPanel>
 
@@ -141,9 +146,9 @@
                          Background="Transparent"
                          BorderThickness="0"
                          SelectedValuePath="Tag"
-                         SelectedValue="{Binding SelectedTabIndex, Mode=TwoWay}"
+                         SelectedValue="{Binding SelectedSidebarTab, Mode=TwoWay}"
                          ItemContainerStyle="{StaticResource SidebarNavItemStyle}">
-                    <ListBoxItem Tag="{x:Static viewModels:MainViewModel+Tabs.Dashboard}">
+                    <ListBoxItem Tag="{x:Static viewModels:AppTab.Dashboard}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        FontSize="19"
@@ -155,7 +160,7 @@
                                        Text="Dashboard" />
                         </StackPanel>
                     </ListBoxItem>
-                    <ListBoxItem Tag="{x:Static viewModels:MainViewModel+Tabs.Players}">
+                    <ListBoxItem Tag="{x:Static viewModels:AppTab.Players}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        FontSize="19"
@@ -167,7 +172,7 @@
                                        Text="Players" />
                         </StackPanel>
                     </ListBoxItem>
-                    <ListBoxItem Tag="{x:Static viewModels:MainViewModel+Tabs.Teams}">
+                    <ListBoxItem Tag="{x:Static viewModels:AppTab.Teams}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        FontSize="19"
@@ -179,7 +184,7 @@
                                        Text="Teams" />
                         </StackPanel>
                     </ListBoxItem>
-                    <ListBoxItem Tag="{x:Static viewModels:MainViewModel+Tabs.Matches}">
+                    <ListBoxItem Tag="{x:Static viewModels:AppTab.Matches}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        FontSize="19"
@@ -191,7 +196,7 @@
                                        Text="Matches" />
                         </StackPanel>
                     </ListBoxItem>
-                    <ListBoxItem Tag="{x:Static viewModels:MainViewModel+Tabs.CountriesLeagues}">
+                    <ListBoxItem Tag="{x:Static viewModels:AppTab.CountriesLeagues}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        FontSize="19"
@@ -203,7 +208,7 @@
                                        Text="Leagues" />
                         </StackPanel>
                     </ListBoxItem>
-                    <ListBoxItem Tag="{x:Static viewModels:MainViewModel+Tabs.Analytics}">
+                    <ListBoxItem Tag="{x:Static viewModels:AppTab.Analytics}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        FontSize="19"
@@ -219,10 +224,10 @@
 
                 <Border Grid.Row="2"
                         Padding="16,20"
-                        BorderBrush="#223244"
+                        BorderBrush="{StaticResource SidebarDividerBrush}"
                         BorderThickness="0,1,0,0">
                     <TextBlock FontSize="12"
-                               Foreground="#A3B3C7"
+                               Foreground="{StaticResource SidebarSecondaryForegroundBrush}"
                                Text="© 2026 ProFootball Analytics" />
                 </Border>
             </Grid>
@@ -275,8 +280,9 @@
 
             <Grid Grid.Row="1" Margin="18,16,18,16">
                 <TabControl Style="{StaticResource ContentOnlyTabControlStyle}"
-                            SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
-            <TabItem Header="Dashboard">
+                            SelectedValuePath="Tag"
+                            SelectedValue="{Binding SelectedTab, Mode=TwoWay}">
+            <TabItem Header="Dashboard" Tag="{x:Static viewModels:AppTab.Dashboard}">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="6,2,6,2">
                         <UniformGrid Columns="5" Margin="0,0,0,14">
@@ -289,9 +295,9 @@
                                     </Grid.RowDefinitions>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Countries" />
                                     <TextBlock Grid.Row="1" Margin="0,8,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Countries}" />
-                                    <TextBlock Grid.Row="2" Margin="0,8,0,0" FontSize="14" Foreground="#22C55E" Text="+2 this year" />
+                                    <TextBlock Grid.Row="2" Margin="0,8,0,0" FontSize="14" Foreground="{StaticResource SuccessForegroundBrush}" Text="+2 this year" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
-                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE909;" />
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{StaticResource SuccessForegroundBrush}" Text="&#xE909;" />
                                     </Border>
                                 </Grid>
                             </Border>
@@ -300,9 +306,9 @@
                                 <Grid>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Leagues" />
                                     <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Leagues}" />
-                                    <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="#22C55E" Text="+5 this year" />
+                                    <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="{StaticResource SuccessForegroundBrush}" Text="+5 this year" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
-                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE7BF;" />
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{StaticResource SuccessForegroundBrush}" Text="&#xE7BF;" />
                                     </Border>
                                 </Grid>
                             </Border>
@@ -311,9 +317,9 @@
                                 <Grid>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Teams" />
                                     <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Teams}" />
-                                    <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="#22C55E" Text="+8 this month" />
+                                    <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="{StaticResource SuccessForegroundBrush}" Text="+8 this month" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
-                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE72E;" />
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{StaticResource SuccessForegroundBrush}" Text="&#xE72E;" />
                                     </Border>
                                 </Grid>
                             </Border>
@@ -322,9 +328,9 @@
                                 <Grid>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Players" />
                                     <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Players}" />
-                                    <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="#EF4444" Text="-3 this month" />
+                                    <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="{StaticResource DangerForegroundBrush}" Text="-3 this month" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
-                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE716;" />
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{StaticResource SuccessForegroundBrush}" Text="&#xE716;" />
                                     </Border>
                                 </Grid>
                             </Border>
@@ -333,9 +339,9 @@
                                 <Grid>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Matches" />
                                     <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Matches}" />
-                                    <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="#22C55E" Text="+24 this week" />
+                                    <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="{StaticResource SuccessForegroundBrush}" Text="+24 this week" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
-                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE787;" />
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{StaticResource SuccessForegroundBrush}" Text="&#xE787;" />
                                     </Border>
                                 </Grid>
                             </Border>
@@ -431,15 +437,15 @@
                                                 <Line X1="490" Y1="20" X2="490" Y2="200" Stroke="#E5E7EB" StrokeThickness="1" StrokeDashArray="2,2" />
 
                                                 <Polyline Points="40,155 130,120 220,132 310,98 490,56 620,64"
-                                                          Stroke="#22C55E"
+                                                          Stroke="{StaticResource SuccessForegroundBrush}"
                                                           StrokeThickness="2.4" />
 
-                                                <Ellipse Width="8" Height="8" Canvas.Left="36" Canvas.Top="151" Fill="#FFFFFF" Stroke="#22C55E" StrokeThickness="2" />
-                                                <Ellipse Width="8" Height="8" Canvas.Left="126" Canvas.Top="116" Fill="#FFFFFF" Stroke="#22C55E" StrokeThickness="2" />
-                                                <Ellipse Width="8" Height="8" Canvas.Left="216" Canvas.Top="128" Fill="#FFFFFF" Stroke="#22C55E" StrokeThickness="2" />
-                                                <Ellipse Width="8" Height="8" Canvas.Left="306" Canvas.Top="94" Fill="#FFFFFF" Stroke="#22C55E" StrokeThickness="2" />
-                                                <Ellipse Width="8" Height="8" Canvas.Left="486" Canvas.Top="52" Fill="#FFFFFF" Stroke="#22C55E" StrokeThickness="2" />
-                                                <Ellipse Width="8" Height="8" Canvas.Left="616" Canvas.Top="60" Fill="#FFFFFF" Stroke="#22C55E" StrokeThickness="2" />
+                                                <Ellipse Width="8" Height="8" Canvas.Left="36" Canvas.Top="151" Fill="#FFFFFF" Stroke="{StaticResource SuccessForegroundBrush}" StrokeThickness="2" />
+                                                <Ellipse Width="8" Height="8" Canvas.Left="126" Canvas.Top="116" Fill="#FFFFFF" Stroke="{StaticResource SuccessForegroundBrush}" StrokeThickness="2" />
+                                                <Ellipse Width="8" Height="8" Canvas.Left="216" Canvas.Top="128" Fill="#FFFFFF" Stroke="{StaticResource SuccessForegroundBrush}" StrokeThickness="2" />
+                                                <Ellipse Width="8" Height="8" Canvas.Left="306" Canvas.Top="94" Fill="#FFFFFF" Stroke="{StaticResource SuccessForegroundBrush}" StrokeThickness="2" />
+                                                <Ellipse Width="8" Height="8" Canvas.Left="486" Canvas.Top="52" Fill="#FFFFFF" Stroke="{StaticResource SuccessForegroundBrush}" StrokeThickness="2" />
+                                                <Ellipse Width="8" Height="8" Canvas.Left="616" Canvas.Top="60" Fill="#FFFFFF" Stroke="{StaticResource SuccessForegroundBrush}" StrokeThickness="2" />
 
                                                 <TextBlock Canvas.Left="12" Canvas.Top="193" FontSize="18" Foreground="#64748B" Text="75" />
                                                 <TextBlock Canvas.Left="12" Canvas.Top="142" FontSize="18" Foreground="#64748B" Text="77" />
@@ -459,7 +465,7 @@
                                                        Margin="0,8,0,0"
                                                        HorizontalAlignment="Center"
                                                        FontSize="19"
-                                                       Foreground="#22C55E"
+                                                       Foreground="{StaticResource SuccessForegroundBrush}"
                                                        Text="* Average Rating" />
                                         </Grid>
                                     </Border>
@@ -490,10 +496,10 @@
                                                 <Line X1="40" Y1="86" X2="620" Y2="86" Stroke="#D8E0EA" StrokeThickness="1" StrokeDashArray="2,2" />
                                                 <Line X1="40" Y1="44" X2="620" Y2="44" Stroke="#D8E0EA" StrokeThickness="1" StrokeDashArray="2,2" />
 
-                                                <Rectangle Width="100" Height="4" Canvas.Left="55" Canvas.Top="196" Fill="#22C55E" />
-                                                <Rectangle Width="100" Height="3" Canvas.Left="195" Canvas.Top="197" Fill="#22C55E" />
-                                                <Rectangle Width="100" Height="26" Canvas.Left="335" Canvas.Top="174" Fill="#22C55E" />
-                                                <Rectangle Width="100" Height="150" Canvas.Left="475" Canvas.Top="50" Fill="#22C55E" />
+                                                <Rectangle Width="100" Height="4" Canvas.Left="55" Canvas.Top="196" Fill="{StaticResource SuccessForegroundBrush}" />
+                                                <Rectangle Width="100" Height="3" Canvas.Left="195" Canvas.Top="197" Fill="{StaticResource SuccessForegroundBrush}" />
+                                                <Rectangle Width="100" Height="26" Canvas.Left="335" Canvas.Top="174" Fill="{StaticResource SuccessForegroundBrush}" />
+                                                <Rectangle Width="100" Height="150" Canvas.Left="475" Canvas.Top="50" Fill="{StaticResource SuccessForegroundBrush}" />
 
                                                 <TextBlock Canvas.Left="8" Canvas.Top="193" FontSize="18" Foreground="#64748B" Text="0" />
                                                 <TextBlock Canvas.Left="2" Canvas.Top="120" FontSize="18" Foreground="#64748B" Text="40000" />
@@ -537,15 +543,15 @@
 
                                         <TextBlock VerticalAlignment="Center" FontSize="19" Foreground="#64748B" Text="03 Jun" />
                                         <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="21" Foreground="#0F172A" Text="Dynamo Kyiv vs Shakhtar" />
-                                        <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="21" FontWeight="SemiBold" Foreground="#22C55E" Text="2 - 1" />
+                                        <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="21" FontWeight="SemiBold" Foreground="{StaticResource SuccessForegroundBrush}" Text="2 - 1" />
 
                                         <TextBlock Grid.Row="1" VerticalAlignment="Center" FontSize="19" Foreground="#64748B" Text="01 Jun" />
                                         <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" FontSize="21" Foreground="#0F172A" Text="Lviv FC vs Odesa" />
-                                        <TextBlock Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="21" FontWeight="SemiBold" Foreground="#22C55E" Text="1 - 1" />
+                                        <TextBlock Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="21" FontWeight="SemiBold" Foreground="{StaticResource SuccessForegroundBrush}" Text="1 - 1" />
 
                                         <TextBlock Grid.Row="2" VerticalAlignment="Center" FontSize="19" Foreground="#64748B" Text="30 May" />
                                         <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" FontSize="21" Foreground="#0F172A" Text="Dnipro vs Karpaty" />
-                                        <TextBlock Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="21" FontWeight="SemiBold" Foreground="#22C55E" Text="3 - 0" />
+                                        <TextBlock Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="21" FontWeight="SemiBold" Foreground="{StaticResource SuccessForegroundBrush}" Text="3 - 0" />
                                     </Grid>
                                 </Border>
                             </StackPanel>
@@ -554,7 +560,7 @@
                 </ScrollViewer>
             </TabItem>
 
-            <TabItem Header="Countries/Leagues">
+            <TabItem Header="Countries/Leagues" Tag="{x:Static viewModels:AppTab.CountriesLeagues}">
                 <Grid Margin="8">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="320" />
@@ -566,7 +572,7 @@
                                    Foreground="#9CA3AF"
                                    Text="{Binding CountriesLeagues.IsLoading, StringFormat=Loading: {0}}" />
                         <TextBlock Margin="0,0,0,6"
-                                   Foreground="#EF4444"
+                                   Foreground="{StaticResource DangerForegroundBrush}"
                                    Text="{Binding CountriesLeagues.ErrorMessage}" />
                         <DataGrid ItemsSource="{Binding CountriesLeagues.Countries}"
                                   SelectedItem="{Binding CountriesLeagues.SelectedCountry, Mode=TwoWay}"
@@ -592,7 +598,7 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Teams">
+            <TabItem Header="Teams" Tag="{x:Static viewModels:AppTab.Teams}">
                 <DockPanel Margin="8">
                     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
                         <TextBlock Margin="0,6,6,0" Text="Name:" />
@@ -616,7 +622,7 @@
                 </DockPanel>
             </TabItem>
 
-            <TabItem Header="Team Details">
+            <TabItem Header="Team Details" Tag="{x:Static viewModels:AppTab.TeamDetails}">
                 <DockPanel Margin="8">
                     <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
                         <TextBlock Margin="0,6,6,0" Text="TeamApiId:" />
@@ -638,7 +644,7 @@
                 </DockPanel>
             </TabItem>
 
-            <TabItem Header="Players">
+            <TabItem Header="Players" Tag="{x:Static viewModels:AppTab.Players}">
                 <DockPanel Margin="8">
                     <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
                         <TextBlock Margin="0,6,6,0" Text="Name:" />
@@ -669,7 +675,7 @@
                 </DockPanel>
             </TabItem>
 
-            <TabItem Header="Player Details">
+            <TabItem Header="Player Details" Tag="{x:Static viewModels:AppTab.PlayerDetails}">
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -711,7 +717,7 @@
                 </Grid>
             </TabItem>
 
-            <TabItem Header="Matches">
+            <TabItem Header="Matches" Tag="{x:Static viewModels:AppTab.Matches}">
                 <DockPanel Margin="8">
                     <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
                         <Button Width="120" Margin="0,0,8,0" Content="Load Leagues" Command="{Binding Matches.LoadLeaguesCommand}" />
@@ -746,7 +752,7 @@
                 </DockPanel>
             </TabItem>
 
-            <TabItem Header="Match Details">
+            <TabItem Header="Match Details" Tag="{x:Static viewModels:AppTab.MatchDetails}">
                 <StackPanel Margin="8">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Margin="0,6,6,0" Text="MatchApiId:" />
@@ -763,7 +769,7 @@
                 </StackPanel>
             </TabItem>
 
-            <TabItem Header="Analytics">
+            <TabItem Header="Analytics" Tag="{x:Static viewModels:AppTab.Analytics}">
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -829,4 +835,6 @@
         </Grid>
     </Grid>
 </Window>
+
+
 
