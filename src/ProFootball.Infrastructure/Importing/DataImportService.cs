@@ -24,7 +24,8 @@ public sealed class DataImportService(
             throw new FileNotFoundException("SQLite source file was not found.", request.SqlitePath);
         }
 
-        var batchSize = request.BatchSize < 100 ? 100 : request.BatchSize;
+        ArgumentOutOfRangeException.ThrowIfLessThan(request.BatchSize, 1);
+        var batchSize = request.BatchSize;
         var stopwatch = Stopwatch.StartNew();
 
         await PrepareDatabaseAsync(cancellationToken);

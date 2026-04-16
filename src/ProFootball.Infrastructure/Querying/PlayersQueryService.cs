@@ -104,17 +104,26 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
                 .OrderByDescending(player => player.OverallRating.HasValue)
                 .ThenByDescending(player => player.OverallRating)
                 .ThenBy(player => player.Name),
-            ("overallrating", false) => projectedQuery.OrderBy(player => player.OverallRating).ThenBy(player => player.Name),
+            ("overallrating", false) => projectedQuery
+                .OrderByDescending(player => player.OverallRating.HasValue)
+                .ThenBy(player => player.OverallRating)
+                .ThenBy(player => player.Name),
             ("potential", true) => projectedQuery
                 .OrderByDescending(player => player.Potential.HasValue)
                 .ThenByDescending(player => player.Potential)
                 .ThenBy(player => player.Name),
-            ("potential", false) => projectedQuery.OrderBy(player => player.Potential).ThenBy(player => player.Name),
+            ("potential", false) => projectedQuery
+                .OrderByDescending(player => player.Potential.HasValue)
+                .ThenBy(player => player.Potential)
+                .ThenBy(player => player.Name),
             ("height", true) => projectedQuery
                 .OrderByDescending(player => player.Height.HasValue)
                 .ThenByDescending(player => player.Height)
                 .ThenBy(player => player.Name),
-            ("height", false) => projectedQuery.OrderBy(player => player.Height).ThenBy(player => player.Name),
+            ("height", false) => projectedQuery
+                .OrderByDescending(player => player.Height.HasValue)
+                .ThenBy(player => player.Height)
+                .ThenBy(player => player.Name),
             (_, true) => projectedQuery.OrderByDescending(player => player.Name),
             _ => projectedQuery.OrderBy(player => player.Name),
         };

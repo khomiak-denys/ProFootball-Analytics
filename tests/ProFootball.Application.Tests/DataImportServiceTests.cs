@@ -54,6 +54,34 @@ public class DataImportServiceTests
         }
     }
 
+    [Fact]
+    public async Task ImportAsync_ShouldThrow_WhenBatchSizeIsNotPositive()
+    {
+        var sourcePath = Path.Combine(Path.GetTempPath(), $"profootball-source-{Guid.NewGuid():N}.sqlite");
+
+        try
+        {
+            await CreateSourceSqliteAsync(sourcePath);
+
+            await using var destinationConnection = new SqliteConnection("Data Source=:memory:");
+            await destinationConnection.OpenAsync();
+
+            var options = new DbContextOptionsBuilder<ProFootballDbContext>()
+                .UseSqlite(destinationConnection)
+                .Options;
+
+            await using var destinationContext = new ProFootballDbContext(options);
+            var service = new DataImportService(destinationContext, NullLogger<DataImportService>.Instance);
+
+            await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+                service.ImportAsync(new DataImportRequest(sourcePath, BatchSize: 0)));
+        }
+        finally
+        {
+            await DeleteFileWithRetryAsync(sourcePath);
+        }
+    }
+
     private static async Task CreateSourceSqliteAsync(string sourcePath)
     {
         await using var sourceConnection = new SqliteConnection($"Data Source={sourcePath};Pooling=False");
