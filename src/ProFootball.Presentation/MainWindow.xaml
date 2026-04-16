@@ -204,17 +204,234 @@
                 <TabControl TabStripPlacement="None"
                             SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
             <TabItem Header="Dashboard">
-                <StackPanel Margin="8">
-                    <TextBlock FontSize="24" FontWeight="SemiBold" Text="ProFootball Dashboard" />
-                    <WrapPanel Margin="0,12,0,12">
-                        <TextBlock Margin="0,0,16,0" Text="{Binding Dashboard.Countries, StringFormat=Countries: {0}}" />
-                        <TextBlock Margin="0,0,16,0" Text="{Binding Dashboard.Leagues, StringFormat=Leagues: {0}}" />
-                        <TextBlock Margin="0,0,16,0" Text="{Binding Dashboard.Teams, StringFormat=Teams: {0}}" />
-                        <TextBlock Margin="0,0,16,0" Text="{Binding Dashboard.Players, StringFormat=Players: {0}}" />
-                        <TextBlock Text="{Binding Dashboard.Matches, StringFormat=Matches: {0}}" />
-                    </WrapPanel>
-                    <Button Width="180" Content="Refresh" Command="{Binding Dashboard.RefreshCommand}" />
-                </StackPanel>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="6,2,6,2">
+                        <UniformGrid Columns="5" Margin="0,0,0,14">
+                            <Border Margin="0,0,12,0"
+                                    Padding="18"
+                                    Background="#FFFFFF"
+                                    BorderBrush="#D6DEE8"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <TextBlock FontSize="31" Foreground="#64748B" Text="Countries" />
+                                    <TextBlock Grid.Row="1" Margin="0,8,0,0" FontSize="52" FontWeight="SemiBold" Foreground="#0F172A" Text="5" />
+                                    <TextBlock Grid.Row="2" Margin="0,8,0,0" FontSize="29" Foreground="#22C55E" Text="+2 this year" />
+                                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE909;" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <Border Margin="0,0,12,0"
+                                    Padding="18"
+                                    Background="#FFFFFF"
+                                    BorderBrush="#D6DEE8"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                <Grid>
+                                    <TextBlock FontSize="31" Foreground="#64748B" Text="Leagues" />
+                                    <TextBlock Margin="0,34,0,0" FontSize="52" FontWeight="SemiBold" Foreground="#0F172A" Text="10" />
+                                    <TextBlock Margin="0,96,0,0" FontSize="29" Foreground="#22C55E" Text="+5 this year" />
+                                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE7BF;" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <Border Margin="0,0,12,0"
+                                    Padding="18"
+                                    Background="#FFFFFF"
+                                    BorderBrush="#D6DEE8"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                <Grid>
+                                    <TextBlock FontSize="31" Foreground="#64748B" Text="Teams" />
+                                    <TextBlock Margin="0,34,0,0" FontSize="52" FontWeight="SemiBold" Foreground="#0F172A" Text="15" />
+                                    <TextBlock Margin="0,96,0,0" FontSize="29" Foreground="#22C55E" Text="+8 this month" />
+                                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE72E;" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <Border Margin="0,0,12,0"
+                                    Padding="18"
+                                    Background="#FFFFFF"
+                                    BorderBrush="#D6DEE8"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                <Grid>
+                                    <TextBlock FontSize="31" Foreground="#64748B" Text="Players" />
+                                    <TextBlock Margin="0,34,0,0" FontSize="52" FontWeight="SemiBold" Foreground="#0F172A" Text="20" />
+                                    <TextBlock Margin="0,96,0,0" FontSize="29" Foreground="#EF4444" Text="-3 this month" />
+                                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE716;" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+
+                            <Border Padding="18"
+                                    Background="#FFFFFF"
+                                    BorderBrush="#D6DEE8"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                <Grid>
+                                    <TextBlock FontSize="31" Foreground="#64748B" Text="Matches" />
+                                    <TextBlock Margin="0,34,0,0" FontSize="52" FontWeight="SemiBold" Foreground="#0F172A" Text="10" />
+                                    <TextBlock Margin="0,96,0,0" FontSize="29" Foreground="#22C55E" Text="+24 this week" />
+                                    <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
+                                        <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE787;" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </UniformGrid>
+
+                        <Border Margin="0,0,0,14"
+                                Padding="18"
+                                Background="#FFFFFF"
+                                BorderBrush="#D6DEE8"
+                                BorderThickness="1"
+                                CornerRadius="12">
+                            <DockPanel LastChildFill="False">
+                                <TextBlock DockPanel.Dock="Left"
+                                           VerticalAlignment="Center"
+                                           FontSize="41"
+                                           FontWeight="SemiBold"
+                                           Foreground="#0F172A"
+                                           Text="Quick Filters" />
+                                <Border Width="210"
+                                        Height="42"
+                                        Margin="26,0,12,0"
+                                        Background="#FFFFFF"
+                                        BorderBrush="#D6DEE8"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                    <Grid Margin="12,0,12,0">
+                                        <TextBlock VerticalAlignment="Center"
+                                                   FontSize="31"
+                                                   Foreground="#1E293B"
+                                                   Text="2025/2026" />
+                                        <TextBlock HorizontalAlignment="Right"
+                                                   VerticalAlignment="Center"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="18"
+                                                   Foreground="#94A3B8"
+                                                   Text="&#xE70D;" />
+                                    </Grid>
+                                </Border>
+                                <Border Width="230"
+                                        Height="42"
+                                        Background="#FFFFFF"
+                                        BorderBrush="#D6DEE8"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                    <Grid Margin="12,0,12,0">
+                                        <TextBlock VerticalAlignment="Center"
+                                                   FontSize="31"
+                                                   Foreground="#1E293B"
+                                                   Text="All Leagues" />
+                                        <TextBlock HorizontalAlignment="Right"
+                                                   VerticalAlignment="Center"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="18"
+                                                   Foreground="#94A3B8"
+                                                   Text="&#xE70D;" />
+                                    </Grid>
+                                </Border>
+                            </DockPanel>
+                        </Border>
+
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Margin="0,0,12,0"
+                                    Padding="18"
+                                    Background="#FFFFFF"
+                                    BorderBrush="#D6DEE8"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                <StackPanel>
+                                    <TextBlock FontSize="41"
+                                               FontWeight="SemiBold"
+                                               Foreground="#0F172A"
+                                               Text="Average Player Rating Trend" />
+                                    <Border Height="300"
+                                            Margin="0,18,0,0"
+                                            Background="#F8FAFC"
+                                            BorderBrush="#E5E7EB"
+                                            BorderThickness="1"
+                                            CornerRadius="8">
+                                        <TextBlock HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="28"
+                                                   Foreground="#94A3B8"
+                                                   Text="Trend chart placeholder" />
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="1"
+                                    Padding="18"
+                                    Background="#FFFFFF"
+                                    BorderBrush="#D6DEE8"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                <StackPanel>
+                                    <TextBlock FontSize="41"
+                                               FontWeight="SemiBold"
+                                               Foreground="#0F172A"
+                                               Text="Match Statistics Overview" />
+                                    <Border Height="300"
+                                            Margin="0,18,0,0"
+                                            Background="#F8FAFC"
+                                            BorderBrush="#E5E7EB"
+                                            BorderThickness="1"
+                                            CornerRadius="8">
+                                        <TextBlock HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="28"
+                                                   Foreground="#94A3B8"
+                                                   Text="Bar chart placeholder" />
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+
+                        <Border Padding="18"
+                                Background="#FFFFFF"
+                                BorderBrush="#D6DEE8"
+                                BorderThickness="1"
+                                CornerRadius="12">
+                            <StackPanel>
+                                <TextBlock FontSize="41"
+                                           FontWeight="SemiBold"
+                                           Foreground="#0F172A"
+                                           Text="Recent Matches" />
+                                <Border Height="120"
+                                        Margin="0,14,0,0"
+                                        Background="#F8FAFC"
+                                        BorderBrush="#E5E7EB"
+                                        BorderThickness="1"
+                                        CornerRadius="8">
+                                    <TextBlock HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               FontSize="27"
+                                               Foreground="#94A3B8"
+                                               Text="Latest fixtures summary placeholder" />
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
             <TabItem Header="Countries/Leagues">
