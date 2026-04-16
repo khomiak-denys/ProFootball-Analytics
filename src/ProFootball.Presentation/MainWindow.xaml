@@ -68,7 +68,9 @@
                         <Border x:Name="NavItemBorder"
                                 Padding="12,11"
                                 CornerRadius="8"
-                                Background="Transparent">
+                                Background="Transparent"
+                                BorderBrush="Transparent"
+                                BorderThickness="2">
                             <ContentPresenter />
                         </Border>
                         <ControlTemplate.Triggers>
@@ -78,6 +80,16 @@
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="NavItemBorder" Property="Background" Value="#22C55E" />
                             </Trigger>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter TargetName="NavItemBorder" Property="BorderBrush" Value="#93C5FD" />
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsKeyboardFocusWithin" Value="True" />
+                                    <Condition Property="IsSelected" Value="False" />
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="NavItemBorder" Property="Background" Value="#223244" />
+                            </MultiTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
