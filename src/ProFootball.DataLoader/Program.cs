@@ -14,8 +14,14 @@ if (string.IsNullOrWhiteSpace(sqlitePath))
 
 var batchSizeText = GetArgument(args, "--batch-size");
 var batchSize = 1_000;
-if (!string.IsNullOrWhiteSpace(batchSizeText) && int.TryParse(batchSizeText, out var parsedBatchSize))
+if (!string.IsNullOrWhiteSpace(batchSizeText))
 {
+    if (!int.TryParse(batchSizeText, out var parsedBatchSize) || parsedBatchSize <= 0)
+    {
+        Console.Error.WriteLine("Invalid '--batch-size' value. Expected a positive integer.");
+        return 1;
+    }
+
     batchSize = parsedBatchSize;
 }
 

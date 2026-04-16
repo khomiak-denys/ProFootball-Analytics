@@ -63,9 +63,20 @@ public sealed class DataImportService(
                 skipped,
                 stopwatch.Elapsed);
         }
-        catch
+        catch (Exception)
         {
-            await importTransaction.RollbackAsync(cancellationToken);
+            try
+            {
+                await importTransaction.RollbackAsync(CancellationToken.None);
+            }
+            catch (Exception rollbackException)
+            {
+                logger.LogWarning(
+                    rollbackException,
+                    "Rollback failed after import error for source '{SqlitePath}'.",
+                    request.SqlitePath);
+            }
+
             throw;
         }
     }
