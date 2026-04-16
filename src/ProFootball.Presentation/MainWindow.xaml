@@ -41,18 +41,18 @@
         </Style>
 
         <Style x:Key="DashboardMetricLabelStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="31" />
+            <Setter Property="FontSize" Value="14" />
             <Setter Property="Foreground" Value="{StaticResource MutedForegroundBrush}" />
         </Style>
 
         <Style x:Key="DashboardMetricValueStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="52" />
+            <Setter Property="FontSize" Value="36" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Foreground" Value="{StaticResource TitleForegroundBrush}" />
         </Style>
 
         <Style x:Key="DashboardSectionTitleStyle" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="41" />
+            <Setter Property="FontSize" Value="18" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="Foreground" Value="{StaticResource TitleForegroundBrush}" />
         </Style>
@@ -98,12 +98,12 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel Margin="24,28,24,22">
-                    <TextBlock FontSize="40"
+                    <TextBlock FontSize="22"
                                FontWeight="Bold"
                                Foreground="White"
                                Text="ProFootball Analytics" />
                     <TextBlock Margin="0,8,0,0"
-                               FontSize="27"
+                               FontSize="14"
                                Foreground="#A3B3C7"
                                Text="Data Analysis Platform" />
                 </StackPanel>
@@ -122,7 +122,7 @@
                                        Foreground="White"
                                        Text="&#xE80F;" />
                             <TextBlock Margin="14,0,0,0"
-                                       FontSize="31"
+                                       FontSize="16"
                                        Foreground="White"
                                        Text="Dashboard" />
                         </StackPanel>
@@ -134,7 +134,7 @@
                                        Foreground="White"
                                        Text="&#xE716;" />
                             <TextBlock Margin="14,0,0,0"
-                                       FontSize="31"
+                                       FontSize="16"
                                        Foreground="White"
                                        Text="Players" />
                         </StackPanel>
@@ -146,7 +146,7 @@
                                        Foreground="White"
                                        Text="&#xE72E;" />
                             <TextBlock Margin="14,0,0,0"
-                                       FontSize="31"
+                                       FontSize="16"
                                        Foreground="White"
                                        Text="Teams" />
                         </StackPanel>
@@ -158,7 +158,7 @@
                                        Foreground="White"
                                        Text="&#xE787;" />
                             <TextBlock Margin="14,0,0,0"
-                                       FontSize="31"
+                                       FontSize="16"
                                        Foreground="White"
                                        Text="Matches" />
                         </StackPanel>
@@ -170,7 +170,7 @@
                                        Foreground="White"
                                        Text="&#xE909;" />
                             <TextBlock Margin="14,0,0,0"
-                                       FontSize="31"
+                                       FontSize="16"
                                        Foreground="White"
                                        Text="Leagues" />
                         </StackPanel>
@@ -182,7 +182,7 @@
                                        Foreground="White"
                                        Text="&#xE9D2;" />
                             <TextBlock Margin="14,0,0,0"
-                                       FontSize="31"
+                                       FontSize="16"
                                        Foreground="White"
                                        Text="Analytics" />
                         </StackPanel>
@@ -193,7 +193,7 @@
                         Padding="16,20"
                         BorderBrush="#223244"
                         BorderThickness="0,1,0,0">
-                    <TextBlock FontSize="25"
+                    <TextBlock FontSize="12"
                                Foreground="#A3B3C7"
                                Text="© 2026 ProFootball Analytics" />
                 </Border>
@@ -212,7 +212,7 @@
                     BorderThickness="0,0,0,1">
                 <Grid Margin="22,0,22,0">
                     <TextBlock VerticalAlignment="Center"
-                               FontSize="45"
+                               FontSize="34"
                                FontWeight="SemiBold"
                                Foreground="#0F172A"
                                Text="{Binding CurrentSectionTitle}" />
@@ -237,7 +237,7 @@
                             <TextBlock Grid.Column="1"
                                        Margin="10,0,0,0"
                                        VerticalAlignment="Center"
-                                       FontSize="24"
+                                       FontSize="16"
                                        Foreground="#64748B"
                                        Text="Search players, teams, matches..." />
                         </Grid>
@@ -261,7 +261,7 @@
                                     </Grid.RowDefinitions>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Countries" />
                                     <TextBlock Grid.Row="1" Margin="0,8,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="5" />
-                                    <TextBlock Grid.Row="2" Margin="0,8,0,0" FontSize="29" Foreground="#22C55E" Text="+2 this year" />
+                                    <TextBlock Grid.Row="2" Margin="0,8,0,0" FontSize="14" Foreground="#22C55E" Text="+2 this year" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE909;" />
                                     </Border>
@@ -272,7 +272,7 @@
                                 <Grid>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Leagues" />
                                     <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="10" />
-                                    <TextBlock Margin="0,96,0,0" FontSize="29" Foreground="#22C55E" Text="+5 this year" />
+                                    <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="#22C55E" Text="+5 this year" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE7BF;" />
                                     </Border>
@@ -283,7 +283,7 @@
                                 <Grid>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Teams" />
                                     <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="15" />
-                                    <TextBlock Margin="0,96,0,0" FontSize="29" Foreground="#22C55E" Text="+8 this month" />
+                                    <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="#22C55E" Text="+8 this month" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE72E;" />
                                     </Border>
@@ -294,7 +294,7 @@
                                 <Grid>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Players" />
                                     <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="20" />
-                                    <TextBlock Margin="0,96,0,0" FontSize="29" Foreground="#EF4444" Text="-3 this month" />
+                                    <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="#EF4444" Text="-3 this month" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE716;" />
                                     </Border>
@@ -305,7 +305,7 @@
                                 <Grid>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Matches" />
                                     <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="10" />
-                                    <TextBlock Margin="0,96,0,0" FontSize="29" Foreground="#22C55E" Text="+24 this week" />
+                                    <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="#22C55E" Text="+24 this week" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE787;" />
                                     </Border>
@@ -329,7 +329,7 @@
                                         CornerRadius="8">
                                     <Grid Margin="12,0,12,0">
                                         <TextBlock VerticalAlignment="Center"
-                                                   FontSize="31"
+                                                   FontSize="15"
                                                    Foreground="#1E293B"
                                                    Text="2025/2026" />
                                         <TextBlock HorizontalAlignment="Right"
@@ -348,7 +348,7 @@
                                         CornerRadius="8">
                                     <Grid Margin="12,0,12,0">
                                         <TextBlock VerticalAlignment="Center"
-                                                   FontSize="31"
+                                                   FontSize="15"
                                                    Foreground="#1E293B"
                                                    Text="All Leagues" />
                                         <TextBlock HorizontalAlignment="Right"
