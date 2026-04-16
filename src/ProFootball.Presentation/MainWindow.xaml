@@ -647,34 +647,198 @@
                     </TabItem>
 
                     <TabItem Header="Players" Tag="{x:Static viewModels:AppTab.Players}">
-                        <DockPanel Margin="8">
-                            <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
-                                <TextBlock Margin="0,6,6,0" Text="Name:" />
-                                <TextBox Width="180" Margin="0,0,8,0" Text="{Binding Players.NameFilter, UpdateSourceTrigger=PropertyChanged}" />
-                                <TextBlock Margin="0,6,6,0" Text="Min Overall:" />
-                                <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Players.MinOverall, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
-                                <TextBlock Margin="0,6,6,0" Text="Min Potential:" />
-                                <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Players.MinPotential, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
-                                <TextBlock Margin="0,6,6,0" Text="Foot:" />
-                                <TextBox Width="80" Margin="0,0,8,0" Text="{Binding Players.PreferredFoot, UpdateSourceTrigger=PropertyChanged}" />
-                                <Button Width="100" Margin="0,0,8,0" Content="Search" Command="{Binding Players.SearchCommand}" />
-                                <Button Width="130" Margin="0,0,8,0" Content="Open Details" Command="{Binding Players.OpenDetailsCommand}" />
-                                <Button Width="80" Margin="0,0,8,0" Content="Prev" Command="{Binding Players.PreviousPageCommand}" />
-                                <Button Width="80" Content="Next" Command="{Binding Players.NextPageCommand}" />
-                            </WrapPanel>
-                            <DataGrid ItemsSource="{Binding Players.Players}"
-                                      SelectedItem="{Binding Players.SelectedPlayer, Mode=TwoWay}"
-                                      AutoGenerateColumns="False"
-                                      IsReadOnly="True">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="PlayerApiId" Binding="{Binding PlayerApiId}" Width="100" />
-                                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
-                                    <DataGridTextColumn Header="Overall" Binding="{Binding OverallRating}" Width="80" />
-                                    <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="80" />
-                                    <DataGridTextColumn Header="Foot" Binding="{Binding PreferredFoot}" Width="80" />
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </DockPanel>
+                        <Grid Margin="6,2,6,2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="280" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="390" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                    Margin="0,0,16,0"
+                                    Padding="16"
+                                    Background="{StaticResource CardBackgroundBrush}"
+                                    BorderBrush="{StaticResource CardBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                <StackPanel>
+                                    <TextBlock FontSize="34"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TitleForegroundBrush}"
+                                               Text="Filters" />
+                                    <TextBlock Margin="0,30,0,0"
+                                               FontSize="24"
+                                               Foreground="{StaticResource TitleForegroundBrush}"
+                                               Text="Player Name" />
+                                    <TextBox Margin="0,8,0,0"
+                                             Height="44"
+                                             Padding="14,0"
+                                             FontSize="22"
+                                             BorderBrush="{StaticResource SubtleBorderBrush}"
+                                             BorderThickness="1"
+                                             Text="{Binding Players.NameFilter, UpdateSourceTrigger=PropertyChanged}" />
+
+                                    <TextBlock Margin="0,22,0,0"
+                                               FontSize="24"
+                                               Foreground="{StaticResource TitleForegroundBrush}"
+                                               Text="Overall Rating" />
+                                    <TextBox Margin="0,8,0,0"
+                                             Height="44"
+                                             Padding="14,0"
+                                             FontSize="22"
+                                             BorderBrush="{StaticResource SubtleBorderBrush}"
+                                             BorderThickness="1"
+                                             Text="{Binding Players.MinOverall, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
+
+                                    <TextBlock Margin="0,22,0,0"
+                                               FontSize="24"
+                                               Foreground="{StaticResource TitleForegroundBrush}"
+                                               Text="Preferred Foot" />
+                                    <TextBox Margin="0,8,0,0"
+                                             Height="44"
+                                             Padding="14,0"
+                                             FontSize="22"
+                                             BorderBrush="{StaticResource SubtleBorderBrush}"
+                                             BorderThickness="1"
+                                             Text="{Binding Players.PreferredFoot, UpdateSourceTrigger=PropertyChanged}" />
+
+                                    <Button Height="44"
+                                            Margin="0,22,0,0"
+                                            Content="Search"
+                                            FontSize="20"
+                                            Command="{Binding Players.SearchCommand}" />
+                                    <TextBlock Margin="0,20,0,0"
+                                               FontSize="24"
+                                               Foreground="{StaticResource MutedForegroundBrush}"
+                                               Text="{Binding Players.TotalCount, StringFormat=Total: {0} players}" />
+                                </StackPanel>
+                            </Border>
+
+                            <Border Grid.Column="1"
+                                    Margin="0,0,16,0"
+                                    Padding="16"
+                                    Background="{StaticResource CardBackgroundBrush}"
+                                    BorderBrush="{StaticResource CardBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <TextBlock FontSize="36"
+                                               FontWeight="SemiBold"
+                                               Foreground="{StaticResource TitleForegroundBrush}"
+                                               Text="Players List" />
+                                    <DataGrid Grid.Row="1"
+                                              Margin="0,16,0,0"
+                                              ItemsSource="{Binding Players.Players}"
+                                              SelectedItem="{Binding Players.SelectedPlayer, Mode=TwoWay}"
+                                              AutoGenerateColumns="False"
+                                              HeadersVisibility="Column"
+                                              CanUserAddRows="False"
+                                              CanUserDeleteRows="False"
+                                              IsReadOnly="True">
+                                        <DataGrid.Columns>
+                                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+                                            <DataGridTextColumn Header="Overall" Binding="{Binding OverallRating}" Width="95" />
+                                            <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="95" />
+                                            <DataGridTextColumn Header="Foot" Binding="{Binding PreferredFoot}" Width="85" />
+                                            <DataGridTextColumn Header="Height" Binding="{Binding Height, StringFormat=\{0\} cm}" Width="110" />
+                                        </DataGrid.Columns>
+                                    </DataGrid>
+                                </Grid>
+                            </Border>
+
+                            <Grid Grid.Column="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="16" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <Border Padding="16"
+                                        Background="{StaticResource CardBackgroundBrush}"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="12">
+                                    <StackPanel>
+                                        <TextBlock FontSize="36"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TitleForegroundBrush}"
+                                                   Text="Player Details" />
+                                        <TextBlock Margin="0,18,0,0"
+                                                   FontSize="50"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{StaticResource TitleForegroundBrush}"
+                                                   Text="{Binding Players.SelectedPlayer.Name, TargetNullValue=Select a player}" />
+                                        <Grid Margin="0,20,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+
+                                            <TextBlock FontSize="22" Foreground="{StaticResource MutedForegroundBrush}" Text="Overall" />
+                                            <TextBlock Grid.Column="1" FontSize="22" Foreground="{StaticResource MutedForegroundBrush}" Text="Potential" />
+                                            <TextBlock Grid.Row="1" FontSize="44" FontWeight="SemiBold" Foreground="{StaticResource SuccessForegroundBrush}" Text="{Binding Players.SelectedPlayer.OverallRating, TargetNullValue=--}" />
+                                            <TextBlock Grid.Row="1" Grid.Column="1" FontSize="44" FontWeight="SemiBold" Foreground="{StaticResource TitleForegroundBrush}" Text="{Binding Players.SelectedPlayer.Potential, TargetNullValue=--}" />
+                                            <TextBlock Grid.Row="2" Margin="0,10,0,0" FontSize="22" Foreground="{StaticResource MutedForegroundBrush}" Text="{Binding Players.SelectedPlayer.PreferredFoot, StringFormat=Foot: {0}, TargetNullValue=Foot: --}" />
+                                            <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,10,0,0" FontSize="22" Foreground="{StaticResource MutedForegroundBrush}" Text="{Binding Players.SelectedPlayer.Weight, StringFormat=Weight: {0} kg, TargetNullValue=Weight: --}" />
+                                        </Grid>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Row="2"
+                                        Padding="16"
+                                        Background="{StaticResource CardBackgroundBrush}"
+                                        BorderBrush="{StaticResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="12">
+                                    <StackPanel>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Border Height="44"
+                                                    Margin="0,0,6,0"
+                                                    Background="{StaticResource SurfaceMutedBrush}"
+                                                    CornerRadius="10">
+                                                <TextBlock HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           FontSize="22"
+                                                           Text="Overview" />
+                                            </Border>
+                                            <Border Grid.Column="1"
+                                                    Height="44"
+                                                    Margin="6,0,0,0"
+                                                    Background="#EEF2F7"
+                                                    CornerRadius="10">
+                                                <TextBlock HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           FontSize="22"
+                                                           Foreground="{StaticResource MutedForegroundBrush}"
+                                                           Text="History" />
+                                            </Border>
+                                        </Grid>
+                                        <Canvas Height="320" Margin="0,16,0,0">
+                                            <Polygon Stroke="#94A3B8"
+                                                     StrokeThickness="1"
+                                                     Fill="#58C98B66"
+                                                     Points="130,18 238,80 238,203 130,264 22,203 22,80" />
+                                            <Line X1="130" Y1="18" X2="130" Y2="264" Stroke="#CBD5E1" StrokeThickness="1" />
+                                            <Line X1="22" Y1="80" X2="238" Y2="203" Stroke="#CBD5E1" StrokeThickness="1" />
+                                            <Line X1="238" Y1="80" X2="22" Y2="203" Stroke="#CBD5E1" StrokeThickness="1" />
+                                        </Canvas>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Grid>
                     </TabItem>
 
                     <TabItem Header="Player Details" Tag="{x:Static viewModels:AppTab.PlayerDetails}">
