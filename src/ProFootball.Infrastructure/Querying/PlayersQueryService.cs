@@ -39,6 +39,7 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
             {
                 player.PlayerApiId,
                 player.Name,
+                player.Birthday,
                 player.Height,
                 player.Weight,
                 OverallRating = latest == null ? null : latest.OverallRating,
@@ -135,6 +136,7 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
             .Select(player => new PlayerListItemDto(
                 player.PlayerApiId,
                 player.Name,
+                player.Birthday,
                 player.Height,
                 player.Weight,
                 player.OverallRating,

@@ -273,7 +273,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
                     item.PlayerApiId,
                     item.Name,
                     ResolvePosition(item.PlayerApiId),
-                    ResolveFallbackAge(item.PlayerApiId),
+                    ResolveAge(item.Birthday, item.PlayerApiId),
                     item.OverallRating,
                     item.Potential,
                     NormalizeText(item.PreferredFoot, "--") ?? "--",
@@ -511,6 +511,24 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     }
 
     private static int ResolveFallbackAge(int playerApiId) => 18 + Math.Abs(playerApiId % 21);
+
+    private static int ResolveAge(DateTime? birthday, int playerApiId)
+    {
+        if (!birthday.HasValue)
+        {
+            return ResolveFallbackAge(playerApiId);
+        }
+
+        var birthdayDate = birthday.Value.Date;
+        var today = DateTime.UtcNow.Date;
+        var age = today.Year - birthdayDate.Year;
+        if (birthdayDate > today.AddYears(-age))
+        {
+            age--;
+        }
+
+        return Math.Clamp(age, 15, 60);
+    }
 
     private static string? NormalizeText(string? value, string? defaultValue)
     {
