@@ -60,21 +60,22 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
         int countryId,
         CancellationToken cancellationToken = default)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        return await GetLeagueCardsCoreAsync(dbContext, countryId, cancellationToken);
+        var snapshot = await GetCountrySnapshotAsync(countryId, cancellationToken);
+        return snapshot.LeagueCards;
     }
 
-    public async Task<CountryLeagueSummaryDto> GetCountrySummaryAsync(
+    public async Task<CountryLeagueSnapshotDto> GetCountrySnapshotAsync(
         int countryId,
         CancellationToken cancellationToken = default)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var cards = await GetLeagueCardsCoreAsync(dbContext, countryId, cancellationToken);
         var activeLeagues = cards.Count;
-        return new CountryLeagueSummaryDto(
-            cards.Sum(card => card.TeamsCount),
-            activeLeagues,
-            activeLeagues);
+        var summary = new CountryLeagueSummaryDto(
+            TotalClubs: cards.Sum(card => card.TeamsCount),
+            ActiveLeagues: activeLeagues,
+            Divisions: activeLeagues);
+        return new CountryLeagueSnapshotDto(cards, summary);
     }
 
     private static async Task<IReadOnlyList<LeagueCountryCardDto>> GetLeagueCardsCoreAsync(

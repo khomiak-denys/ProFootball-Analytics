@@ -15,7 +15,7 @@ public interface ICountriesLeaguesQueryService
         int countryId,
         CancellationToken cancellationToken = default);
 
-    Task<CountryLeagueSummaryDto> GetCountrySummaryAsync(
+    Task<CountryLeagueSnapshotDto> GetCountrySnapshotAsync(
         int countryId,
         CancellationToken cancellationToken = default);
 }

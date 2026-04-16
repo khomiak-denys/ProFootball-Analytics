@@ -153,12 +153,9 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
                 return;
             }
 
-            var cardsTask = _service.GetLeagueCardsAsync(selectedCountryId.Value, reloadToken);
-            var summaryTask = _service.GetCountrySummaryAsync(selectedCountryId.Value, reloadToken);
-            await Task.WhenAll(cardsTask, summaryTask);
-
-            var cards = await cardsTask;
-            var summary = await summaryTask;
+            var snapshot = await _service.GetCountrySnapshotAsync(selectedCountryId.Value, reloadToken);
+            var cards = snapshot.LeagueCards;
+            var summary = snapshot.Summary;
 
             LeagueCards.Clear();
             foreach (var card in cards)
