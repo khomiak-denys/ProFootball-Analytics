@@ -7,4 +7,15 @@ public interface ICountriesLeaguesQueryService
     Task<IReadOnlyList<CountryDto>> GetCountriesAsync(CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<LeagueDto>> GetLeaguesAsync(int? countryId = null, CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<CountryLeagueListItemDto>> GetCountriesWithLeagueCountAsync(
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<LeagueCountryCardDto>> GetLeagueCardsAsync(
+        int countryId,
+        CancellationToken cancellationToken = default);
+
+    Task<CountryLeagueSummaryDto> GetCountrySummaryAsync(
+        int countryId,
+        CancellationToken cancellationToken = default);
 }
