@@ -8,7 +8,7 @@
         Title="ProFootball MVP"
         Height="900"
         Width="1580"
-        Background="{StaticResource ShellMainBackgroundBrush}">
+        Background="{DynamicResource ShellMainBackgroundBrush}">
     <Window.Resources>
         <converters:TrendToPointCollectionConverter x:Key="TrendToPointsConverter" />
         <converters:NullableIntTextConverter x:Key="NullableIntTextConverter" />
@@ -78,6 +78,21 @@
                                 <Setter TargetName="NavItemBorder" Property="Background" Value="#22C55E" />
                             </Trigger>
                         </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ContentOnlyTabControlStyle" TargetType="TabControl">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabControl">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter ContentSource="SelectedContent" />
+                        </Border>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -246,7 +261,7 @@
             </Border>
 
             <Grid Grid.Row="1" Margin="18,16,18,16">
-                <TabControl TabStripPlacement="None"
+                <TabControl Style="{StaticResource ContentOnlyTabControlStyle}"
                             SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
             <TabItem Header="Dashboard">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
