@@ -276,7 +276,7 @@
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Countries" />
-                                    <TextBlock Grid.Row="1" Margin="0,8,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="5" />
+                                    <TextBlock Grid.Row="1" Margin="0,8,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Countries}" />
                                     <TextBlock Grid.Row="2" Margin="0,8,0,0" FontSize="14" Foreground="#22C55E" Text="+2 this year" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE909;" />
@@ -287,7 +287,7 @@
                             <Border Style="{StaticResource DashboardCardStyle}">
                                 <Grid>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Leagues" />
-                                    <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="10" />
+                                    <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Leagues}" />
                                     <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="#22C55E" Text="+5 this year" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE7BF;" />
@@ -298,7 +298,7 @@
                             <Border Style="{StaticResource DashboardCardStyle}">
                                 <Grid>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Teams" />
-                                    <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="15" />
+                                    <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Teams}" />
                                     <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="#22C55E" Text="+8 this month" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE72E;" />
@@ -309,7 +309,7 @@
                             <Border Style="{StaticResource DashboardCardStyle}">
                                 <Grid>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Players" />
-                                    <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="20" />
+                                    <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Players}" />
                                     <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="#EF4444" Text="-3 this month" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE716;" />
@@ -320,7 +320,7 @@
                             <Border Style="{StaticResource DashboardCardStyle}" Margin="0">
                                 <Grid>
                                     <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Matches" />
-                                    <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="10" />
+                                    <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Matches}" />
                                     <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="#22C55E" Text="+24 this week" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE787;" />
@@ -375,6 +375,11 @@
                                                    Text="&#xE70D;" />
                                     </Grid>
                                 </Border>
+                                <Button Width="112"
+                                        Height="42"
+                                        Margin="12,0,0,0"
+                                        Content="Refresh KPI"
+                                        Command="{Binding Dashboard.RefreshCommand}" />
                             </DockPanel>
                         </Border>
 
