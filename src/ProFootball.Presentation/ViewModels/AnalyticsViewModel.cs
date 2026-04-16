@@ -39,7 +39,7 @@ public sealed class AnalyticsViewModel : ObservableObject
     public AnalyticsViewModel(IAnalyticsQueryService analyticsQueryService)
     {
         _analyticsQueryService = analyticsQueryService;
-        _metricOptions = ["Overall Rating", "Potential", "Samples"];
+        _metricOptions = ["Overall Rating", "Potential"];
         _selectedMetric = _metricOptions[0];
 
         AvailablePlayers = new ObservableCollection<AnalyticsPlayerOptionViewModel>();
@@ -550,7 +550,6 @@ public sealed class AnalyticsViewModel : ObservableObject
         metric switch
         {
             "Potential" => players.OrderByDescending(player => player.AveragePotential).ThenBy(player => player.PlayerName).ToList(),
-            "Samples" => players.OrderByDescending(player => player.Samples).ThenBy(player => player.PlayerName).ToList(),
             _ => players.OrderByDescending(player => player.AverageOverallRating).ThenBy(player => player.PlayerName).ToList(),
         };
 
@@ -558,7 +557,6 @@ public sealed class AnalyticsViewModel : ObservableObject
         metric switch
         {
             "Potential" => player.AveragePotential,
-            "Samples" => player.Samples,
             _ => player.AverageOverallRating,
         };
 
@@ -721,7 +719,6 @@ public sealed class AnalyticsViewModel : ObservableObject
         return metric switch
         {
             "Potential" => point.Potential,
-            "Samples" => point.OverallRating,
             _ => point.OverallRating,
         };
     }
@@ -760,42 +757,3 @@ public sealed class AnalyticsViewModel : ObservableObject
 
     private static int Offset(int seed, int salt) => ((seed * (11 + salt * 5)) % 13) - 6;
 }
-
-public enum AnalyticsCompareMode
-{
-    Players = 0,
-    Teams = 1,
-}
-
-public sealed record AnalyticsPlayerOptionViewModel(
-    int PlayerApiId,
-    string PlayerName,
-    double AverageOverallRating,
-    double AveragePotential,
-    int Samples)
-{
-    public string DisplayName => string.Create(
-        CultureInfo.InvariantCulture,
-        $"{PlayerName} ({Math.Round(AverageOverallRating, MidpointRounding.AwayFromZero):0})");
-}
-
-public sealed record AnalyticsTrendPointViewModel(string Label, double Value);
-
-public sealed record AnalyticsTopPerformerBarViewModel(
-    string PlayerLabel,
-    double Value,
-    double BarWidth);
-
-public sealed record AnalyticsGoalsAssistsBarViewModel(
-    string PlayerLabel,
-    int Goals,
-    int Assists,
-    double GoalsBarHeight,
-    double AssistsBarHeight);
-
-public sealed record AnalyticsTopPerformerCardViewModel(
-    int Rank,
-    string PlayerName,
-    double Rating,
-    int Goals,
-    int Assists);
