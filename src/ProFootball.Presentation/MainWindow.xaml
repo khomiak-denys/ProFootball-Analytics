@@ -24,6 +24,12 @@
         <SolidColorBrush x:Key="DangerForegroundBrush" Color="#EF4444" />
         <SolidColorBrush x:Key="SidebarSelectedBackgroundBrush" Color="#22C55E" />
         <SolidColorBrush x:Key="SurfaceMutedBrush" Color="#F8FAFC" />
+        <SolidColorBrush x:Key="SelectionSurfaceBrush" Color="#EEF2F7" />
+        <SolidColorBrush x:Key="SelectionActiveSurfaceBrush" Color="#E7F7EC" />
+        <SolidColorBrush x:Key="BadgeSurfaceBrush" Color="#E5E7EB" />
+        <SolidColorBrush x:Key="ChartAxisBrush" Color="#94A3B8" />
+        <SolidColorBrush x:Key="ChartGridBrush" Color="#CBD5E1" />
+        <SolidColorBrush x:Key="RadarFillBrush" Color="#7D22C55E" />
         <SolidColorBrush x:Key="SidebarHoverBrush" Color="#1B2735" />
         <SolidColorBrush x:Key="SidebarFocusBackgroundBrush" Color="#223244" />
         <SolidColorBrush x:Key="SidebarFocusBorderBrush" Color="#93C5FD" />
@@ -243,7 +249,7 @@
 
             <Border Grid.Row="0"
                     Background="#FFFFFF"
-                    BorderBrush="#E5E7EB"
+                    BorderBrush="{StaticResource SubtleBorderBrush}"
                     BorderThickness="0,0,0,1">
                 <Grid Margin="22,0,22,0">
                     <TextBlock VerticalAlignment="Center"
@@ -256,7 +262,7 @@
                             HorizontalAlignment="Right"
                             VerticalAlignment="Center"
                             Background="#F8FAFC"
-                            BorderBrush="#E5E7EB"
+                            BorderBrush="{StaticResource SubtleBorderBrush}"
                             BorderThickness="1"
                             CornerRadius="20">
                         <Grid Margin="14,0,14,0">
@@ -267,7 +273,7 @@
                             <TextBlock VerticalAlignment="Center"
                                        FontFamily="Segoe MDL2 Assets"
                                        FontSize="14"
-                                       Foreground="#94A3B8"
+                                       Foreground="{StaticResource ChartAxisBrush}"
                                        Text="&#xE721;" />
                             <TextBlock Grid.Column="1"
                                        Margin="10,0,0,0"
@@ -656,10 +662,10 @@
                                                         CornerRadius="10">
                                                     <Border.Style>
                                                         <Style TargetType="Border">
-                                                            <Setter Property="Background" Value="#EEF2F7" />
+                                                            <Setter Property="Background" Value="{StaticResource SelectionSurfaceBrush}" />
                                                             <Style.Triggers>
                                                                 <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                                                                    <Setter Property="Background" Value="#E7F7EC" />
+                                                                    <Setter Property="Background" Value="{StaticResource SelectionActiveSurfaceBrush}" />
                                                                     <Setter Property="BorderBrush" Value="{StaticResource SuccessForegroundBrush}" />
                                                                 </DataTrigger>
                                                             </Style.Triggers>
@@ -673,7 +679,7 @@
                                                         <Border Margin="0,8,0,0"
                                                                 Padding="10,4"
                                                                 HorizontalAlignment="Left"
-                                                                Background="#E5E7EB"
+                                                                Background="{StaticResource BadgeSurfaceBrush}"
                                                                 CornerRadius="8">
                                                             <TextBlock FontSize="18"
                                                                        Foreground="{StaticResource TitleForegroundBrush}"
@@ -830,8 +836,8 @@
                                                    Foreground="{StaticResource TitleForegroundBrush}"
                                                    Text="Team Attribute Trends" />
                                         <Canvas Height="220" Margin="0,16,0,0" Background="{StaticResource SurfaceMutedBrush}">
-                                            <Line X1="30" Y1="20" X2="30" Y2="196" Stroke="#94A3B8" StrokeThickness="1" />
-                                            <Line X1="30" Y1="196" X2="742" Y2="196" Stroke="#94A3B8" StrokeThickness="1" />
+                                            <Line X1="30" Y1="20" X2="30" Y2="196" Stroke="{StaticResource ChartAxisBrush}" StrokeThickness="1" />
+                                            <Line X1="30" Y1="196" X2="742" Y2="196" Stroke="{StaticResource ChartAxisBrush}" StrokeThickness="1" />
                                             <Polyline Stroke="{StaticResource SuccessForegroundBrush}"
                                                       StrokeThickness="3"
                                                       Points="{Binding Teams.TeamTrendPolylinePoints}" />
@@ -1046,7 +1052,7 @@
                                                     Content="Overview">
                                                 <Button.Style>
                                                     <Style TargetType="Button">
-                                                        <Setter Property="Background" Value="#EEF2F7" />
+                                                        <Setter Property="Background" Value="{StaticResource SelectionSurfaceBrush}" />
                                                         <Setter Property="BorderBrush" Value="Transparent" />
                                                         <Setter Property="BorderThickness" Value="1" />
                                                         <Setter Property="Foreground" Value="{StaticResource MutedForegroundBrush}" />
@@ -1081,7 +1087,7 @@
                                                     Content="History">
                                                 <Button.Style>
                                                     <Style TargetType="Button">
-                                                        <Setter Property="Background" Value="#EEF2F7" />
+                                                        <Setter Property="Background" Value="{StaticResource SelectionSurfaceBrush}" />
                                                         <Setter Property="BorderBrush" Value="Transparent" />
                                                         <Setter Property="BorderThickness" Value="1" />
                                                         <Setter Property="Foreground" Value="{StaticResource MutedForegroundBrush}" />
@@ -1121,28 +1127,28 @@
                                                 </Style>
                                             </Grid.Style>
                                             <Canvas Height="320">
-                                                <Polygon Stroke="#CBD5E1"
+                                                <Polygon Stroke="{StaticResource ChartGridBrush}"
                                                          StrokeThickness="1"
                                                          Fill="Transparent"
                                                          Points="132,44 225,98 225,206 132,260 38,206 38,98" />
-                                                <Polygon Stroke="#CBD5E1"
+                                                <Polygon Stroke="{StaticResource ChartGridBrush}"
                                                          StrokeThickness="1"
                                                          Fill="Transparent"
                                                          Points="132,71 202,111 202,193 132,233 61,193 61,111" />
-                                                <Polygon Stroke="#CBD5E1"
+                                                <Polygon Stroke="{StaticResource ChartGridBrush}"
                                                          StrokeThickness="1"
                                                          Fill="Transparent"
                                                          Points="132,98 179,125 179,179 132,206 84,179 84,125" />
-                                                <Polygon Stroke="#CBD5E1"
+                                                <Polygon Stroke="{StaticResource ChartGridBrush}"
                                                          StrokeThickness="1"
                                                          Fill="Transparent"
                                                          Points="132,125 156,138 156,165 132,179 107,165 107,138" />
-                                                <Line X1="132" Y1="44" X2="132" Y2="260" Stroke="#94A3B8" StrokeThickness="1" />
-                                                <Line X1="38" Y1="98" X2="225" Y2="206" Stroke="#94A3B8" StrokeThickness="1" />
-                                                <Line X1="225" Y1="98" X2="38" Y2="206" Stroke="#94A3B8" StrokeThickness="1" />
+                                                <Line X1="132" Y1="44" X2="132" Y2="260" Stroke="{StaticResource ChartAxisBrush}" StrokeThickness="1" />
+                                                <Line X1="38" Y1="98" X2="225" Y2="206" Stroke="{StaticResource ChartAxisBrush}" StrokeThickness="1" />
+                                                <Line X1="225" Y1="98" X2="38" Y2="206" Stroke="{StaticResource ChartAxisBrush}" StrokeThickness="1" />
                                                 <Polygon Stroke="{StaticResource SuccessForegroundBrush}"
                                                          StrokeThickness="2"
-                                                         Fill="#7D22C55E"
+                                                         Fill="{StaticResource RadarFillBrush}"
                                                          Points="{Binding Players.RadarPolygonPoints}" />
 
                                                 <TextBlock Canvas.Left="126" Canvas.Top="12" FontSize="14" Foreground="{StaticResource MutedForegroundBrush}" Text="Pace" />
