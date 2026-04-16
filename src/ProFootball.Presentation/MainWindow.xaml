@@ -778,17 +778,17 @@
                                             <StackPanel>
                                                 <TextBlock FontSize="22" Foreground="{StaticResource MutedForegroundBrush}" Text="Build Up Play" />
                                                 <TextBlock Margin="0,6,0,0" FontSize="50" Foreground="{StaticResource SuccessForegroundBrush}" Text="{Binding Teams.BuildUpPlayScore}" />
-                                                <ProgressBar Height="10" Margin="0,10,0,0" Value="{Binding Teams.BuildUpPlayScore}" Maximum="100" />
+                                                <ProgressBar Height="10" Margin="0,10,0,0" Value="{Binding Teams.BuildUpPlayScore, Mode=OneWay}" Maximum="100" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
                                                 <TextBlock FontSize="22" Foreground="{StaticResource MutedForegroundBrush}" Text="Chance Creation" />
                                                 <TextBlock Margin="0,6,0,0" FontSize="50" Foreground="{StaticResource SuccessForegroundBrush}" Text="{Binding Teams.ChanceCreationScore}" />
-                                                <ProgressBar Height="10" Margin="0,10,0,0" Value="{Binding Teams.ChanceCreationScore}" Maximum="100" />
+                                                <ProgressBar Height="10" Margin="0,10,0,0" Value="{Binding Teams.ChanceCreationScore, Mode=OneWay}" Maximum="100" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="4">
                                                 <TextBlock FontSize="22" Foreground="{StaticResource MutedForegroundBrush}" Text="Defence" />
                                                 <TextBlock Margin="0,6,0,0" FontSize="50" Foreground="{StaticResource SuccessForegroundBrush}" Text="{Binding Teams.DefenceScore}" />
-                                                <ProgressBar Height="10" Margin="0,10,0,0" Value="{Binding Teams.DefenceScore}" Maximum="100" />
+                                                <ProgressBar Height="10" Margin="0,10,0,0" Value="{Binding Teams.DefenceScore, Mode=OneWay}" Maximum="100" />
                                             </StackPanel>
                                         </Grid>
                                     </Grid>
@@ -828,7 +828,7 @@
                                                                      Grid.ColumnSpan="2"
                                                                      Height="10"
                                                                      Margin="0,8,0,0"
-                                                                     Value="{Binding Value}"
+                                                                     Value="{Binding Value, Mode=OneWay}"
                                                                      Maximum="100" />
                                                     </Grid>
                                                 </DataTemplate>
