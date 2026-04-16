@@ -131,18 +131,18 @@ public sealed class PlayersViewModel : ObservableObject
     public async Task SearchAsync()
     {
         var result = await _playersQueryService.SearchPlayersAsync(new PlayerSearchQuery(
-            NameFilter,
-            MinOverall,
-            null,
-            MinPotential,
-            null,
-            null,
-            null,
-            PreferredFoot,
-            "name",
-            false,
-            Page,
-            PageSize));
+            Name: NameFilter,
+            MinOverallRating: MinOverall,
+            MaxOverallRating: null,
+            MinPotential: MinPotential,
+            MaxPotential: null,
+            MinHeight: null,
+            MaxHeight: null,
+            PreferredFoot: PreferredFoot,
+            SortBy: "name",
+            SortDescending: false,
+            Page: Page,
+            PageSize: PageSize));
 
         TotalCount = result.TotalCount;
         Players.Clear();

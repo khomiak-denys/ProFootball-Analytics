@@ -99,7 +99,6 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         {
             await _loadLeaguesLock.WaitAsync(loadToken);
             lockAcquired = true;
-            DisposeLoadSource(previousSource);
 
             ErrorMessage = null;
             loadToken.ThrowIfCancellationRequested();
@@ -132,6 +131,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
                 _loadLeaguesCts = null;
             }
 
+            DisposeLoadSource(previousSource);
             DisposeLoadSource(loadSource);
             EndLoading(loadingOperationId);
         }
