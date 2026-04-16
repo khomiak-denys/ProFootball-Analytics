@@ -156,8 +156,24 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     {
         var newSource = new CancellationTokenSource();
         var previousSource = Interlocked.Exchange(ref _loadLeaguesCts, newSource);
-        previousSource?.Cancel();
+        CancelLoadSource(previousSource);
         return (newSource, previousSource);
+    }
+
+    private static void CancelLoadSource(CancellationTokenSource? loadSource)
+    {
+        if (loadSource is null)
+        {
+            return;
+        }
+
+        try
+        {
+            loadSource.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
     }
 
     private static void DisposeLoadSource(CancellationTokenSource? loadSource)
@@ -178,7 +194,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
-        _loadLeaguesCts?.Cancel();
+        CancelLoadSource(_loadLeaguesCts);
         DisposeLoadSource(_loadLeaguesCts);
         _loadLeaguesCts = null;
         _loadLeaguesLock.Dispose();
