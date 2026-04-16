@@ -278,7 +278,8 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
                     item.Potential,
                     NormalizeText(item.PreferredFoot, "--") ?? "--",
                     item.Height,
-                    item.Weight));
+                    item.Weight,
+                    FormatMeasure(item.Height, "cm")));
             }
 
             SelectedPlayer = selectedPlayerId.HasValue
@@ -574,4 +575,5 @@ public sealed record PlayerListEntryViewModel(
     int? Potential,
     string PreferredFoot,
     int? Height,
-    int? Weight);
+    int? Weight,
+    string HeightDisplay);

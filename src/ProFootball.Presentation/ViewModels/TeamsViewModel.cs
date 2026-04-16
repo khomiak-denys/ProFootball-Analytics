@@ -24,7 +24,6 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
     private int _buildUpPlayScore;
     private int _chanceCreationScore;
     private int _defenceScore;
-    private int _defenceAggressionScore;
     private string _teamTrendPolylinePoints = string.Empty;
     private long _searchVersion;
     private long _detailsVersion;
@@ -145,12 +144,6 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
         private set => SetProperty(ref _defenceScore, value);
     }
 
-    public int DefenceAggressionScore
-    {
-        get => _defenceAggressionScore;
-        private set => SetProperty(ref _defenceAggressionScore, value);
-    }
-
     public string TeamTrendPolylinePoints
     {
         get => _teamTrendPolylinePoints;
@@ -242,7 +235,6 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
             BuildUpPlayScore = 0;
             ChanceCreationScore = 0;
             DefenceScore = 0;
-            DefenceAggressionScore = 0;
             TeamTrendPolylinePoints = string.Empty;
             RaiseSelectedTeamPropertiesChanged();
             return;
@@ -266,19 +258,16 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
             var buildUpPlayPassing = latest?.BuildUpPlayPassing ?? ResolveFallbackMetric(selectedTeam.TeamApiId, 77);
             var chanceCreationPassing = latest?.ChanceCreationPassing ?? ResolveFallbackMetric(selectedTeam.TeamApiId, 75);
             var defencePressure = latest?.DefencePressure ?? ResolveFallbackMetric(selectedTeam.TeamApiId, 72);
-            var defenceAggression = defencePressure;
 
             BuildUpPlayScore = (buildUpPlaySpeed + buildUpPlayPassing) / 2;
             ChanceCreationScore = chanceCreationPassing;
             DefenceScore = defencePressure;
-            DefenceAggressionScore = defenceAggression;
 
             TacticalMetrics.Clear();
             TacticalMetrics.Add(new TeamMetricEntryViewModel("Build Up Play Speed", buildUpPlaySpeed));
             TacticalMetrics.Add(new TeamMetricEntryViewModel("Build Up Passing", buildUpPlayPassing));
             TacticalMetrics.Add(new TeamMetricEntryViewModel("Chance Creation", chanceCreationPassing));
             TacticalMetrics.Add(new TeamMetricEntryViewModel("Defence Pressure", defencePressure));
-            TacticalMetrics.Add(new TeamMetricEntryViewModel("Defence Aggression", defenceAggression));
 
             UpdateTrendPolyline(details?.Attributes);
             RaiseSelectedTeamPropertiesChanged();

@@ -1008,7 +1008,7 @@
                                             <DataGridTextColumn Header="Overall" Binding="{Binding OverallRating}" Width="95" />
                                             <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="95" />
                                             <DataGridTextColumn Header="Foot" Binding="{Binding PreferredFoot}" Width="85" />
-                                            <DataGridTextColumn Header="Height" Binding="{Binding Height, StringFormat=\{0\} cm}" Width="110" />
+                                            <DataGridTextColumn Header="Height" Binding="{Binding HeightDisplay}" Width="110" />
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </Grid>
