@@ -87,7 +87,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public string CurrentSectionTitle => SelectedTab switch
     {
         AppTab.Dashboard => "Dashboard",
-        AppTab.CountriesLeagues => "Leagues",
+        AppTab.CountriesLeagues => "Leagues & Countries",
         AppTab.Teams => "Teams",
         AppTab.TeamDetails => "Team Details",
         AppTab.Players => "Players",
