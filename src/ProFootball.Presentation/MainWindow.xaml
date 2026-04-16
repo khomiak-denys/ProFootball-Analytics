@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:ProFootball.Presentation.Converters"
+        xmlns:viewModels="clr-namespace:ProFootball.Presentation.ViewModels"
         mc:Ignorable="d"
         Title="ProFootball MVP"
         Height="900"
@@ -130,7 +131,7 @@
                          SelectedValuePath="Tag"
                          SelectedValue="{Binding SelectedTabIndex, Mode=TwoWay}"
                          ItemContainerStyle="{StaticResource SidebarNavItemStyle}">
-                    <ListBoxItem Tag="0">
+                    <ListBoxItem Tag="{x:Static viewModels:MainViewModel+Tabs.Dashboard}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        FontSize="19"
@@ -142,7 +143,7 @@
                                        Text="Dashboard" />
                         </StackPanel>
                     </ListBoxItem>
-                    <ListBoxItem Tag="4">
+                    <ListBoxItem Tag="{x:Static viewModels:MainViewModel+Tabs.Players}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        FontSize="19"
@@ -154,7 +155,7 @@
                                        Text="Players" />
                         </StackPanel>
                     </ListBoxItem>
-                    <ListBoxItem Tag="2">
+                    <ListBoxItem Tag="{x:Static viewModels:MainViewModel+Tabs.Teams}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        FontSize="19"
@@ -166,7 +167,7 @@
                                        Text="Teams" />
                         </StackPanel>
                     </ListBoxItem>
-                    <ListBoxItem Tag="6">
+                    <ListBoxItem Tag="{x:Static viewModels:MainViewModel+Tabs.Matches}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        FontSize="19"
@@ -178,7 +179,7 @@
                                        Text="Matches" />
                         </StackPanel>
                     </ListBoxItem>
-                    <ListBoxItem Tag="1">
+                    <ListBoxItem Tag="{x:Static viewModels:MainViewModel+Tabs.CountriesLeagues}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        FontSize="19"
@@ -190,7 +191,7 @@
                                        Text="Leagues" />
                         </StackPanel>
                     </ListBoxItem>
-                    <ListBoxItem Tag="8">
+                    <ListBoxItem Tag="{x:Static viewModels:MainViewModel+Tabs.Analytics}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock FontFamily="Segoe MDL2 Assets"
                                        FontSize="19"
