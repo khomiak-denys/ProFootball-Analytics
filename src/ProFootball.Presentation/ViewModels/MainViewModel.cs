@@ -69,8 +69,28 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public int SelectedTabIndex
     {
         get => _selectedTabIndex;
-        set => SetProperty(ref _selectedTabIndex, value);
+        set
+        {
+            if (SetProperty(ref _selectedTabIndex, value))
+            {
+                RaisePropertyChanged(nameof(CurrentSectionTitle));
+            }
+        }
     }
+
+    public string CurrentSectionTitle => SelectedTabIndex switch
+    {
+        Tabs.Dashboard => "Dashboard",
+        Tabs.CountriesLeagues => "Leagues",
+        Tabs.Teams => "Teams",
+        Tabs.TeamDetails => "Team Details",
+        Tabs.Players => "Players",
+        Tabs.PlayerDetails => "Player Details",
+        Tabs.Matches => "Matches",
+        Tabs.MatchDetails => "Match Details",
+        Tabs.Analytics => "Analytics",
+        _ => "Dashboard",
+    };
 
     public AsyncRelayCommand LoadInitialDataCommand { get; }
 

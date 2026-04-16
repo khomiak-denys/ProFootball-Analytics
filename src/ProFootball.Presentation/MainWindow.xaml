@@ -6,14 +6,203 @@
         xmlns:converters="clr-namespace:ProFootball.Presentation.Converters"
         mc:Ignorable="d"
         Title="ProFootball MVP"
-        Height="820"
-        Width="1280">
+        Height="900"
+        Width="1580"
+        Background="#F3F4F6">
     <Window.Resources>
         <converters:TrendToPointCollectionConverter x:Key="TrendToPointsConverter" />
         <converters:NullableIntTextConverter x:Key="NullableIntTextConverter" />
+        <Style x:Key="SidebarNavItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Margin" Value="0,0,0,8" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="NavItemBorder"
+                                Padding="12,11"
+                                CornerRadius="8"
+                                Background="Transparent">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="NavItemBorder" Property="Background" Value="#1B2735" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="NavItemBorder" Property="Background" Value="#22C55E" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
-    <Grid Margin="10">
-        <TabControl SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="250" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Background="#101923">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <StackPanel Margin="24,28,24,22">
+                    <TextBlock FontSize="40"
+                               FontWeight="Bold"
+                               Foreground="White"
+                               Text="ProFootball Analytics" />
+                    <TextBlock Margin="0,8,0,0"
+                               FontSize="27"
+                               Foreground="#A3B3C7"
+                               Text="Data Analysis Platform" />
+                </StackPanel>
+
+                <ListBox Grid.Row="1"
+                         Margin="16,6,16,16"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         SelectedValuePath="Tag"
+                         SelectedValue="{Binding SelectedTabIndex, Mode=TwoWay}"
+                         ItemContainerStyle="{StaticResource SidebarNavItemStyle}">
+                    <ListBoxItem Tag="0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       FontSize="19"
+                                       Foreground="White"
+                                       Text="&#xE80F;" />
+                            <TextBlock Margin="14,0,0,0"
+                                       FontSize="31"
+                                       Foreground="White"
+                                       Text="Dashboard" />
+                        </StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem Tag="4">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       FontSize="19"
+                                       Foreground="White"
+                                       Text="&#xE716;" />
+                            <TextBlock Margin="14,0,0,0"
+                                       FontSize="31"
+                                       Foreground="White"
+                                       Text="Players" />
+                        </StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem Tag="2">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       FontSize="19"
+                                       Foreground="White"
+                                       Text="&#xE72E;" />
+                            <TextBlock Margin="14,0,0,0"
+                                       FontSize="31"
+                                       Foreground="White"
+                                       Text="Teams" />
+                        </StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem Tag="6">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       FontSize="19"
+                                       Foreground="White"
+                                       Text="&#xE787;" />
+                            <TextBlock Margin="14,0,0,0"
+                                       FontSize="31"
+                                       Foreground="White"
+                                       Text="Matches" />
+                        </StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem Tag="1">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       FontSize="19"
+                                       Foreground="White"
+                                       Text="&#xE909;" />
+                            <TextBlock Margin="14,0,0,0"
+                                       FontSize="31"
+                                       Foreground="White"
+                                       Text="Leagues" />
+                        </StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem Tag="8">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock FontFamily="Segoe MDL2 Assets"
+                                       FontSize="19"
+                                       Foreground="White"
+                                       Text="&#xE9D2;" />
+                            <TextBlock Margin="14,0,0,0"
+                                       FontSize="31"
+                                       Foreground="White"
+                                       Text="Analytics" />
+                        </StackPanel>
+                    </ListBoxItem>
+                </ListBox>
+
+                <Border Grid.Row="2"
+                        Padding="16,20"
+                        BorderBrush="#223244"
+                        BorderThickness="0,1,0,0">
+                    <TextBlock FontSize="25"
+                               Foreground="#A3B3C7"
+                               Text="© 2026 ProFootball Analytics" />
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="66" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Grid.Row="0"
+                    Background="#FFFFFF"
+                    BorderBrush="#E5E7EB"
+                    BorderThickness="0,0,0,1">
+                <Grid Margin="22,0,22,0">
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="45"
+                               FontWeight="SemiBold"
+                               Foreground="#0F172A"
+                               Text="{Binding CurrentSectionTitle}" />
+                    <Border Width="430"
+                            Height="40"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Background="#F8FAFC"
+                            BorderBrush="#E5E7EB"
+                            BorderThickness="1"
+                            CornerRadius="20">
+                        <Grid Margin="14,0,14,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="14"
+                                       Foreground="#94A3B8"
+                                       Text="&#xE721;" />
+                            <TextBlock Grid.Column="1"
+                                       Margin="10,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="24"
+                                       Foreground="#64748B"
+                                       Text="Search players, teams, matches..." />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="1" Margin="18,16,18,16">
+                <TabControl TabStripPlacement="None"
+                            SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
             <TabItem Header="Dashboard">
                 <StackPanel Margin="8">
                     <TextBlock FontSize="24" FontWeight="SemiBold" Text="ProFootball Dashboard" />
@@ -298,6 +487,8 @@
                     </Grid>
                 </Grid>
             </TabItem>
-        </TabControl>
+                </TabControl>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>
