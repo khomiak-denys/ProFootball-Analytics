@@ -82,9 +82,48 @@ public class DataImportServiceTests
         }
     }
 
+    [Fact]
+    public async Task ImportAsync_ShouldSupportSqlitePathWithSemicolon()
+    {
+        var sourcePath = Path.Combine(Path.GetTempPath(), $"profootball;source-{Guid.NewGuid():N}.sqlite");
+
+        try
+        {
+            await CreateSourceSqliteAsync(sourcePath);
+
+            await using var destinationConnection = new SqliteConnection("Data Source=:memory:");
+            await destinationConnection.OpenAsync();
+
+            var options = new DbContextOptionsBuilder<ProFootballDbContext>()
+                .UseSqlite(destinationConnection)
+                .Options;
+
+            var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
+            var result = await service.ImportAsync(new DataImportRequest(sourcePath, BatchSize: 2));
+
+            Assert.Equal(1, result.CountriesImported);
+            Assert.Equal(1, result.LeaguesImported);
+            Assert.Equal(1, result.TeamsImported);
+            Assert.Equal(1, result.PlayersImported);
+            Assert.Equal(1, result.MatchesImported);
+            Assert.Equal(1, result.TeamAttributesImported);
+            Assert.Equal(1, result.PlayerAttributesImported);
+        }
+        finally
+        {
+            await DeleteFileWithRetryAsync(sourcePath);
+        }
+    }
+
     private static async Task CreateSourceSqliteAsync(string sourcePath)
     {
-        await using var sourceConnection = new SqliteConnection($"Data Source={sourcePath};Pooling=False");
+        var sourceConnectionString = new SqliteConnectionStringBuilder
+        {
+            DataSource = sourcePath,
+            Pooling = false,
+        }.ToString();
+
+        await using var sourceConnection = new SqliteConnection(sourceConnectionString);
         await sourceConnection.OpenAsync();
 
         var statements = new[]
