@@ -27,7 +27,7 @@ public sealed class DataImportService(
         ArgumentOutOfRangeException.ThrowIfLessThan(request.BatchSize, 1);
         var batchSize = request.BatchSize;
         var stopwatch = Stopwatch.StartNew();
-        await using var dbContext = dbContextFactory.CreateDbContext();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         await PrepareDatabaseAsync(dbContext, cancellationToken);
 
