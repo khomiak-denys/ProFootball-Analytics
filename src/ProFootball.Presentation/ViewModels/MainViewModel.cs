@@ -139,6 +139,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
+        Teams.Dispose();
+        Players.Dispose();
         CountriesLeagues.Dispose();
     }
 }

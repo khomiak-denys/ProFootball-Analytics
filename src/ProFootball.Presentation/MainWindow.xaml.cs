@@ -48,7 +48,8 @@ public partial class MainWindow : Window
 
         if (ItemsControl.ContainerFromElement(listBox, source) is ListBoxItem { Tag: AppTab tab })
         {
-            _viewModel.SelectedTab = tab;
+            _viewModel.SelectedSidebarTab = tab;
+            e.Handled = true;
         }
     }
 }
