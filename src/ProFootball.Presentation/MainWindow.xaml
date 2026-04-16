@@ -8,10 +8,55 @@
         Title="ProFootball MVP"
         Height="900"
         Width="1580"
-        Background="#F3F4F6">
+        Background="{StaticResource ShellMainBackgroundBrush}">
     <Window.Resources>
         <converters:TrendToPointCollectionConverter x:Key="TrendToPointsConverter" />
         <converters:NullableIntTextConverter x:Key="NullableIntTextConverter" />
+        <SolidColorBrush x:Key="ShellSidebarBrush" Color="#101923" />
+        <SolidColorBrush x:Key="ShellMainBackgroundBrush" Color="#F3F4F6" />
+        <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFF" />
+        <SolidColorBrush x:Key="CardBorderBrush" Color="#D6DEE8" />
+        <SolidColorBrush x:Key="SubtleBorderBrush" Color="#E5E7EB" />
+        <SolidColorBrush x:Key="TitleForegroundBrush" Color="#0F172A" />
+        <SolidColorBrush x:Key="MutedForegroundBrush" Color="#64748B" />
+        <SolidColorBrush x:Key="SuccessForegroundBrush" Color="#22C55E" />
+        <SolidColorBrush x:Key="DangerForegroundBrush" Color="#EF4444" />
+        <SolidColorBrush x:Key="SurfaceMutedBrush" Color="#F8FAFC" />
+
+        <Style x:Key="DashboardCardStyle" TargetType="Border">
+            <Setter Property="Margin" Value="0,0,12,0" />
+            <Setter Property="Padding" Value="18" />
+            <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="12" />
+        </Style>
+
+        <Style x:Key="DashboardPanelStyle" TargetType="Border">
+            <Setter Property="Padding" Value="18" />
+            <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="12" />
+        </Style>
+
+        <Style x:Key="DashboardMetricLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="31" />
+            <Setter Property="Foreground" Value="{StaticResource MutedForegroundBrush}" />
+        </Style>
+
+        <Style x:Key="DashboardMetricValueStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="52" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource TitleForegroundBrush}" />
+        </Style>
+
+        <Style x:Key="DashboardSectionTitleStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="41" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource TitleForegroundBrush}" />
+        </Style>
+
         <Style x:Key="SidebarNavItemStyle" TargetType="ListBoxItem">
             <Setter Property="Margin" Value="0,0,0,8" />
             <Setter Property="Padding" Value="0" />
@@ -44,7 +89,7 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="#101923">
+        <Border Grid.Column="0" Background="{StaticResource ShellSidebarBrush}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -207,20 +252,15 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="6,2,6,2">
                         <UniformGrid Columns="5" Margin="0,0,0,14">
-                            <Border Margin="0,0,12,0"
-                                    Padding="18"
-                                    Background="#FFFFFF"
-                                    BorderBrush="#D6DEE8"
-                                    BorderThickness="1"
-                                    CornerRadius="12">
+                            <Border Style="{StaticResource DashboardCardStyle}">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-                                    <TextBlock FontSize="31" Foreground="#64748B" Text="Countries" />
-                                    <TextBlock Grid.Row="1" Margin="0,8,0,0" FontSize="52" FontWeight="SemiBold" Foreground="#0F172A" Text="5" />
+                                    <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Countries" />
+                                    <TextBlock Grid.Row="1" Margin="0,8,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="5" />
                                     <TextBlock Grid.Row="2" Margin="0,8,0,0" FontSize="29" Foreground="#22C55E" Text="+2 this year" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE909;" />
@@ -228,15 +268,10 @@
                                 </Grid>
                             </Border>
 
-                            <Border Margin="0,0,12,0"
-                                    Padding="18"
-                                    Background="#FFFFFF"
-                                    BorderBrush="#D6DEE8"
-                                    BorderThickness="1"
-                                    CornerRadius="12">
+                            <Border Style="{StaticResource DashboardCardStyle}">
                                 <Grid>
-                                    <TextBlock FontSize="31" Foreground="#64748B" Text="Leagues" />
-                                    <TextBlock Margin="0,34,0,0" FontSize="52" FontWeight="SemiBold" Foreground="#0F172A" Text="10" />
+                                    <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Leagues" />
+                                    <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="10" />
                                     <TextBlock Margin="0,96,0,0" FontSize="29" Foreground="#22C55E" Text="+5 this year" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE7BF;" />
@@ -244,15 +279,10 @@
                                 </Grid>
                             </Border>
 
-                            <Border Margin="0,0,12,0"
-                                    Padding="18"
-                                    Background="#FFFFFF"
-                                    BorderBrush="#D6DEE8"
-                                    BorderThickness="1"
-                                    CornerRadius="12">
+                            <Border Style="{StaticResource DashboardCardStyle}">
                                 <Grid>
-                                    <TextBlock FontSize="31" Foreground="#64748B" Text="Teams" />
-                                    <TextBlock Margin="0,34,0,0" FontSize="52" FontWeight="SemiBold" Foreground="#0F172A" Text="15" />
+                                    <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Teams" />
+                                    <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="15" />
                                     <TextBlock Margin="0,96,0,0" FontSize="29" Foreground="#22C55E" Text="+8 this month" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE72E;" />
@@ -260,15 +290,10 @@
                                 </Grid>
                             </Border>
 
-                            <Border Margin="0,0,12,0"
-                                    Padding="18"
-                                    Background="#FFFFFF"
-                                    BorderBrush="#D6DEE8"
-                                    BorderThickness="1"
-                                    CornerRadius="12">
+                            <Border Style="{StaticResource DashboardCardStyle}">
                                 <Grid>
-                                    <TextBlock FontSize="31" Foreground="#64748B" Text="Players" />
-                                    <TextBlock Margin="0,34,0,0" FontSize="52" FontWeight="SemiBold" Foreground="#0F172A" Text="20" />
+                                    <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Players" />
+                                    <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="20" />
                                     <TextBlock Margin="0,96,0,0" FontSize="29" Foreground="#EF4444" Text="-3 this month" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE716;" />
@@ -276,14 +301,10 @@
                                 </Grid>
                             </Border>
 
-                            <Border Padding="18"
-                                    Background="#FFFFFF"
-                                    BorderBrush="#D6DEE8"
-                                    BorderThickness="1"
-                                    CornerRadius="12">
+                            <Border Style="{StaticResource DashboardCardStyle}" Margin="0">
                                 <Grid>
-                                    <TextBlock FontSize="31" Foreground="#64748B" Text="Matches" />
-                                    <TextBlock Margin="0,34,0,0" FontSize="52" FontWeight="SemiBold" Foreground="#0F172A" Text="10" />
+                                    <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Matches" />
+                                    <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="10" />
                                     <TextBlock Margin="0,96,0,0" FontSize="29" Foreground="#22C55E" Text="+24 this week" />
                                     <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="#EAF8EF" CornerRadius="10">
                                         <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="#22C55E" Text="&#xE787;" />
@@ -293,17 +314,11 @@
                         </UniformGrid>
 
                         <Border Margin="0,0,0,14"
-                                Padding="18"
-                                Background="#FFFFFF"
-                                BorderBrush="#D6DEE8"
-                                BorderThickness="1"
-                                CornerRadius="12">
+                                Style="{StaticResource DashboardPanelStyle}">
                             <DockPanel LastChildFill="False">
                                 <TextBlock DockPanel.Dock="Left"
                                            VerticalAlignment="Center"
-                                           FontSize="41"
-                                           FontWeight="SemiBold"
-                                           Foreground="#0F172A"
+                                           Style="{StaticResource DashboardSectionTitleStyle}"
                                            Text="Quick Filters" />
                                 <Border Width="210"
                                         Height="42"
@@ -354,20 +369,14 @@
                             </Grid.ColumnDefinitions>
 
                             <Border Margin="0,0,12,0"
-                                    Padding="18"
-                                    Background="#FFFFFF"
-                                    BorderBrush="#D6DEE8"
-                                    BorderThickness="1"
-                                    CornerRadius="12">
+                                    Style="{StaticResource DashboardPanelStyle}">
                                 <StackPanel>
-                                    <TextBlock FontSize="41"
-                                               FontWeight="SemiBold"
-                                               Foreground="#0F172A"
+                                    <TextBlock Style="{StaticResource DashboardSectionTitleStyle}"
                                                Text="Average Player Rating Trend" />
                                     <Border Height="300"
                                             Margin="0,18,0,0"
-                                            Background="#F8FAFC"
-                                            BorderBrush="#E5E7EB"
+                                            Background="{StaticResource SurfaceMutedBrush}"
+                                            BorderBrush="{StaticResource SubtleBorderBrush}"
                                             BorderThickness="1"
                                             CornerRadius="8">
                                         <Grid Margin="10,10,10,6">
@@ -418,27 +427,21 @@
                                                        HorizontalAlignment="Center"
                                                        FontSize="19"
                                                        Foreground="#22C55E"
-                                                       Text="◦ Average Rating" />
+                                                       Text="* Average Rating" />
                                         </Grid>
                                     </Border>
                                 </StackPanel>
                             </Border>
 
                             <Border Grid.Column="1"
-                                    Padding="18"
-                                    Background="#FFFFFF"
-                                    BorderBrush="#D6DEE8"
-                                    BorderThickness="1"
-                                    CornerRadius="12">
+                                    Style="{StaticResource DashboardPanelStyle}">
                                 <StackPanel>
-                                    <TextBlock FontSize="41"
-                                               FontWeight="SemiBold"
-                                               Foreground="#0F172A"
+                                    <TextBlock Style="{StaticResource DashboardSectionTitleStyle}"
                                                Text="Match Statistics Overview" />
                                     <Border Height="300"
                                             Margin="0,18,0,0"
-                                            Background="#F8FAFC"
-                                            BorderBrush="#E5E7EB"
+                                            Background="{StaticResource SurfaceMutedBrush}"
+                                            BorderBrush="{StaticResource SubtleBorderBrush}"
                                             BorderThickness="1"
                                             CornerRadius="8">
                                         <Grid Margin="10,10,10,6">
@@ -477,20 +480,14 @@
                             </Border>
                         </Grid>
 
-                        <Border Padding="18"
-                                Background="#FFFFFF"
-                                BorderBrush="#D6DEE8"
-                                BorderThickness="1"
-                                CornerRadius="12">
+                        <Border Style="{StaticResource DashboardPanelStyle}">
                             <StackPanel>
-                                <TextBlock FontSize="41"
-                                           FontWeight="SemiBold"
-                                           Foreground="#0F172A"
+                                <TextBlock Style="{StaticResource DashboardSectionTitleStyle}"
                                            Text="Recent Matches" />
                                 <Border Height="120"
                                         Margin="0,14,0,0"
-                                        Background="#F8FAFC"
-                                        BorderBrush="#E5E7EB"
+                                        Background="{StaticResource SurfaceMutedBrush}"
+                                        BorderBrush="{StaticResource SubtleBorderBrush}"
                                         BorderThickness="1"
                                         CornerRadius="8">
                                     <Grid Margin="14,8,14,8">
@@ -799,3 +796,4 @@
         </Grid>
     </Grid>
 </Window>
+
