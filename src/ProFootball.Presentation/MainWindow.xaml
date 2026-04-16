@@ -3,36 +3,301 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:ProFootball.Presentation.Converters"
         mc:Ignorable="d"
-        Title="ProFootball"
-        Height="360"
-        Width="560"
-        MinHeight="320"
-        MinWidth="480">
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="16" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+        Title="ProFootball MVP"
+        Height="820"
+        Width="1280">
+    <Window.Resources>
+        <converters:TrendToPointCollectionConverter x:Key="TrendToPointsConverter" />
+        <converters:NullableIntTextConverter x:Key="NullableIntTextConverter" />
+    </Window.Resources>
+    <Grid Margin="10">
+        <TabControl SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}">
+            <TabItem Header="Dashboard">
+                <StackPanel Margin="8">
+                    <TextBlock FontSize="24" FontWeight="SemiBold" Text="ProFootball Dashboard" />
+                    <WrapPanel Margin="0,12,0,12">
+                        <TextBlock Margin="0,0,16,0" Text="{Binding Dashboard.Countries, StringFormat=Countries: {0}}" />
+                        <TextBlock Margin="0,0,16,0" Text="{Binding Dashboard.Leagues, StringFormat=Leagues: {0}}" />
+                        <TextBlock Margin="0,0,16,0" Text="{Binding Dashboard.Teams, StringFormat=Teams: {0}}" />
+                        <TextBlock Margin="0,0,16,0" Text="{Binding Dashboard.Players, StringFormat=Players: {0}}" />
+                        <TextBlock Text="{Binding Dashboard.Matches, StringFormat=Matches: {0}}" />
+                    </WrapPanel>
+                    <Button Width="180" Content="Refresh" Command="{Binding Dashboard.RefreshCommand}" />
+                </StackPanel>
+            </TabItem>
 
-        <StackPanel>
-            <TextBlock FontSize="24" FontWeight="SemiBold" Text="ProFootball" />
-            <TextBlock Margin="0,4,0,0" Opacity="0.85" Text="WPF baseline with PostgreSQL and session placeholder." />
-        </StackPanel>
+            <TabItem Header="Countries/Leagues">
+                <Grid Margin="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="320" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <Button Width="120" Margin="0,0,0,8" Content="Refresh" Command="{Binding CountriesLeagues.RefreshCommand}" />
+                        <TextBlock Margin="0,0,0,6"
+                                   Foreground="#9CA3AF"
+                                   Text="{Binding CountriesLeagues.IsLoading, StringFormat=Loading: {0}}" />
+                        <TextBlock Margin="0,0,0,6"
+                                   Foreground="#EF4444"
+                                   Text="{Binding CountriesLeagues.ErrorMessage}" />
+                        <DataGrid ItemsSource="{Binding CountriesLeagues.Countries}"
+                                  SelectedItem="{Binding CountriesLeagues.SelectedCountry, Mode=TwoWay}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="80" />
+                                <DataGridTextColumn Header="Country" Binding="{Binding Name}" Width="*" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                    <DataGrid Grid.Column="1"
+                              Margin="10,0,0,0"
+                              ItemsSource="{Binding CountriesLeagues.Leagues}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Id" Binding="{Binding Id}" Width="80" />
+                            <DataGridTextColumn Header="League" Binding="{Binding Name}" Width="*" />
+                            <DataGridTextColumn Header="Country" Binding="{Binding CountryName}" Width="220" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
 
-        <Border Grid.Row="2" Padding="12" BorderBrush="#2F3A4A" BorderThickness="1" CornerRadius="8">
-            <StackPanel>
-                <TextBlock FontSize="16" FontWeight="SemiBold" Text="Session Status" />
-                <TextBlock x:Name="SessionStateText" Margin="0,8,0,0" />
-                <Button x:Name="SessionActionButton"
-                        Width="160"
-                        Margin="0,12,0,0"
-                        Padding="8,4"
-                        Click="OnSessionActionClick"
-                        HorizontalAlignment="Left" />
-            </StackPanel>
-        </Border>
+            <TabItem Header="Teams">
+                <DockPanel Margin="8">
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Margin="0,6,6,0" Text="Name:" />
+                        <TextBox Width="260" Margin="0,0,8,0" Text="{Binding Teams.NameFilter, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Width="100" Margin="0,0,8,0" Content="Search" Command="{Binding Teams.SearchCommand}" />
+                        <Button Width="130" Margin="0,0,8,0" Content="Open Details" Command="{Binding Teams.OpenDetailsCommand}" />
+                        <Button Width="100" Margin="0,0,8,0" Content="Prev" Command="{Binding Teams.PreviousPageCommand}" />
+                        <Button Width="100" Content="Next" Command="{Binding Teams.NextPageCommand}" />
+                        <TextBlock Margin="12,6,0,0" Text="{Binding Teams.TotalCount, StringFormat=Total: {0}}" />
+                    </StackPanel>
+                    <DataGrid ItemsSource="{Binding Teams.Teams}"
+                              SelectedItem="{Binding Teams.SelectedTeam, Mode=TwoWay}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="TeamApiId" Binding="{Binding TeamApiId}" Width="110" />
+                            <DataGridTextColumn Header="Long Name" Binding="{Binding LongName}" Width="*" />
+                            <DataGridTextColumn Header="Short Name" Binding="{Binding ShortName}" Width="120" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+
+            <TabItem Header="Team Details">
+                <DockPanel Margin="8">
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Margin="0,6,6,0" Text="TeamApiId:" />
+                        <TextBox Width="120" Margin="0,0,8,0" Text="{Binding TeamDetails.SelectedTeamApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Width="100" Content="Load" Command="{Binding TeamDetails.LoadCommand}" />
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock FontSize="20" FontWeight="SemiBold" Text="{Binding TeamDetails.Details.Team.LongName}" />
+                        <DataGrid Margin="0,8,0,0" ItemsSource="{Binding TeamDetails.Attributes}" AutoGenerateColumns="False" IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=\{0:yyyy-MM-dd\}}" Width="130" />
+                                <DataGridTextColumn Header="Speed" Binding="{Binding BuildUpPlaySpeed}" Width="90" />
+                                <DataGridTextColumn Header="Passing" Binding="{Binding BuildUpPlayPassing}" Width="90" />
+                                <DataGridTextColumn Header="Chance" Binding="{Binding ChanceCreationPassing}" Width="90" />
+                                <DataGridTextColumn Header="Pressure" Binding="{Binding DefencePressure}" Width="90" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </StackPanel>
+                </DockPanel>
+            </TabItem>
+
+            <TabItem Header="Players">
+                <DockPanel Margin="8">
+                    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                        <TextBlock Margin="0,6,6,0" Text="Name:" />
+                        <TextBox Width="180" Margin="0,0,8,0" Text="{Binding Players.NameFilter, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Margin="0,6,6,0" Text="Min Overall:" />
+                        <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Players.MinOverall, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Margin="0,6,6,0" Text="Min Potential:" />
+                        <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Players.MinPotential, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Margin="0,6,6,0" Text="Foot:" />
+                        <TextBox Width="80" Margin="0,0,8,0" Text="{Binding Players.PreferredFoot, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Width="100" Margin="0,0,8,0" Content="Search" Command="{Binding Players.SearchCommand}" />
+                        <Button Width="130" Margin="0,0,8,0" Content="Open Details" Command="{Binding Players.OpenDetailsCommand}" />
+                        <Button Width="80" Margin="0,0,8,0" Content="Prev" Command="{Binding Players.PreviousPageCommand}" />
+                        <Button Width="80" Content="Next" Command="{Binding Players.NextPageCommand}" />
+                    </WrapPanel>
+                    <DataGrid ItemsSource="{Binding Players.Players}"
+                              SelectedItem="{Binding Players.SelectedPlayer, Mode=TwoWay}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="PlayerApiId" Binding="{Binding PlayerApiId}" Width="100" />
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
+                            <DataGridTextColumn Header="Overall" Binding="{Binding OverallRating}" Width="80" />
+                            <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="80" />
+                            <DataGridTextColumn Header="Foot" Binding="{Binding PreferredFoot}" Width="80" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+
+            <TabItem Header="Player Details">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                        <TextBlock Margin="0,6,6,0" Text="PlayerApiId:" />
+                        <TextBox Width="120" Margin="0,0,8,0" Text="{Binding PlayerDetails.SelectedPlayerApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Width="100" Content="Load" Command="{Binding PlayerDetails.LoadCommand}" />
+                    </StackPanel>
+                    <TextBlock Grid.Row="1" FontSize="18" FontWeight="SemiBold" Text="{Binding PlayerDetails.Details.Name}" />
+                    <Grid Grid.Row="2" Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="420" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Canvas Width="380" Height="160" Background="#0E1A2A">
+                            <Polyline Stroke="#F6C344"
+                                      StrokeThickness="2"
+                                      Points="{Binding PlayerDetails.TrendPoints, Converter={StaticResource TrendToPointsConverter}, ConverterParameter=overall}" />
+                            <Polyline Stroke="#44D7F6"
+                                      StrokeThickness="2"
+                                      Points="{Binding PlayerDetails.TrendPoints, Converter={StaticResource TrendToPointsConverter}, ConverterParameter=potential}" />
+                        </Canvas>
+                        <DataGrid Grid.Column="1"
+                                  Margin="8,0,0,0"
+                                  ItemsSource="{Binding PlayerDetails.Attributes}"
+                                  AutoGenerateColumns="False"
+                                  IsReadOnly="True">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=\{0:yyyy-MM-dd\}}" Width="130" />
+                                <DataGridTextColumn Header="Overall" Binding="{Binding OverallRating}" Width="80" />
+                                <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="80" />
+                                <DataGridTextColumn Header="Foot" Binding="{Binding PreferredFoot}" Width="80" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="Matches">
+                <DockPanel Margin="8">
+                    <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,8">
+                        <Button Width="120" Margin="0,0,8,0" Content="Load Leagues" Command="{Binding Matches.LoadLeaguesCommand}" />
+                        <TextBlock Margin="0,6,6,0" Text="League:" />
+                        <ComboBox Width="250"
+                                  Margin="0,0,8,0"
+                                  ItemsSource="{Binding Matches.Leagues}"
+                                  SelectedItem="{Binding Matches.SelectedLeague, Mode=TwoWay}"
+                                  DisplayMemberPath="Name" />
+                        <TextBlock Margin="0,6,6,0" Text="Season:" />
+                        <TextBox Width="100" Margin="0,0,8,0" Text="{Binding Matches.Season, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Margin="0,6,6,0" Text="TeamApiId:" />
+                        <TextBox Width="80" Margin="0,0,8,0" Text="{Binding Matches.TeamApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Width="100" Margin="0,0,8,0" Content="Search" Command="{Binding Matches.SearchCommand}" />
+                        <Button Width="130" Margin="0,0,8,0" Content="Open Details" Command="{Binding Matches.OpenDetailsCommand}" />
+                        <Button Width="80" Margin="0,0,8,0" Content="Prev" Command="{Binding Matches.PreviousPageCommand}" />
+                        <Button Width="80" Content="Next" Command="{Binding Matches.NextPageCommand}" />
+                    </WrapPanel>
+                    <DataGrid ItemsSource="{Binding Matches.Matches}"
+                              SelectedItem="{Binding Matches.SelectedMatch, Mode=TwoWay}"
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="MatchApiId" Binding="{Binding MatchApiId}" Width="100" />
+                            <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=\{0:yyyy-MM-dd\}}" Width="120" />
+                            <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="90" />
+                            <DataGridTextColumn Header="League" Binding="{Binding LeagueName}" Width="180" />
+                            <DataGridTextColumn Header="Home Team" Binding="{Binding HomeTeamName}" Width="180" />
+                            <DataGridTextColumn Header="Away Team" Binding="{Binding AwayTeamName}" Width="180" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </DockPanel>
+            </TabItem>
+
+            <TabItem Header="Match Details">
+                <StackPanel Margin="8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Margin="0,6,6,0" Text="MatchApiId:" />
+                        <TextBox Width="120" Margin="0,0,8,0" Text="{Binding MatchDetails.SelectedMatchApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Width="100" Content="Load" Command="{Binding MatchDetails.LoadCommand}" />
+                    </StackPanel>
+                    <TextBlock Margin="0,10,0,0" FontSize="18" FontWeight="SemiBold" Text="{Binding MatchDetails.Details.LeagueName}" />
+                    <TextBlock Margin="0,4,0,0" Text="{Binding MatchDetails.Details.CountryName}" />
+                    <TextBlock Margin="0,4,0,0" Text="{Binding MatchDetails.Details.Season}" />
+                    <TextBlock Margin="0,10,0,0" Text="{Binding MatchDetails.Details.HomeTeamName}" />
+                    <TextBlock Text="{Binding MatchDetails.Details.HomeTeamGoal, StringFormat=Goals: {0}}" />
+                    <TextBlock Margin="0,8,0,0" Text="{Binding MatchDetails.Details.AwayTeamName}" />
+                    <TextBlock Text="{Binding MatchDetails.Details.AwayTeamGoal, StringFormat=Goals: {0}}" />
+                </StackPanel>
+            </TabItem>
+
+            <TabItem Header="Analytics">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <WrapPanel Margin="0,0,0,8">
+                        <TextBlock Margin="0,6,6,0" Text="Trend PlayerApiId:" />
+                        <TextBox Width="100" Margin="0,0,8,0" Text="{Binding Analytics.TrendPlayerApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=LostFocus}" />
+                        <Button Width="100" Margin="0,0,8,0" Content="Load Trend" Command="{Binding Analytics.LoadTrendCommand}" />
+                        <TextBlock Margin="0,6,6,0" Text="Min Overall:" />
+                        <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Analytics.MinOverall, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Margin="0,6,6,0" Text="Min Potential:" />
+                        <TextBox Width="70" Margin="0,0,8,0" Text="{Binding Analytics.MinPotential, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Margin="0,6,6,0" Text="Foot:" />
+                        <TextBox Width="80" Margin="0,0,8,0" Text="{Binding Analytics.PreferredFoot, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Width="120" Margin="0,0,8,0" Content="Top Players" Command="{Binding Analytics.LoadTopPlayersCommand}" />
+                        <Button Width="140" Margin="0,0,8,0" Content="Matches/Season" Command="{Binding Analytics.LoadMatchesBySeasonCommand}" />
+                        <Button Width="100" Content="Refresh All" Command="{Binding Analytics.RefreshAllCommand}" />
+                    </WrapPanel>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="420" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Canvas Width="380" Height="160" Background="#0E1A2A">
+                            <Polyline Stroke="#F6C344"
+                                      StrokeThickness="2"
+                                      Points="{Binding Analytics.TrendPoints, Converter={StaticResource TrendToPointsConverter}, ConverterParameter=overall}" />
+                            <Polyline Stroke="#44D7F6"
+                                      StrokeThickness="2"
+                                      Points="{Binding Analytics.TrendPoints, Converter={StaticResource TrendToPointsConverter}, ConverterParameter=potential}" />
+                        </Canvas>
+                        <Grid Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <DataGrid ItemsSource="{Binding Analytics.TopPlayers}" AutoGenerateColumns="False" IsReadOnly="True">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="PlayerApiId" Binding="{Binding PlayerApiId}" Width="100" />
+                                    <DataGridTextColumn Header="Player" Binding="{Binding PlayerName}" Width="*" />
+                                    <DataGridTextColumn Header="Avg Overall" Binding="{Binding AverageOverallRating}" Width="100" />
+                                    <DataGridTextColumn Header="Avg Potential" Binding="{Binding AveragePotential}" Width="100" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <DataGrid Grid.Row="1"
+                                      Margin="0,8,0,0"
+                                      ItemsSource="{Binding Analytics.MatchesBySeason}"
+                                      AutoGenerateColumns="False"
+                                      IsReadOnly="True">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Season" Binding="{Binding Season}" Width="110" />
+                                    <DataGridTextColumn Header="League" Binding="{Binding LeagueName}" Width="*" />
+                                    <DataGridTextColumn Header="Matches" Binding="{Binding MatchCount}" Width="90" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Grid>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </Window>

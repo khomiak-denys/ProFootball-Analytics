@@ -3,7 +3,7 @@
 ![Build](https://img.shields.io/badge/build-local-informational)
 ![Coverage](https://img.shields.io/badge/coverage-70%25%20target-blue)
 
-ProFootball is a .NET 10 WPF monorepo with Clean Architecture boundaries (`Domain`, `Application`, `Infrastructure`, `Presentation`) and a PostgreSQL baseline.
+ProFootball is a .NET 10 WPF monorepo with Clean Architecture boundaries (`Domain`, `Application`, `Infrastructure`, `Presentation`) and a PostgreSQL-backed read-only MVP for football analytics.
 
 ## Quickstart
 
@@ -20,6 +20,11 @@ dotnet restore ProFootball.slnx
 ### Development Run
 ```powershell
 .\scripts\tasks.ps1 dev
+```
+
+### Import Dataset (SQLite -> PostgreSQL)
+```powershell
+dotnet run --project .\src\ProFootball.DataLoader\ProFootball.DataLoader.csproj -- --sqlite "C:\path\to\database.sqlite"
 ```
 
 ### Test
@@ -52,14 +57,16 @@ Create local `.env` from `.env.example` and set values as needed.
 .\scripts\tasks.ps1 lint
 .\scripts\tasks.ps1 format
 .\scripts\tasks.ps1 clean
+dotnet run --project .\src\ProFootball.DataLoader\ProFootball.DataLoader.csproj -- --sqlite "<path>" --batch-size 1000
 ```
 
 ## Project Structure
 
 - `src/ProFootball.Domain`: domain entities.
-- `src/ProFootball.Application`: application contracts and session placeholder service.
-- `src/ProFootball.Infrastructure`: EF Core + PostgreSQL persistence and repository implementations.
-- `src/ProFootball.Presentation`: WPF entrypoint, DI composition, and UI.
+- `src/ProFootball.Application`: query/import contracts and read-model abstractions.
+- `src/ProFootball.Infrastructure`: EF Core + PostgreSQL persistence, migrations, query services, and SQLite import service.
+- `src/ProFootball.Presentation`: WPF MVVM client with dashboard, list/detail pages, and analytics views.
+- `src/ProFootball.DataLoader`: console data-loader for importing SQLite dataset into PostgreSQL.
 - `tests/ProFootball.Application.Tests`: xUnit tests with coverage threshold.
 - `docs/adr`: architecture decision records.
 
@@ -86,8 +93,8 @@ The solution follows a layered architecture where core business concepts stay in
 - Coverage threshold: `70%` line coverage (`Directory.Build.targets`)
 - Pre-commit hook: `.githooks/pre-commit` (enable with `git config core.hooksPath .githooks`)
 
-## Next Steps
+## MVP Scope
 
-1. Add first EF Core migration (`src/ProFootball.Infrastructure/Migrations/README.md`).
-2. Replace in-memory session placeholder with real authentication flow.
-3. Expand domain use-cases and UI navigation.
+1. Entities: `Country`, `League`, `Team`, `TeamAttribute`, `Player`, `PlayerAttribute`, `FootballMatch`.
+2. UI pages: `Dashboard`, `Countries/Leagues`, `Teams`, `Team Details`, `Players`, `Player Details`, `Matches`, `Match Details`, `Analytics`.
+3. Analytics: player rating/potential trend, top players by filters, matches by season/league.

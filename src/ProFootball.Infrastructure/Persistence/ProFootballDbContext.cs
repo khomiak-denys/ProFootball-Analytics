@@ -6,6 +6,13 @@ namespace ProFootball.Infrastructure.Persistence;
 public sealed class ProFootballDbContext(DbContextOptions<ProFootballDbContext> options) : DbContext(options)
 {
     public DbSet<FootballClub> FootballClubs => Set<FootballClub>();
+    public DbSet<Country> Countries => Set<Country>();
+    public DbSet<League> Leagues => Set<League>();
+    public DbSet<Team> Teams => Set<Team>();
+    public DbSet<TeamAttribute> TeamAttributes => Set<TeamAttribute>();
+    public DbSet<Player> Players => Set<Player>();
+    public DbSet<PlayerAttribute> PlayerAttributes => Set<PlayerAttribute>();
+    public DbSet<FootballMatch> Matches => Set<FootballMatch>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

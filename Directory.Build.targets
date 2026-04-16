@@ -7,5 +7,6 @@
     <ThresholdType>line</ThresholdType>
     <ThresholdStat>total</ThresholdStat>
     <Include>[ProFootball.Application]*,[ProFootball.Domain]*</Include>
+    <Exclude>[ProFootball.Application]ProFootball.Application.Abstractions.*,[ProFootball.Application]ProFootball.Application.Contracts.*</Exclude>
   </PropertyGroup>
 </Project>
