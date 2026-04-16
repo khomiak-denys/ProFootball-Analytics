@@ -838,6 +838,29 @@
                                                 </DataTemplate>
                                             </ItemsControl.ItemTemplate>
                                         </ItemsControl>
+
+                                        <TextBlock Grid.Row="2"
+                                                   Margin="0,20,0,0"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="24"
+                                                   Foreground="{StaticResource MutedForegroundBrush}"
+                                                   Text="No leagues found for selected country.">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding CountriesLeagues.IsLoading}" Value="False" />
+                                                                <Condition Binding="{Binding CountriesLeagues.LeagueCards.Count}" Value="0" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </MultiDataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
                                     </Grid>
                                 </Border>
 
@@ -1647,8 +1670,42 @@
                                                     <ColumnDefinition Width="*" />
                                                     <ColumnDefinition Width="*" />
                                                 </Grid.ColumnDefinitions>
-                                                <Button Grid.Column="0" BorderThickness="0" Background="Transparent" FontSize="20" Content="Compare Players" Command="{Binding Analytics.ComparePlayersModeCommand}" />
-                                                <Button Grid.Column="1" BorderThickness="0" Background="Transparent" FontSize="20" Content="Compare Teams" Command="{Binding Analytics.CompareTeamsModeCommand}" />
+                                                <Border Grid.Column="0" CornerRadius="9">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="Transparent" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Analytics.IsComparePlayersMode}" Value="True">
+                                                                    <Setter Property="Background" Value="{StaticResource SegmentSelectedBackgroundBrush}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <Button BorderThickness="0"
+                                                            Background="Transparent"
+                                                            FontSize="20"
+                                                            FontWeight="SemiBold"
+                                                            Content="Compare Players"
+                                                            Command="{Binding Analytics.ComparePlayersModeCommand}" />
+                                                </Border>
+                                                <Border Grid.Column="1" CornerRadius="9">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="Transparent" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Analytics.IsCompareTeamsMode}" Value="True">
+                                                                    <Setter Property="Background" Value="{StaticResource SegmentSelectedBackgroundBrush}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <Button BorderThickness="0"
+                                                            Background="Transparent"
+                                                            FontSize="20"
+                                                            FontWeight="SemiBold"
+                                                            Content="Compare Teams"
+                                                            Command="{Binding Analytics.CompareTeamsModeCommand}" />
+                                                </Border>
                                             </Grid>
                                         </Border>
                                         <Grid Margin="0,12,0,0">
