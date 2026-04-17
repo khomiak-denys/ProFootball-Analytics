@@ -33,6 +33,8 @@ public sealed class AnalyticsViewModel : ObservableObject
     private double _trendAxisMidLow = 79;
     private double _trendAxisMidHigh = 83;
     private double _trendAxisMax = 90;
+    private CancellationTokenSource? _refreshAllCts;
+    private CancellationTokenSource? _visualRefreshCts;
     private long _visualStateVersion;
     private bool _isUpdatingSelection;
 
@@ -239,6 +241,10 @@ public sealed class AnalyticsViewModel : ObservableObject
     public async Task RefreshAllAsync()
     {
         var version = Interlocked.Increment(ref _visualStateVersion);
+        var (refreshSource, previousRefreshSource) = ReplaceRefreshAllSource();
+        var refreshToken = refreshSource.Token;
+        var (visualSource, previousVisualSource) = ReplaceVisualRefreshSource();
+        var visualToken = visualSource.Token;
         IsLoading = true;
         ErrorMessage = null;
 
@@ -250,12 +256,16 @@ public sealed class AnalyticsViewModel : ObservableObject
                 MinPotential: null,
                 PreferredFoot: null,
                 SortBy: "overall",
-                SortDescending: true));
+                SortDescending: true), refreshToken);
 
             UpdatePlayerOptions();
             EnsureSelectedPlayers();
 
-            await RefreshVisualStateAsync(version);
+            refreshToken.ThrowIfCancellationRequested();
+            await RefreshVisualStateAsync(version, visualToken);
+        }
+        catch (OperationCanceledException)
+        {
         }
         catch (Exception exception)
         {
@@ -267,6 +277,21 @@ public sealed class AnalyticsViewModel : ObservableObject
         }
         finally
         {
+            if (ReferenceEquals(_refreshAllCts, refreshSource))
+            {
+                _refreshAllCts = null;
+            }
+
+            if (ReferenceEquals(_visualRefreshCts, visualSource))
+            {
+                _visualRefreshCts = null;
+            }
+
+            DisposeSource(previousRefreshSource);
+            DisposeSource(refreshSource);
+            DisposeSource(previousVisualSource);
+            DisposeSource(visualSource);
+
             if (version == Volatile.Read(ref _visualStateVersion))
             {
                 IsLoading = false;
@@ -277,11 +302,16 @@ public sealed class AnalyticsViewModel : ObservableObject
     private async Task RefreshVisualStateSafeAsync()
     {
         var version = Interlocked.Increment(ref _visualStateVersion);
+        var (currentVisualSource, previousVisualSource) = ReplaceVisualRefreshSource();
+        var visualToken = currentVisualSource.Token;
         IsLoading = true;
         ErrorMessage = null;
         try
         {
-            await RefreshVisualStateAsync(version);
+            await RefreshVisualStateAsync(version, visualToken);
+        }
+        catch (OperationCanceledException)
+        {
         }
         catch (Exception exception)
         {
@@ -293,6 +323,14 @@ public sealed class AnalyticsViewModel : ObservableObject
         }
         finally
         {
+            if (ReferenceEquals(_visualRefreshCts, currentVisualSource))
+            {
+                _visualRefreshCts = null;
+            }
+
+            DisposeSource(previousVisualSource);
+            DisposeSource(currentVisualSource);
+
             if (version == Volatile.Read(ref _visualStateVersion))
             {
                 IsLoading = false;
@@ -300,7 +338,7 @@ public sealed class AnalyticsViewModel : ObservableObject
         }
     }
 
-    private async Task RefreshVisualStateAsync(long version)
+    private async Task RefreshVisualStateAsync(long version, CancellationToken cancellationToken)
     {
         var orderedPlayers = OrderByMetric(_playersSnapshot, SelectedMetric)
             .Take(5)
@@ -308,14 +346,15 @@ public sealed class AnalyticsViewModel : ObservableObject
 
         var trendTask1 = SelectedPlayer1 is null
             ? Task.FromResult<IReadOnlyList<PlayerTrendPointDto>>(Array.Empty<PlayerTrendPointDto>())
-            : _analyticsQueryService.GetPlayerTrendAsync(SelectedPlayer1.PlayerApiId);
+            : _analyticsQueryService.GetPlayerTrendAsync(SelectedPlayer1.PlayerApiId, cancellationToken);
         var trendTask2 = SelectedPlayer2 is null
             ? Task.FromResult<IReadOnlyList<PlayerTrendPointDto>>(Array.Empty<PlayerTrendPointDto>())
-            : _analyticsQueryService.GetPlayerTrendAsync(SelectedPlayer2.PlayerApiId);
+            : _analyticsQueryService.GetPlayerTrendAsync(SelectedPlayer2.PlayerApiId, cancellationToken);
         await Task.WhenAll(trendTask1, trendTask2);
 
         var playerOneTrend = await trendTask1;
         var playerTwoTrend = await trendTask2;
+        cancellationToken.ThrowIfCancellationRequested();
 
         if (version != Volatile.Read(ref _visualStateVersion))
         {
@@ -332,6 +371,54 @@ public sealed class AnalyticsViewModel : ObservableObject
 
         RaisePropertyChanged(nameof(PlayerOneLegendLabel));
         RaisePropertyChanged(nameof(PlayerTwoLegendLabel));
+    }
+
+    private (CancellationTokenSource Current, CancellationTokenSource? Previous) ReplaceRefreshAllSource()
+    {
+        var newSource = new CancellationTokenSource();
+        var previousSource = Interlocked.Exchange(ref _refreshAllCts, newSource);
+        CancelSource(previousSource);
+        return (newSource, previousSource);
+    }
+
+    private (CancellationTokenSource Current, CancellationTokenSource? Previous) ReplaceVisualRefreshSource()
+    {
+        var newSource = new CancellationTokenSource();
+        var previousSource = Interlocked.Exchange(ref _visualRefreshCts, newSource);
+        CancelSource(previousSource);
+        return (newSource, previousSource);
+    }
+
+    private static void CancelSource(CancellationTokenSource? source)
+    {
+        if (source is null)
+        {
+            return;
+        }
+
+        try
+        {
+            source.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+    }
+
+    private static void DisposeSource(CancellationTokenSource? source)
+    {
+        if (source is null)
+        {
+            return;
+        }
+
+        try
+        {
+            source.Dispose();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
     }
 
     private void UpdatePlayerOptions()
