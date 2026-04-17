@@ -4,5 +4,7 @@
   <Project Path="src/ProFootball.DataLoader/ProFootball.DataLoader.csproj" />
   <Project Path="src/ProFootball.Infrastructure/ProFootball.Infrastructure.csproj" />
   <Project Path="src/ProFootball.Presentation/ProFootball.Presentation.csproj" />
+  <Project Path="tests/ProFootball.Domain.Tests/ProFootball.Domain.Tests.csproj" />
   <Project Path="tests/ProFootball.Application.Tests/ProFootball.Application.Tests.csproj" />
+  <Project Path="tests/ProFootball.Infrastructure.Tests/ProFootball.Infrastructure.Tests.csproj" />
 </Solution>
