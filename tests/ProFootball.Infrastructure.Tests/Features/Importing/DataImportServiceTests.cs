@@ -6,7 +6,7 @@ using ProFootball.Infrastructure.Importing;
 using ProFootball.Infrastructure.Persistence;
 using Xunit;
 
-namespace ProFootball.Application.Tests;
+namespace ProFootball.Infrastructure.Tests.Features.Importing;
 
 public class DataImportServiceTests
 {

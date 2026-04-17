@@ -2,7 +2,7 @@ using Microsoft.Data.Sqlite;
 using ProFootball.Infrastructure.Importing;
 using Xunit;
 
-namespace ProFootball.Application.Tests;
+namespace ProFootball.Infrastructure.Tests.Features.Common;
 
 public class SqliteValueParserTests
 {

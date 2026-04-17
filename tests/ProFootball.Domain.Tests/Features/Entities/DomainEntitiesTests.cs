@@ -1,7 +1,7 @@
 using ProFootball.Domain.Entities;
 using Xunit;
 
-namespace ProFootball.Application.Tests;
+namespace ProFootball.Domain.Tests.Features.Entities;
 
 public class DomainEntitiesTests
 {

@@ -1,7 +1,7 @@
 using ProFootball.Application.Services.Auth;
 using Xunit;
 
-namespace ProFootball.Application.Tests;
+namespace ProFootball.Application.Tests.Features.Auth;
 
 public class InMemorySessionServiceTests
 {
