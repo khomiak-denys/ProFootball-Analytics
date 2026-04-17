@@ -5,6 +5,15 @@ namespace ProFootball.Domain.Tests.Features.Entities;
 
 public class DomainEntitiesTests
 {
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Country_Constructor_ShouldThrow_WhenNameIsMissing(string? name)
+    {
+        Assert.Throws<ArgumentException>(() => new Country(1, name!));
+    }
+
     [Fact]
     public void Country_Constructor_ShouldTrimName()
     {
@@ -14,20 +23,38 @@ public class DomainEntitiesTests
         Assert.Equal("Ukraine", country.Name);
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void League_Constructor_ShouldThrow_WhenNameIsMissing(string? name)
+    {
+        Assert.Throws<ArgumentException>(() => new League(2, 1, name!));
+    }
+
     [Fact]
     public void League_Constructor_ShouldSetFields()
     {
-        var league = new League(2, 1, "Premier League");
+        var league = new League(2, 1, "  Premier League ");
 
         Assert.Equal(2, league.Id);
         Assert.Equal(1, league.CountryId);
         Assert.Equal("Premier League", league.Name);
     }
 
-    [Fact]
-    public void Team_Constructor_ShouldSetFields()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Team_Constructor_ShouldThrow_WhenLongNameIsMissing(string? longName)
     {
-        var team = new Team(10, 1001, 2001, "Dynamo Kyiv", "DYK");
+        Assert.Throws<ArgumentException>(() => new Team(10, 1001, 2001, longName!, "DYK"));
+    }
+
+    [Fact]
+    public void Team_Constructor_ShouldSetFieldsAndTrimNames()
+    {
+        var team = new Team(10, 1001, 2001, "  Dynamo Kyiv ", " DYK ");
 
         Assert.Equal(10, team.Id);
         Assert.Equal(1001, team.TeamApiId);
@@ -36,11 +63,20 @@ public class DomainEntitiesTests
         Assert.Equal("DYK", team.ShortName);
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Player_Constructor_ShouldThrow_WhenNameIsMissing(string? name)
+    {
+        Assert.Throws<ArgumentException>(() => new Player(11, 1101, 2101, name!, DateTime.UtcNow, 182, 78));
+    }
+
     [Fact]
-    public void Player_Constructor_ShouldSetFields()
+    public void Player_Constructor_ShouldSetFieldsAndTrimName()
     {
         var birthday = new DateTime(1993, 6, 24, 0, 0, 0, DateTimeKind.Utc);
-        var player = new Player(11, 1101, 2101, "Player Name", birthday, 182, 78);
+        var player = new Player(11, 1101, 2101, "  Player Name  ", birthday, 182, 78);
 
         Assert.Equal(11, player.Id);
         Assert.Equal(1101, player.PlayerApiId);
@@ -51,11 +87,21 @@ public class DomainEntitiesTests
         Assert.Equal(78, player.Weight);
     }
 
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void FootballMatch_Constructor_ShouldThrow_WhenSeasonIsMissing(string? season)
+    {
+        Assert.Throws<ArgumentException>(() =>
+            new FootballMatch(22, 1, 2, season!, DateTime.UtcNow, 33001, 100, 200, 2, 1));
+    }
+
     [Fact]
-    public void FootballMatch_Constructor_ShouldSetFields()
+    public void FootballMatch_Constructor_ShouldSetFieldsAndTrimSeason()
     {
         var date = new DateTime(2015, 3, 10, 0, 0, 0, DateTimeKind.Utc);
-        var match = new FootballMatch(22, 1, 2, "2014/2015", date, 33001, 100, 200, 2, 1);
+        var match = new FootballMatch(22, 1, 2, " 2014/2015 ", date, 33001, 100, 200, 2, 1);
 
         Assert.Equal(22, match.Id);
         Assert.Equal(1, match.CountryId);
@@ -86,5 +132,24 @@ public class DomainEntitiesTests
         Assert.Equal("right", attribute.PreferredFoot);
         Assert.Equal("high", attribute.AttackingWorkRate);
         Assert.Equal("medium", attribute.DefensiveWorkRate);
+    }
+
+    [Fact]
+    public void PlayerAttribute_Constructor_ShouldAllowNullOptionalTextFields()
+    {
+        var attribute = new PlayerAttribute(
+            30,
+            1101,
+            2202,
+            new DateTime(2015, 1, 1, 0, 0, 0, DateTimeKind.Utc),
+            70,
+            78,
+            null,
+            null,
+            null);
+
+        Assert.Null(attribute.PreferredFoot);
+        Assert.Null(attribute.AttackingWorkRate);
+        Assert.Null(attribute.DefensiveWorkRate);
     }
 }
