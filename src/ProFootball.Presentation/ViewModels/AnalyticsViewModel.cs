@@ -8,8 +8,6 @@ namespace ProFootball.Presentation.ViewModels;
 
 public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 {
-    private static readonly string[] FallbackTrendMonths = ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
-
     private readonly IAnalyticsQueryService _analyticsQueryService;
     private readonly IReadOnlyList<string> _metricOptions;
     private IReadOnlyList<TopPlayerDto> _playersSnapshot = Array.Empty<TopPlayerDto>();
@@ -731,6 +729,7 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         IReadOnlyList<PlayerTrendPointDto> trendTwo,
         string metric)
     {
+        var fallbackMonths = BuildFallbackMonthLabels();
         var orderedOne = trendOne.OrderBy(point => point.Date).TakeLast(6).ToList();
         var orderedTwo = trendTwo.OrderBy(point => point.Date).TakeLast(6).ToList();
 
@@ -753,7 +752,7 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
             var resolvedValue = ResolveTrendValue(entryOne, entryTwo, metric);
             var label = entryOne?.Date.ToString("MMM", CultureInfo.InvariantCulture)
                 ?? entryTwo?.Date.ToString("MMM", CultureInfo.InvariantCulture)
-                ?? FallbackTrendMonths[index % FallbackTrendMonths.Length];
+                ?? fallbackMonths[index % fallbackMonths.Count];
 
             values.Add(new AnalyticsTrendPointViewModel(label, resolvedValue));
         }
@@ -763,19 +762,28 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
     private IReadOnlyList<AnalyticsTrendPointViewModel> BuildFallbackTrend(string metric)
     {
+        var fallbackMonths = BuildFallbackMonthLabels();
         var baseline = metric switch
         {
             "Potential" => ResolveMetricValue(ResolvePlayerById(SelectedPlayer1?.PlayerApiId) ?? CreateFallbackPlayer(), "Potential"),
             _ => ResolveMetricValue(ResolvePlayerById(SelectedPlayer1?.PlayerApiId) ?? CreateFallbackPlayer(), "Overall Rating"),
         };
 
-        return FallbackTrendMonths
+        return fallbackMonths
             .Select((label, index) =>
             {
                 var offset = ((SelectedPlayer1?.PlayerApiId ?? 0) + index * 7) % 5;
                 var value = Math.Clamp(baseline - 3 + index + offset * 0.2, 70, 95);
                 return new AnalyticsTrendPointViewModel(label, Math.Round(value, 1));
             })
+            .ToList();
+    }
+
+    private static IReadOnlyList<string> BuildFallbackMonthLabels()
+    {
+        var currentMonthStart = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        return Enumerable.Range(0, 6)
+            .Select(index => currentMonthStart.AddMonths(index - 5).ToString("MMM", CultureInfo.InvariantCulture))
             .ToList();
     }
 
