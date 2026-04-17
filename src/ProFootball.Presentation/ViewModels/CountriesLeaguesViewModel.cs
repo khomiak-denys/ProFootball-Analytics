@@ -10,12 +10,15 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
 {
     private readonly ICountriesLeaguesQueryService _service;
     private readonly ILogger<CountriesLeaguesViewModel> _logger;
-    private readonly SemaphoreSlim _loadLeaguesLock = new(1, 1);
-    private CancellationTokenSource? _loadLeaguesCts;
-    private CountryDto? _selectedCountry;
+    private readonly SemaphoreSlim _reloadLock = new(1, 1);
+    private CancellationTokenSource? _reloadCts;
+    private CountryLeagueListItemDto? _selectedCountry;
     private bool _isLoading;
     private string? _errorMessage;
     private long _lastLoadingOperationId;
+    private int _totalClubs;
+    private int _activeLeagues;
+    private int _divisions;
 
     public CountriesLeaguesViewModel(
         ICountriesLeaguesQueryService service,
@@ -23,26 +26,31 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     {
         _service = service;
         _logger = logger;
-        Countries = new ObservableCollection<CountryDto>();
-        Leagues = new ObservableCollection<LeagueDto>();
+        Countries = new ObservableCollection<CountryLeagueListItemDto>();
+        LeagueCards = new ObservableCollection<LeagueCountryCardDto>();
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, CommandExceptionHandler.Handle);
     }
 
-    public ObservableCollection<CountryDto> Countries { get; }
+    public ObservableCollection<CountryLeagueListItemDto> Countries { get; }
 
-    public ObservableCollection<LeagueDto> Leagues { get; }
+    public ObservableCollection<LeagueCountryCardDto> LeagueCards { get; }
 
-    public CountryDto? SelectedCountry
+    public CountryLeagueListItemDto? SelectedCountry
     {
         get => _selectedCountry;
         set
         {
-            if (!SetProperty(ref _selectedCountry, value))
+            if (ReferenceEquals(_selectedCountry, value))
             {
                 return;
             }
 
-            _ = ReloadLeaguesSafeAsync();
+            _selectedCountry = value;
+            RaisePropertyChanged(nameof(SelectedCountry));
+            RaisePropertyChanged(nameof(SelectedCountryName));
+            RaisePropertyChanged(nameof(SelectedCountryAboutTitle));
+            RaisePropertyChanged(nameof(SelectedCountryDescription));
+            _ = ReloadCountrySnapshotSafeAsync();
         }
     }
 
@@ -60,22 +68,65 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         private set => SetProperty(ref _errorMessage, value);
     }
 
+    public string SelectedCountryName => SelectedCountry?.Name ?? "Select country";
+
+    public string SelectedCountryAboutTitle => SelectedCountry is null
+        ? "Country football overview"
+        : $"About {SelectedCountry.Name} Football";
+
+    public string SelectedCountryDescription => BuildCountryDescription(SelectedCountry?.Name);
+
+    public int TotalCountries => Countries.Count;
+
+    public int TotalLeagues => Countries.Sum(country => country.LeagueCount);
+
+    public int TotalClubs
+    {
+        get => _totalClubs;
+        private set => SetProperty(ref _totalClubs, value);
+    }
+
+    public int ActiveLeagues
+    {
+        get => _activeLeagues;
+        private set => SetProperty(ref _activeLeagues, value);
+    }
+
+    public int Divisions
+    {
+        get => _divisions;
+        private set => SetProperty(ref _divisions, value);
+    }
+
     public async Task RefreshAsync()
     {
         var loadingOperationId = BeginLoading();
-
         try
         {
             ErrorMessage = null;
 
+            var countries = await _service.GetCountriesWithLeagueCountAsync();
             Countries.Clear();
-            var countries = await _service.GetCountriesAsync();
             foreach (var country in countries)
             {
                 Countries.Add(country);
             }
 
-            await ReloadLeaguesSafeAsync();
+            RaisePropertyChanged(nameof(TotalCountries));
+            RaisePropertyChanged(nameof(TotalLeagues));
+
+            var previouslySelectedCountryId = SelectedCountry?.Id;
+            var nextSelection = countries.FirstOrDefault(country => country.Id == previouslySelectedCountryId)
+                ?? countries.FirstOrDefault();
+
+            if (!ReferenceEquals(_selectedCountry, nextSelection))
+            {
+                SelectedCountry = nextSelection;
+            }
+            else
+            {
+                await ReloadCountrySnapshotSafeAsync();
+            }
         }
         catch (Exception exception)
         {
@@ -88,53 +139,74 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         }
     }
 
-    private async Task ReloadLeaguesSafeAsync()
+    private async Task ReloadCountrySnapshotSafeAsync()
     {
         var loadingOperationId = BeginLoading();
-        var (loadSource, previousSource) = ReplaceLoadSource();
-        var loadToken = loadSource.Token;
+        var (currentSource, previousSource) = ReplaceReloadSource();
+        var reloadToken = currentSource.Token;
         var lockAcquired = false;
 
         try
         {
-            await _loadLeaguesLock.WaitAsync(loadToken);
+            await _reloadLock.WaitAsync(reloadToken);
             lockAcquired = true;
 
             ErrorMessage = null;
-            loadToken.ThrowIfCancellationRequested();
-            var leagues = await _service.GetLeaguesAsync(SelectedCountry?.Id, loadToken);
-            loadToken.ThrowIfCancellationRequested();
 
-            Leagues.Clear();
-            foreach (var league in leagues)
+            var selectedCountryId = SelectedCountry?.Id;
+            if (!selectedCountryId.HasValue)
             {
-                Leagues.Add(league);
+                ClearCountrySnapshot();
+                return;
             }
+
+            var snapshot = await _service.GetCountrySnapshotAsync(selectedCountryId.Value, reloadToken);
+            var cards = snapshot.LeagueCards;
+            var summary = snapshot.Summary;
+
+            LeagueCards.Clear();
+            foreach (var card in cards)
+            {
+                LeagueCards.Add(card);
+            }
+
+            TotalClubs = summary.TotalClubs;
+            ActiveLeagues = summary.ActiveLeagues;
+            Divisions = summary.Divisions;
         }
         catch (OperationCanceledException)
         {
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Failed to load leagues for country {CountryId}.", SelectedCountry?.Id);
-            ErrorMessage = "Failed to load leagues.";
+            _logger.LogError(exception, "Failed to load country snapshot for country {CountryId}.", SelectedCountry?.Id);
+            ErrorMessage = "Failed to load leagues data.";
+            ClearCountrySnapshot();
         }
         finally
         {
             if (lockAcquired)
             {
-                _loadLeaguesLock.Release();
+                _reloadLock.Release();
             }
 
-            if (ReferenceEquals(_loadLeaguesCts, loadSource))
+            if (ReferenceEquals(_reloadCts, currentSource))
             {
-                _loadLeaguesCts = null;
+                _reloadCts = null;
             }
 
-            DisposeLoadSource(previousSource);
-            DisposeLoadSource(loadSource);
+            DisposeSource(previousSource);
+            DisposeSource(currentSource);
             EndLoading(loadingOperationId);
         }
+    }
+
+    private void ClearCountrySnapshot()
+    {
+        LeagueCards.Clear();
+        TotalClubs = 0;
+        ActiveLeagues = 0;
+        Divisions = 0;
     }
 
     private long BeginLoading()
@@ -152,51 +224,62 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         }
     }
 
-    private (CancellationTokenSource Current, CancellationTokenSource? Previous) ReplaceLoadSource()
+    private (CancellationTokenSource Current, CancellationTokenSource? Previous) ReplaceReloadSource()
     {
         var newSource = new CancellationTokenSource();
-        var previousSource = Interlocked.Exchange(ref _loadLeaguesCts, newSource);
-        CancelLoadSource(previousSource);
+        var previousSource = Interlocked.Exchange(ref _reloadCts, newSource);
+        CancelSource(previousSource);
         return (newSource, previousSource);
     }
 
-    private static void CancelLoadSource(CancellationTokenSource? loadSource)
+    private static void CancelSource(CancellationTokenSource? source)
     {
-        if (loadSource is null)
+        if (source is null)
         {
             return;
         }
 
         try
         {
-            loadSource.Cancel();
+            source.Cancel();
         }
         catch (ObjectDisposedException)
         {
         }
     }
 
-    private static void DisposeLoadSource(CancellationTokenSource? loadSource)
+    private static void DisposeSource(CancellationTokenSource? source)
     {
-        if (loadSource is null)
+        if (source is null)
         {
             return;
         }
 
         try
         {
-            loadSource.Dispose();
+            source.Dispose();
         }
         catch (ObjectDisposedException)
         {
         }
+    }
+
+    private static string BuildCountryDescription(string? countryName)
+    {
+        if (string.IsNullOrWhiteSpace(countryName))
+        {
+            return "Select a country to view league information and structure highlights.";
+        }
+
+        return $"{countryName} has a competitive football ecosystem with multiple divisions. " +
+               "League structure snapshots below summarize active competitions, club participation, and latest-season activity.";
     }
 
     public void Dispose()
     {
-        CancelLoadSource(_loadLeaguesCts);
-        DisposeLoadSource(_loadLeaguesCts);
-        _loadLeaguesCts = null;
-        _loadLeaguesLock.Dispose();
+        CancelSource(_reloadCts);
+        DisposeSource(_reloadCts);
+        _reloadCts = null;
+        _reloadLock.Dispose();
     }
 }
