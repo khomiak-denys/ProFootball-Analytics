@@ -21,20 +21,33 @@ internal sealed class QueryingTestHost : IAsyncDisposable
 
     public static async Task<QueryingTestHost> CreateAsync()
     {
-        var connection = new SqliteConnection("Data Source=:memory:");
-        await connection.OpenAsync();
-
-        var options = new DbContextOptionsBuilder<ProFootballDbContext>()
-            .UseSqlite(connection)
-            .Options;
-
-        await using (var dbContext = new ProFootballDbContext(options))
+        SqliteConnection? connection = null;
+        try
         {
-            await dbContext.Database.EnsureCreatedAsync();
-            await SeedAsync(dbContext);
-        }
+            connection = new SqliteConnection("Data Source=:memory:");
+            await connection.OpenAsync();
 
-        return new QueryingTestHost(connection, options);
+            var options = new DbContextOptionsBuilder<ProFootballDbContext>()
+                .UseSqlite(connection)
+                .Options;
+
+            await using (var dbContext = new ProFootballDbContext(options))
+            {
+                await dbContext.Database.EnsureCreatedAsync();
+                await SeedAsync(dbContext);
+            }
+
+            return new QueryingTestHost(connection, options);
+        }
+        catch
+        {
+            if (connection is not null)
+            {
+                await connection.DisposeAsync();
+            }
+
+            throw;
+        }
     }
 
     public async ValueTask DisposeAsync()
