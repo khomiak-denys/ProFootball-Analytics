@@ -228,7 +228,7 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
     public string PlayerTwoLegendLabel => SelectedPlayer2?.PlayerName ?? "Player 2";
 
-    public string TeamsModePlaceholder => "Compare Teams: coming next phase.";
+    public string TeamsModePlaceholder => "Compare Teams: coming in the next phase.";
 
     public AsyncRelayCommand RefreshAllCommand { get; }
 
