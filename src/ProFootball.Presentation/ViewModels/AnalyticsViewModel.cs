@@ -643,17 +643,14 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         TrendAxisMidHigh = axisMin + axisStep * 2;
         TrendAxisMax = axisMax;
 
-        const double left = 40;
-        const double right = 542;
-        const double top = 22;
-        const double bottom = 198;
-
         var points = mergedTrend.Select((entry, index) =>
         {
             var xRatio = mergedTrend.Count == 1 ? 0.5 : index / (double)(mergedTrend.Count - 1);
-            var x = left + (right - left) * xRatio;
+            var x = AnalyticsTrendChartLayout.PlotLeft +
+                    (AnalyticsTrendChartLayout.PlotRight - AnalyticsTrendChartLayout.PlotLeft) * xRatio;
             var yRatio = (entry.Value - axisMin) / Math.Max(0.0001, axisMax - axisMin);
-            var y = bottom - yRatio * (bottom - top);
+            var y = AnalyticsTrendChartLayout.PlotBottom -
+                    yRatio * (AnalyticsTrendChartLayout.PlotBottom - AnalyticsTrendChartLayout.PlotTop);
             return string.Create(CultureInfo.InvariantCulture, $"{x:0.0},{y:0.0}");
         });
 
