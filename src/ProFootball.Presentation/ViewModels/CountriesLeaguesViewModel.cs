@@ -40,11 +40,13 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         get => _selectedCountry;
         set
         {
-            if (!SetProperty(ref _selectedCountry, value))
+            if (ReferenceEquals(_selectedCountry, value))
             {
                 return;
             }
 
+            _selectedCountry = value;
+            RaisePropertyChanged(nameof(SelectedCountry));
             RaisePropertyChanged(nameof(SelectedCountryName));
             RaisePropertyChanged(nameof(SelectedCountryDescription));
             _ = ReloadCountrySnapshotSafeAsync();
@@ -112,7 +114,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
             var nextSelection = countries.FirstOrDefault(country => country.Id == previouslySelectedCountryId)
                 ?? countries.FirstOrDefault();
 
-            if (SelectedCountry != nextSelection)
+            if (!ReferenceEquals(_selectedCountry, nextSelection))
             {
                 SelectedCountry = nextSelection;
             }
