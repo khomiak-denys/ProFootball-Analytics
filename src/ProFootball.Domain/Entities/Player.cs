@@ -15,7 +15,11 @@ public sealed class Player
         int? height,
         int? weight)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Name cannot be empty.", nameof(name));
+        }
+
         Id = id;
         PlayerApiId = playerApiId;
         PlayerFifaApiId = playerFifaApiId;

@@ -8,7 +8,11 @@ public sealed class League
 
     public League(int id, int countryId, string name)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Name cannot be empty.", nameof(name));
+        }
+
         Id = id;
         CountryId = countryId;
         Name = name.Trim();

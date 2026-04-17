@@ -18,7 +18,11 @@ public sealed class FootballMatch
         int? homeTeamGoal,
         int? awayTeamGoal)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(season);
+        if (string.IsNullOrWhiteSpace(season))
+        {
+            throw new ArgumentException("Season cannot be empty.", nameof(season));
+        }
+
         Id = id;
         CountryId = countryId;
         LeagueId = leagueId;

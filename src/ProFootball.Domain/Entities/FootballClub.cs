@@ -8,7 +8,10 @@ public sealed class FootballClub
 
     public FootballClub(string name, int foundedYear)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Name cannot be empty.", nameof(name));
+        }
 
         if (foundedYear < 1857 || foundedYear > DateTime.UtcNow.Year)
         {

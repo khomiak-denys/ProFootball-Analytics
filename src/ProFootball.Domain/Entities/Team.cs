@@ -8,7 +8,11 @@ public sealed class Team
 
     public Team(int id, int teamApiId, int? teamFifaApiId, string longName, string? shortName)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(longName);
+        if (string.IsNullOrWhiteSpace(longName))
+        {
+            throw new ArgumentException("Long name cannot be empty.", nameof(longName));
+        }
+
         Id = id;
         TeamApiId = teamApiId;
         TeamFifaApiId = teamFifaApiId;
