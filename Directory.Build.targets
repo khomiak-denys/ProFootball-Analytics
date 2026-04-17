@@ -19,4 +19,8 @@
     <Include>[ProFootball.Domain]*</Include>
     <Exclude></Exclude>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsTestProject)' == 'true' and '$(MSBuildProjectName)' == 'ProFootball.Infrastructure.Tests'">
+    <CollectCoverage>false</CollectCoverage>
+  </PropertyGroup>
 </Project>
