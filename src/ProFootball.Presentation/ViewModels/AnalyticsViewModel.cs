@@ -6,7 +6,7 @@ using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
 
-public sealed class AnalyticsViewModel : ObservableObject
+public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 {
     private static readonly string[] FallbackTrendMonths = ["Oct", "Nov", "Dec", "Jan", "Feb", "Mar"];
 
@@ -912,4 +912,15 @@ public sealed class AnalyticsViewModel : ObservableObject
     }
 
     private static int Offset(int seed, int salt) => ((seed * (11 + salt * 5)) % 13) - 6;
+
+    public void Dispose()
+    {
+        var refreshSource = Interlocked.Exchange(ref _refreshAllCts, null);
+        var visualSource = Interlocked.Exchange(ref _visualRefreshCts, null);
+
+        CancelSource(refreshSource);
+        CancelSource(visualSource);
+        DisposeSource(refreshSource);
+        DisposeSource(visualSource);
+    }
 }
