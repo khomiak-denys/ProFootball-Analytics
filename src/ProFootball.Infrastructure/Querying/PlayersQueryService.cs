@@ -2,12 +2,15 @@ using Microsoft.EntityFrameworkCore;
 using ProFootball.Application.Abstractions.Querying;
 using ProFootball.Application.Contracts.Common;
 using ProFootball.Application.Contracts.Queries;
+using ProFootball.Domain.Entities;
 using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
 public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) : IPlayersQueryService
 {
+    private const string SqliteProviderName = "Microsoft.EntityFrameworkCore.Sqlite";
+
     public async Task<PagedResult<PlayerListItemDto>> SearchPlayersAsync(
         PlayerSearchQuery query,
         CancellationToken cancellationToken = default)
@@ -15,7 +18,7 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var (page, pageSize, skip) = Paging.Normalize(query.Page, query.PageSize);
 
-        if (dbContext.Database.ProviderName?.Contains("Sqlite", StringComparison.OrdinalIgnoreCase) == true)
+        if (string.Equals(dbContext.Database.ProviderName, SqliteProviderName, StringComparison.Ordinal))
         {
             return await SearchPlayersSqliteFallbackAsync(dbContext, query, page, pageSize, skip, cancellationToken);
         }
@@ -160,8 +163,73 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
         int skip,
         CancellationToken cancellationToken)
     {
-        var players = await dbContext.Players
-            .AsNoTracking()
+        var normalizedSortBy = query.SortBy?.Trim().ToLowerInvariant();
+        var requiresLatestAttributeFiltering =
+            !string.IsNullOrWhiteSpace(query.PreferredFoot)
+            || query.MinOverallRating.HasValue
+            || query.MaxOverallRating.HasValue
+            || query.MinPotential.HasValue
+            || query.MaxPotential.HasValue;
+        var requiresLatestAttributeSorting = normalizedSortBy is "overallrating" or "potential";
+
+        var playersQuery = dbContext.Players.AsNoTracking();
+        if (!string.IsNullOrWhiteSpace(query.Name))
+        {
+            var normalizedName = query.Name.Trim().ToLowerInvariant();
+            playersQuery = playersQuery.Where(player => player.Name.ToLower().Contains(normalizedName));
+        }
+
+        if (query.MinHeight.HasValue)
+        {
+            playersQuery = playersQuery.Where(player => player.Height.HasValue && player.Height.Value >= query.MinHeight.Value);
+        }
+
+        if (query.MaxHeight.HasValue)
+        {
+            playersQuery = playersQuery.Where(player => player.Height.HasValue && player.Height.Value <= query.MaxHeight.Value);
+        }
+
+        if (!requiresLatestAttributeFiltering && !requiresLatestAttributeSorting)
+        {
+            playersQuery = ApplySqliteBaseSorting(playersQuery, normalizedSortBy, query.SortDescending);
+            var totalCount = await playersQuery.CountAsync(cancellationToken);
+
+            var pagedPlayers = await playersQuery
+                .Skip(skip)
+                .Take(pageSize)
+                .Select(player => new PlayerProjection(
+                    player.PlayerApiId,
+                    player.Name,
+                    player.Birthday,
+                    player.Height,
+                    player.Weight,
+                    null,
+                    null,
+                    null))
+                .ToListAsync(cancellationToken);
+
+            var latestByPlayerApiId = await GetLatestAttributeByPlayerApiIdAsync(
+                dbContext,
+                pagedPlayers.Select(player => player.PlayerApiId),
+                cancellationToken);
+
+            var items = pagedPlayers
+                .Select(player => MergeLatestAttributes(player, latestByPlayerApiId))
+                .Select(player => new PlayerListItemDto(
+                    player.PlayerApiId,
+                    player.Name,
+                    player.Birthday,
+                    player.Height,
+                    player.Weight,
+                    player.OverallRating,
+                    player.Potential,
+                    player.PreferredFoot))
+                .ToList();
+
+            return new PagedResult<PlayerListItemDto>(items, totalCount, page, pageSize);
+        }
+
+        var candidatePlayers = await playersQuery
             .Select(player => new PlayerProjection(
                 player.PlayerApiId,
                 player.Name,
@@ -173,53 +241,13 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
                 null))
             .ToListAsync(cancellationToken);
 
-        var latestAttributes = await dbContext.PlayerAttributes
-            .AsNoTracking()
-            .Select(attribute => new PlayerAttributeProjection(
-                attribute.Id,
-                attribute.PlayerApiId,
-                attribute.Date,
-                attribute.OverallRating,
-                attribute.Potential,
-                attribute.PreferredFoot))
-            .ToListAsync(cancellationToken);
+        var latestByCandidatePlayerApiId = await GetLatestAttributeByPlayerApiIdAsync(
+            dbContext,
+            candidatePlayers.Select(player => player.PlayerApiId),
+            cancellationToken);
 
-        var latestByPlayerApiId = latestAttributes
-            .GroupBy(attribute => attribute.PlayerApiId)
-            .ToDictionary(
-                grouped => grouped.Key,
-                grouped => grouped
-                    .OrderByDescending(attribute => attribute.Date)
-                    .ThenByDescending(attribute => attribute.Id)
-                    .First());
-
-        IEnumerable<PlayerProjection> projected = players.Select(player =>
-        {
-            latestByPlayerApiId.TryGetValue(player.PlayerApiId, out var latest);
-            return player with
-            {
-                OverallRating = latest?.OverallRating,
-                Potential = latest?.Potential,
-                PreferredFoot = latest?.PreferredFoot,
-            };
-        });
-
-        if (!string.IsNullOrWhiteSpace(query.Name))
-        {
-            var nameFilter = query.Name.Trim();
-            projected = projected.Where(player =>
-                player.Name.Contains(nameFilter, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (query.MinHeight.HasValue)
-        {
-            projected = projected.Where(player => player.Height.HasValue && player.Height.Value >= query.MinHeight.Value);
-        }
-
-        if (query.MaxHeight.HasValue)
-        {
-            projected = projected.Where(player => player.Height.HasValue && player.Height.Value <= query.MaxHeight.Value);
-        }
+        IEnumerable<PlayerProjection> projected = candidatePlayers
+            .Select(player => MergeLatestAttributes(player, latestByCandidatePlayerApiId));
 
         if (!string.IsNullOrWhiteSpace(query.PreferredFoot))
         {
@@ -257,7 +285,53 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
                 player.Potential.Value <= query.MaxPotential.Value);
         }
 
-        projected = (query.SortBy?.Trim().ToLowerInvariant(), query.SortDescending) switch
+        var sortedProjected = ApplySqliteProjectedSorting(projected, normalizedSortBy, query.SortDescending);
+        var materialized = sortedProjected.ToList();
+        var totalCandidateCount = materialized.Count;
+
+        var pagedItems = materialized
+            .Skip(skip)
+            .Take(pageSize)
+            .Select(player => new PlayerListItemDto(
+                player.PlayerApiId,
+                player.Name,
+                player.Birthday,
+                player.Height,
+                player.Weight,
+                player.OverallRating,
+                player.Potential,
+                player.PreferredFoot))
+            .ToList();
+
+        return new PagedResult<PlayerListItemDto>(pagedItems, totalCandidateCount, page, pageSize);
+    }
+
+    private static IQueryable<Player> ApplySqliteBaseSorting(
+        IQueryable<Player> playersQuery,
+        string? sortBy,
+        bool sortDescending)
+    {
+        return (sortBy, sortDescending) switch
+        {
+            ("height", true) => playersQuery
+                .OrderByDescending(player => player.Height.HasValue)
+                .ThenByDescending(player => player.Height)
+                .ThenBy(player => player.Name),
+            ("height", false) => playersQuery
+                .OrderByDescending(player => player.Height.HasValue)
+                .ThenBy(player => player.Height)
+                .ThenBy(player => player.Name),
+            (_, true) => playersQuery.OrderByDescending(player => player.Name),
+            _ => playersQuery.OrderBy(player => player.Name),
+        };
+    }
+
+    private static IEnumerable<PlayerProjection> ApplySqliteProjectedSorting(
+        IEnumerable<PlayerProjection> projected,
+        string? sortBy,
+        bool sortDescending)
+    {
+        return (sortBy, sortDescending) switch
         {
             ("overallrating", true) => projected
                 .OrderByDescending(player => player.OverallRating.HasValue)
@@ -286,24 +360,54 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
             (_, true) => projected.OrderByDescending(player => player.Name, StringComparer.Ordinal),
             _ => projected.OrderBy(player => player.Name, StringComparer.Ordinal),
         };
+    }
 
-        var materialized = projected.ToList();
-        var totalCount = materialized.Count;
-        var items = materialized
-            .Skip(skip)
-            .Take(pageSize)
-            .Select(player => new PlayerListItemDto(
-                player.PlayerApiId,
-                player.Name,
-                player.Birthday,
-                player.Height,
-                player.Weight,
-                player.OverallRating,
-                player.Potential,
-                player.PreferredFoot))
+    private static PlayerProjection MergeLatestAttributes(
+        PlayerProjection player,
+        IReadOnlyDictionary<int, PlayerAttributeProjection> latestByPlayerApiId)
+    {
+        latestByPlayerApiId.TryGetValue(player.PlayerApiId, out var latest);
+        return player with
+        {
+            OverallRating = latest?.OverallRating,
+            Potential = latest?.Potential,
+            PreferredFoot = latest?.PreferredFoot,
+        };
+    }
+
+    private static async Task<Dictionary<int, PlayerAttributeProjection>> GetLatestAttributeByPlayerApiIdAsync(
+        ProFootballDbContext dbContext,
+        IEnumerable<int> playerApiIds,
+        CancellationToken cancellationToken)
+    {
+        var playerApiIdList = playerApiIds
+            .Distinct()
             .ToList();
+        if (playerApiIdList.Count == 0)
+        {
+            return [];
+        }
 
-        return new PagedResult<PlayerListItemDto>(items, totalCount, page, pageSize);
+        var latestAttributes = await dbContext.PlayerAttributes
+            .AsNoTracking()
+            .Where(attribute => playerApiIdList.Contains(attribute.PlayerApiId))
+            .Select(attribute => new PlayerAttributeProjection(
+                attribute.Id,
+                attribute.PlayerApiId,
+                attribute.Date,
+                attribute.OverallRating,
+                attribute.Potential,
+                attribute.PreferredFoot))
+            .ToListAsync(cancellationToken);
+
+        return latestAttributes
+            .GroupBy(attribute => attribute.PlayerApiId)
+            .ToDictionary(
+                grouped => grouped.Key,
+                grouped => grouped
+                    .OrderByDescending(attribute => attribute.Date)
+                    .ThenByDescending(attribute => attribute.Id)
+                    .First());
     }
 
     public async Task<PlayerDetailsDto?> GetPlayerDetailsAsync(
