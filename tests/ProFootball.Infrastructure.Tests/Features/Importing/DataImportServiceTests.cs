@@ -2,6 +2,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
 using ProFootball.Application.Contracts.Importing;
+using ProFootball.Domain.Entities;
 using ProFootball.Infrastructure.Importing;
 using ProFootball.Infrastructure.Persistence;
 using Xunit;
@@ -10,6 +11,39 @@ namespace ProFootball.Infrastructure.Tests.Features.Importing;
 
 public class DataImportServiceTests
 {
+    [Fact]
+    public async Task ImportAsync_ShouldThrow_WhenSqlitePathIsWhitespace()
+    {
+        await using var destinationConnection = new SqliteConnection("Data Source=:memory:");
+        await destinationConnection.OpenAsync();
+
+        var options = new DbContextOptionsBuilder<ProFootballDbContext>()
+            .UseSqlite(destinationConnection)
+            .Options;
+
+        var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
+
+        await Assert.ThrowsAnyAsync<ArgumentException>(() =>
+            service.ImportAsync(new DataImportRequest("   ", BatchSize: 100)));
+    }
+
+    [Fact]
+    public async Task ImportAsync_ShouldThrow_WhenSqliteFileDoesNotExist()
+    {
+        await using var destinationConnection = new SqliteConnection("Data Source=:memory:");
+        await destinationConnection.OpenAsync();
+
+        var options = new DbContextOptionsBuilder<ProFootballDbContext>()
+            .UseSqlite(destinationConnection)
+            .Options;
+
+        var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
+        var missingFilePath = Path.Combine(Path.GetTempPath(), $"missing-{Guid.NewGuid():N}.sqlite");
+
+        await Assert.ThrowsAsync<FileNotFoundException>(() =>
+            service.ImportAsync(new DataImportRequest(missingFilePath, BatchSize: 100)));
+    }
+
     [Fact]
     public async Task ImportAsync_ShouldImportValidRowsAndCountSkipped()
     {
@@ -115,6 +149,47 @@ public class DataImportServiceTests
         }
     }
 
+    [Fact]
+    public async Task ImportAsync_ShouldRollbackDestinationData_WhenImportFailsMidTransaction()
+    {
+        var sourcePath = Path.Combine(Path.GetTempPath(), $"profootball-failing-source-{Guid.NewGuid():N}.sqlite");
+
+        try
+        {
+            await CreateFailingSourceSqliteAsync(sourcePath);
+
+            await using var destinationConnection = new SqliteConnection("Data Source=:memory:");
+            await destinationConnection.OpenAsync();
+
+            var options = new DbContextOptionsBuilder<ProFootballDbContext>()
+                .UseSqlite(destinationConnection)
+                .Options;
+
+            await using var destinationContext = new ProFootballDbContext(options);
+            await destinationContext.Database.EnsureCreatedAsync();
+            destinationContext.Countries.Add(new Country(77, "Baseline Country"));
+            await destinationContext.SaveChangesAsync();
+
+            var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
+
+            await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
+                service.ImportAsync(new DataImportRequest(sourcePath, BatchSize: 1)));
+
+            var countries = await destinationContext.Countries
+                .AsNoTracking()
+                .OrderBy(country => country.Id)
+                .ToListAsync();
+
+            Assert.Single(countries);
+            Assert.Equal(77, countries[0].Id);
+            Assert.Equal("Baseline Country", countries[0].Name);
+        }
+        finally
+        {
+            await DeleteFileWithRetryAsync(sourcePath);
+        }
+    }
+
     private static async Task CreateSourceSqliteAsync(string sourcePath)
     {
         var sourceConnectionString = new SqliteConnectionStringBuilder
@@ -156,6 +231,32 @@ public class DataImportServiceTests
 
             "INSERT INTO Player_Attributes VALUES (1, 2000, 200, '2015-08-10 00:00:00', 78, 82, 'right', 'high', 'medium');",
             "INSERT INTO Player_Attributes VALUES (2, 2000, 200, NULL, 78, 82, 'right', 'high', 'medium');",
+        };
+
+        foreach (var statement in statements)
+        {
+            await using var command = sourceConnection.CreateCommand();
+            command.CommandText = statement;
+            await command.ExecuteNonQueryAsync();
+        }
+    }
+
+    private static async Task CreateFailingSourceSqliteAsync(string sourcePath)
+    {
+        var sourceConnectionString = new SqliteConnectionStringBuilder
+        {
+            DataSource = sourcePath,
+            Pooling = false,
+        }.ToString();
+
+        await using var sourceConnection = new SqliteConnection(sourceConnectionString);
+        await sourceConnection.OpenAsync();
+
+        var statements = new[]
+        {
+            "CREATE TABLE Country (id INTEGER, name TEXT);",
+            "INSERT INTO Country VALUES (1, 'Ukraine');",
+            "INSERT INTO Country VALUES (1, 'Duplicate Country');",
         };
 
         foreach (var statement in statements)
