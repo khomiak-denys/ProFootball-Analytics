@@ -48,6 +48,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
             _selectedCountry = value;
             RaisePropertyChanged(nameof(SelectedCountry));
             RaisePropertyChanged(nameof(SelectedCountryName));
+            RaisePropertyChanged(nameof(SelectedCountryAboutTitle));
             RaisePropertyChanged(nameof(SelectedCountryDescription));
             _ = ReloadCountrySnapshotSafeAsync();
         }
@@ -68,6 +69,10 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     }
 
     public string SelectedCountryName => SelectedCountry?.Name ?? "Select country";
+
+    public string SelectedCountryAboutTitle => SelectedCountry is null
+        ? "Country football overview"
+        : $"About {SelectedCountry.Name} Football";
 
     public string SelectedCountryDescription => BuildCountryDescription(SelectedCountry?.Name);
 

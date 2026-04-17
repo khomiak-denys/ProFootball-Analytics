@@ -874,7 +874,7 @@
                                         <TextBlock Margin="0,14,0,0"
                                                    FontSize="24"
                                                    Foreground="{StaticResource MutedForegroundBrush}"
-                                                   Text="{Binding CountriesLeagues.SelectedCountryName, StringFormat=About {0} Football}" />
+                                                   Text="{Binding CountriesLeagues.SelectedCountryAboutTitle}" />
                                         <TextBlock Margin="0,6,0,0"
                                                    FontSize="26"
                                                    Foreground="{StaticResource TitleForegroundBrush}"
@@ -1789,7 +1789,11 @@
 
                                         <Border Grid.Column="0" Style="{StaticResource SectionPanelStyle}">
                                             <StackPanel>
-                                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Player Attribute Comparison" />
+                                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Estimated Player Profile (Mock)" />
+                                                <TextBlock Margin="0,4,0,0"
+                                                           FontSize="13"
+                                                           Foreground="{StaticResource MutedForegroundBrush}"
+                                                           Text="Derived from available ratings with deterministic offsets." />
                                                 <Canvas Margin="0,10,0,0" Width="350" Height="300">
                                                     <Polygon Stroke="{StaticResource ChartGridBrush}" StrokeThickness="1" Fill="Transparent" Points="165,38 262,94 262,206 165,262 68,206 68,94" />
                                                     <Polygon Stroke="{StaticResource ChartGridBrush}" StrokeThickness="1" Fill="Transparent" Points="165,66 238,108 238,192 165,234 92,192 92,108" />
