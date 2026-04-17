@@ -74,8 +74,67 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
         var summary = new CountryLeagueSummaryDto(
             TotalClubs: cards.Sum(card => card.TeamsCount),
             ActiveLeagues: activeLeagues,
-            Divisions: activeLeagues);
+            Divisions: CalculateDivisions(cards));
         return new CountryLeagueSnapshotDto(cards, summary);
+    }
+
+    private static int CalculateDivisions(IReadOnlyList<LeagueCountryCardDto> cards)
+    {
+        if (cards.Count == 0)
+        {
+            return 0;
+        }
+
+        return cards
+            .Select(card => ResolveLeagueTier(card.LeagueName))
+            .DefaultIfEmpty(1)
+            .Max();
+    }
+
+    private static int ResolveLeagueTier(string leagueName)
+    {
+        if (string.IsNullOrWhiteSpace(leagueName))
+        {
+            return 1;
+        }
+
+        var normalized = leagueName.Trim().ToLowerInvariant();
+        if (normalized.Contains("league two") || normalized.Contains("fourth"))
+        {
+            return 4;
+        }
+
+        if (normalized.Contains("league one") || normalized.Contains("third"))
+        {
+            return 3;
+        }
+
+        if (normalized.Contains("championship")
+            || normalized.Contains("segunda")
+            || normalized.Contains("serie b")
+            || normalized.Contains("ligue 2")
+            || normalized.Contains("2. bundesliga"))
+        {
+            return 2;
+        }
+
+        var tokens = normalized.Split([' ', '-', '.', '_'], StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (tokens.Contains("4") || tokens.Contains("iv"))
+        {
+            return 4;
+        }
+
+        if (tokens.Contains("3") || tokens.Contains("iii"))
+        {
+            return 3;
+        }
+
+        if (tokens.Contains("2") || tokens.Contains("ii") || tokens.Contains("b"))
+        {
+            return 2;
+        }
+
+        return 1;
     }
 
     private static async Task<IReadOnlyList<LeagueCountryCardDto>> GetLeagueCardsCoreAsync(
