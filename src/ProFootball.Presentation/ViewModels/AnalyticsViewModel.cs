@@ -712,7 +712,7 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
     private static IReadOnlyList<int> BuildRadarMetrics(TopPlayerDto player)
     {
-        var seed = Math.Abs(player.PlayerApiId);
+        var seed = SafeAbs(player.PlayerApiId);
         var overall = (int)Math.Round(player.AverageOverallRating);
         var potential = (int)Math.Round(player.AveragePotential);
 
@@ -912,6 +912,8 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
     }
 
     private static int Offset(int seed, int salt) => ((seed * (11 + salt * 5)) % 13) - 6;
+
+    private static int SafeAbs(int value) => value == int.MinValue ? int.MaxValue : Math.Abs(value);
 
     public void Dispose()
     {
