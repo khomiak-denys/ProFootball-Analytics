@@ -1868,7 +1868,11 @@
                                         </Border>
                                         <Border Grid.Column="2" Style="{StaticResource SectionPanelStyle}">
                                             <StackPanel>
-                                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Goals &amp; Assists Comparison" />
+                                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Estimated Goals &amp; Assists (Mock)" />
+                                                <TextBlock Margin="0,4,0,0"
+                                                           FontSize="13"
+                                                           Foreground="{StaticResource MutedForegroundBrush}"
+                                                           Text="Deterministic placeholder values until official stats are added." />
                                                 <ItemsControl Margin="0,12,0,0" ItemsSource="{Binding Analytics.GoalsAssistsBars}">
                                                     <ItemsControl.ItemsPanel>
                                                         <ItemsPanelTemplate>
@@ -1911,8 +1915,8 @@
                                                                 <TextBlock FontSize="18" FontWeight="SemiBold" Text="{Binding Rank, StringFormat=#{0}}" />
                                                                 <TextBlock Margin="0,4,0,0" FontSize="18" FontWeight="SemiBold" Text="{Binding PlayerName}" />
                                                                 <TextBlock Margin="0,10,0,0" FontSize="15" Text="{Binding Rating, StringFormat=Rating: {0}}" />
-                                                                <TextBlock Margin="0,4,0,0" FontSize="15" Text="{Binding Goals, StringFormat=Goals: {0}}" />
-                                                                <TextBlock Margin="0,4,0,0" FontSize="15" Text="{Binding Assists, StringFormat=Assists: {0}}" />
+                                                                <TextBlock Margin="0,4,0,0" FontSize="15" Text="{Binding Goals, StringFormat=Est. Goals: {0}}" />
+                                                                <TextBlock Margin="0,4,0,0" FontSize="15" Text="{Binding Assists, StringFormat=Est. Assists: {0}}" />
                                                             </StackPanel>
                                                         </Border>
                                                     </DataTemplate>
