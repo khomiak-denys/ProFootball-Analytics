@@ -253,17 +253,7 @@ public sealed class AnalyticsViewModel : ObservableObject
                 SortDescending: true));
 
             UpdatePlayerOptions();
-
-            if (SelectedPlayer1 is null)
-            {
-                SelectedPlayer1 = AvailablePlayers.FirstOrDefault();
-            }
-
-            if (SelectedPlayer2 is null || SelectedPlayer2.PlayerApiId == SelectedPlayer1?.PlayerApiId)
-            {
-                SelectedPlayer2 = AvailablePlayers.FirstOrDefault(player =>
-                    player.PlayerApiId != SelectedPlayer1?.PlayerApiId) ?? SelectedPlayer1;
-            }
+            EnsureSelectedPlayers();
 
             await RefreshVisualStateAsync(version);
         }
@@ -272,9 +262,8 @@ public sealed class AnalyticsViewModel : ObservableObject
             if (version == Volatile.Read(ref _visualStateVersion))
             {
                 ErrorMessage = "Failed to load analytics data.";
+                CommandExceptionHandler.Handle(exception);
             }
-
-            CommandExceptionHandler.Handle(exception);
         }
         finally
         {
@@ -299,9 +288,8 @@ public sealed class AnalyticsViewModel : ObservableObject
             if (version == Volatile.Read(ref _visualStateVersion))
             {
                 ErrorMessage = "Failed to update analytics visualizations.";
+                CommandExceptionHandler.Handle(exception);
             }
-
-            CommandExceptionHandler.Handle(exception);
         }
         finally
         {
@@ -326,17 +314,21 @@ public sealed class AnalyticsViewModel : ObservableObject
             : _analyticsQueryService.GetPlayerTrendAsync(SelectedPlayer2.PlayerApiId);
         await Task.WhenAll(trendTask1, trendTask2);
 
+        var playerOneTrend = await trendTask1;
+        var playerTwoTrend = await trendTask2;
+
         if (version != Volatile.Read(ref _visualStateVersion))
         {
             return;
         }
 
         BuildKpiCards();
+        BuildKpiDeltasFromTrend(playerOneTrend, playerTwoTrend);
         BuildTopPerformerBars(orderedPlayers);
         BuildGoalsAndAssists(orderedPlayers);
         BuildTopPerformerCards(orderedPlayers);
         BuildRadar(ResolvePlayerById(SelectedPlayer1?.PlayerApiId), ResolvePlayerById(SelectedPlayer2?.PlayerApiId));
-        BuildTrend(await trendTask1, await trendTask2);
+        BuildTrend(playerOneTrend, playerTwoTrend);
 
         RaisePropertyChanged(nameof(PlayerOneLegendLabel));
         RaisePropertyChanged(nameof(PlayerTwoLegendLabel));
@@ -379,6 +371,28 @@ public sealed class AnalyticsViewModel : ObservableObject
         }
     }
 
+    private void EnsureSelectedPlayers()
+    {
+        var resolvedPlayerOne = SelectedPlayer1 ?? AvailablePlayers.FirstOrDefault();
+        var resolvedPlayerTwo = SelectedPlayer2;
+        if (resolvedPlayerTwo is null || resolvedPlayerTwo.PlayerApiId == resolvedPlayerOne?.PlayerApiId)
+        {
+            resolvedPlayerTwo = AvailablePlayers.FirstOrDefault(player =>
+                player.PlayerApiId != resolvedPlayerOne?.PlayerApiId) ?? resolvedPlayerOne;
+        }
+
+        _isUpdatingSelection = true;
+        try
+        {
+            SelectedPlayer1 = resolvedPlayerOne;
+            SelectedPlayer2 = resolvedPlayerTwo;
+        }
+        finally
+        {
+            _isUpdatingSelection = false;
+        }
+    }
+
     private void BuildKpiCards()
     {
         if (_playersSnapshot.Count == 0)
@@ -387,8 +401,8 @@ public sealed class AnalyticsViewModel : ObservableObject
             AveragePotential = 0;
             TopPerformersCount = 0;
             RisingStarsCount = 0;
-            AverageOverallDelta = "+0.0 from last month";
-            AveragePotentialDelta = "+0.0 from last month";
+            AverageOverallDelta = "insufficient trend data";
+            AveragePotentialDelta = "insufficient trend data";
             return;
         }
 
@@ -396,12 +410,23 @@ public sealed class AnalyticsViewModel : ObservableObject
         AveragePotential = Math.Round(_playersSnapshot.Average(player => player.AveragePotential), 1);
         TopPerformersCount = _playersSnapshot.Count(player => player.AverageOverallRating >= 90);
         RisingStarsCount = _playersSnapshot.Count(player => player.AveragePotential >= 90);
+        AverageOverallDelta = "insufficient trend data";
+        AveragePotentialDelta = "insufficient trend data";
+    }
 
-        var deltaSeed = Math.Abs((SelectedPlayer1?.PlayerApiId ?? 0) + (SelectedPlayer2?.PlayerApiId ?? 0));
-        var overallDelta = 0.8 + (deltaSeed % 17) / 10.0;
-        var potentialDelta = 0.6 + (deltaSeed % 13) / 10.0;
-        AverageOverallDelta = string.Create(CultureInfo.InvariantCulture, $"+{overallDelta:0.0} from last month");
-        AveragePotentialDelta = string.Create(CultureInfo.InvariantCulture, $"+{potentialDelta:0.0} from last month");
+    private void BuildKpiDeltasFromTrend(
+        IReadOnlyList<PlayerTrendPointDto> playerOneTrend,
+        IReadOnlyList<PlayerTrendPointDto> playerTwoTrend)
+    {
+        var overallDelta = AverageNullable(
+            ComputeLatestDelta(playerOneTrend, point => point.OverallRating),
+            ComputeLatestDelta(playerTwoTrend, point => point.OverallRating));
+        var potentialDelta = AverageNullable(
+            ComputeLatestDelta(playerOneTrend, point => point.Potential),
+            ComputeLatestDelta(playerTwoTrend, point => point.Potential));
+
+        AverageOverallDelta = FormatDelta(overallDelta);
+        AveragePotentialDelta = FormatDelta(potentialDelta);
     }
 
     private void BuildTopPerformerBars(IReadOnlyList<TopPlayerDto> topPlayers)
@@ -455,16 +480,20 @@ public sealed class AnalyticsViewModel : ObservableObject
             maxValue = 1;
         }
 
+        const double chartHeight = 170;
+        const double minBarHeight = 12;
+
         foreach (var item in rawValues)
         {
-            var goalsHeight = 12 + item.goals / (double)maxValue * 170;
-            var assistsHeight = 12 + item.assists / (double)maxValue * 170;
+            var goalsHeight = minBarHeight + item.goals / (double)maxValue * (chartHeight - minBarHeight);
+            var assistsHeight = minBarHeight + item.assists / (double)maxValue * (chartHeight - minBarHeight);
+
             GoalsAssistsBars.Add(new AnalyticsGoalsAssistsBarViewModel(
                 ToCompactName(item.player.PlayerName),
                 item.goals,
                 item.assists,
-                goalsHeight,
-                assistsHeight));
+                Math.Clamp(goalsHeight, minBarHeight, chartHeight),
+                Math.Clamp(assistsHeight, minBarHeight, chartHeight)));
         }
     }
 
@@ -661,6 +690,46 @@ public sealed class AnalyticsViewModel : ObservableObject
                 return new AnalyticsTrendPointViewModel(label, Math.Round(value, 1));
             })
             .ToList();
+    }
+
+    private static double? ComputeLatestDelta(
+        IReadOnlyList<PlayerTrendPointDto> trend,
+        Func<PlayerTrendPointDto, int?> selector)
+    {
+        var points = trend
+            .OrderBy(point => point.Date)
+            .Select(selector)
+            .Where(value => value.HasValue)
+            .Select(value => (double)value!.Value)
+            .ToList();
+
+        if (points.Count < 2)
+        {
+            return null;
+        }
+
+        return points[^1] - points[^2];
+    }
+
+    private static double? AverageNullable(params double?[] values)
+    {
+        var available = values
+            .Where(value => value.HasValue)
+            .Select(value => value!.Value)
+            .ToArray();
+
+        return available.Length == 0 ? null : available.Average();
+    }
+
+    private static string FormatDelta(double? delta)
+    {
+        if (!delta.HasValue)
+        {
+            return "insufficient trend data";
+        }
+
+        var prefix = delta.Value >= 0 ? "+" : string.Empty;
+        return string.Create(CultureInfo.InvariantCulture, $"{prefix}{delta.Value:0.0} from last month");
     }
 
     private static PlayerTrendPointDto? GetAlignedEntry(
