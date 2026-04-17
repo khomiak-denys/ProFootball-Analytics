@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Windows;
+using System.Windows.Media;
 using ProFootball.Application.Abstractions.Querying;
 using ProFootball.Application.Contracts.Analytics;
 using ProFootball.Presentation.Commands;
@@ -24,9 +26,9 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
     private int _risingStarsCount;
     private string _averageOverallDelta = "+0.0 from last month";
     private string _averagePotentialDelta = "+0.0 from last month";
-    private string _radarPlayerOnePoints = string.Empty;
-    private string _radarPlayerTwoPoints = string.Empty;
-    private string _performanceTrendPoints = string.Empty;
+    private PointCollection _radarPlayerOnePoints = new();
+    private PointCollection _radarPlayerTwoPoints = new();
+    private PointCollection _performanceTrendPoints = new();
     private double _trendAxisMin = 75;
     private double _trendAxisMidLow = 79;
     private double _trendAxisMidHigh = 83;
@@ -92,6 +94,8 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
                 return;
             }
 
+            RaisePropertyChanged(nameof(PlayerOneLegendLabel));
+
             if (_isUpdatingSelection)
             {
                 return;
@@ -110,6 +114,8 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
             {
                 return;
             }
+
+            RaisePropertyChanged(nameof(PlayerTwoLegendLabel));
 
             if (_isUpdatingSelection)
             {
@@ -182,19 +188,19 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         private set => SetProperty(ref _averagePotentialDelta, value);
     }
 
-    public string RadarPlayerOnePoints
+    public PointCollection RadarPlayerOnePoints
     {
         get => _radarPlayerOnePoints;
         private set => SetProperty(ref _radarPlayerOnePoints, value);
     }
 
-    public string RadarPlayerTwoPoints
+    public PointCollection RadarPlayerTwoPoints
     {
         get => _radarPlayerTwoPoints;
         private set => SetProperty(ref _radarPlayerTwoPoints, value);
     }
 
-    public string PerformanceTrendPoints
+    public PointCollection PerformanceTrendPoints
     {
         get => _performanceTrendPoints;
         private set => SetProperty(ref _performanceTrendPoints, value);
@@ -367,8 +373,6 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         BuildRadar(ResolvePlayerById(SelectedPlayer1?.PlayerApiId), ResolvePlayerById(SelectedPlayer2?.PlayerApiId));
         BuildTrend(playerOneTrend, playerTwoTrend);
 
-        RaisePropertyChanged(nameof(PlayerOneLegendLabel));
-        RaisePropertyChanged(nameof(PlayerTwoLegendLabel));
     }
 
     private (CancellationTokenSource Current, CancellationTokenSource? Previous) ReplaceRefreshAllSource()
@@ -617,7 +621,7 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
         if (mergedTrend.Count == 0)
         {
-            PerformanceTrendPoints = string.Empty;
+            PerformanceTrendPoints = new PointCollection();
             TrendAxisMin = 75;
             TrendAxisMidLow = 79;
             TrendAxisMidHigh = 83;
@@ -651,10 +655,10 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
             var yRatio = (entry.Value - axisMin) / Math.Max(0.0001, axisMax - axisMin);
             var y = AnalyticsTrendChartLayout.PlotBottom -
                     yRatio * (AnalyticsTrendChartLayout.PlotBottom - AnalyticsTrendChartLayout.PlotTop);
-            return string.Create(CultureInfo.InvariantCulture, $"{x:0.0},{y:0.0}");
+            return new Point(x, y);
         });
 
-        PerformanceTrendPoints = string.Join(" ", points);
+        PerformanceTrendPoints = new PointCollection(points);
     }
 
     private static IReadOnlyList<TopPlayerDto> OrderByMetric(IEnumerable<TopPlayerDto> players, string metric) =>
@@ -681,11 +685,11 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         return _playersSnapshot.FirstOrDefault(player => player.PlayerApiId == playerApiId.Value);
     }
 
-    private string BuildRadarPolygonPoints(TopPlayerDto? player)
+    private static PointCollection BuildRadarPolygonPoints(TopPlayerDto? player)
     {
         if (player is null)
         {
-            return string.Empty;
+            return new PointCollection();
         }
 
         var metrics = BuildRadarMetrics(player);
@@ -699,10 +703,10 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
             var radius = maxRadius * Math.Clamp(value / 100.0, 0, 1);
             var x = centerX + Math.Cos(angle) * radius;
             var y = centerY + Math.Sin(angle) * radius;
-            return string.Create(CultureInfo.InvariantCulture, $"{x:0.0},{y:0.0}");
+            return new Point(x, y);
         });
 
-        return string.Join(" ", coordinates);
+        return new PointCollection(coordinates);
     }
 
     private static IReadOnlyList<int> BuildRadarMetrics(TopPlayerDto player)
