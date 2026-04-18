@@ -15,7 +15,7 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
     IQueryHandler<GetCountrySnapshotQuery, CountryLeagueSnapshotDto>
 {
     public async Task<IReadOnlyList<CountryDto>> HandleAsync(
-        GetCountriesQuery query,
+        GetCountriesQuery _,
         CancellationToken cancellationToken = default)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -52,7 +52,7 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
     }
 
     public async Task<IReadOnlyList<CountryLeagueListItemDto>> HandleAsync(
-        GetCountriesWithLeagueCountQuery query,
+        GetCountriesWithLeagueCountQuery _,
         CancellationToken cancellationToken = default)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);

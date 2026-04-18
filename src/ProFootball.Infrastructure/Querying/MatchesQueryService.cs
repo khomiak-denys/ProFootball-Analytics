@@ -166,7 +166,7 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
     }
 
     public async Task<DashboardKpiDto> HandleAsync(
-        GetDashboardKpiQuery query,
+        GetDashboardKpiQuery _,
         CancellationToken cancellationToken = default)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);

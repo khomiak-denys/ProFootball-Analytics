@@ -6,8 +6,9 @@ namespace ProFootball.Application.Auth.Handlers;
 
 public sealed class SignOutCommandHandler(IUserSessionStore sessionStore) : ICommandHandler<SignOutCommand>
 {
-    public Task HandleAsync(SignOutCommand command, CancellationToken cancellationToken = default)
+    public Task HandleAsync(SignOutCommand _, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         sessionStore.SetCurrentUser(null);
         return Task.CompletedTask;
     }

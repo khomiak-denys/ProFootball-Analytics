@@ -8,6 +8,7 @@ public sealed class SignInCommandHandler(IUserSessionStore sessionStore) : IComm
 {
     public Task HandleAsync(SignInCommand command, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         ArgumentException.ThrowIfNullOrWhiteSpace(command.UserName);
         sessionStore.SetCurrentUser(command.UserName.Trim());
         return Task.CompletedTask;

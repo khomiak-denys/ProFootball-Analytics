@@ -7,8 +7,9 @@ namespace ProFootball.Application.Auth.Handlers;
 
 public sealed class GetSessionStateQueryHandler(IUserSessionStore sessionStore) : IQueryHandler<GetSessionStateQuery, SessionStateDto>
 {
-    public Task<SessionStateDto> HandleAsync(GetSessionStateQuery query, CancellationToken cancellationToken = default)
+    public Task<SessionStateDto> HandleAsync(GetSessionStateQuery _, CancellationToken cancellationToken = default)
     {
+        cancellationToken.ThrowIfCancellationRequested();
         return Task.FromResult(new SessionStateDto(sessionStore.IsAuthenticated, sessionStore.CurrentUser));
     }
 }
