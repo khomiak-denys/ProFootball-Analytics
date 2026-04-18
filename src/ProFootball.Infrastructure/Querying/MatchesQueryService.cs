@@ -22,7 +22,6 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
 
         var projectedQuery = from match in dbContext.Matches.AsNoTracking()
                              join league in dbContext.Leagues.AsNoTracking() on match.LeagueId equals league.Id
-                             join country in dbContext.Countries.AsNoTracking() on match.CountryId equals country.Id
                              join homeTeam in dbContext.Teams.AsNoTracking() on match.HomeTeamApiId equals homeTeam.TeamApiId into homeTeamJoin
                              from homeTeam in homeTeamJoin.DefaultIfEmpty()
                              join awayTeam in dbContext.Teams.AsNoTracking() on match.AwayTeamApiId equals awayTeam.TeamApiId into awayTeamJoin
@@ -34,7 +33,7 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
                                  match.Season,
                                  LeagueId = league.Id,
                                  LeagueName = league.Name,
-                                 CountryName = country.Name,
+                                 match.CountryName,
                                  match.HomeTeamApiId,
                                  HomeTeamName = homeTeam == null ? match.HomeTeamApiId.ToString() : homeTeam.LongName,
                                  match.AwayTeamApiId,
@@ -110,7 +109,6 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
         var match = await (from item in dbContext.Matches.AsNoTracking()
                            where item.MatchApiId == matchApiId
                            join league in dbContext.Leagues.AsNoTracking() on item.LeagueId equals league.Id
-                           join country in dbContext.Countries.AsNoTracking() on item.CountryId equals country.Id
                            join homeTeam in dbContext.Teams.AsNoTracking() on item.HomeTeamApiId equals homeTeam.TeamApiId into homeTeamJoin
                            from homeTeam in homeTeamJoin.DefaultIfEmpty()
                            join awayTeam in dbContext.Teams.AsNoTracking() on item.AwayTeamApiId equals awayTeam.TeamApiId into awayTeamJoin
@@ -120,7 +118,7 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
                                item.Date,
                                item.Season,
                                league.Name,
-                               country.Name,
+                               item.CountryName,
                                item.HomeTeamApiId,
                                homeTeam == null ? item.HomeTeamApiId.ToString() : homeTeam.LongName,
                                item.AwayTeamApiId,
@@ -170,7 +168,11 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
         CancellationToken cancellationToken = default)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        var countries = await dbContext.Countries.CountAsync(cancellationToken);
+        var countries = await dbContext.Leagues
+            .AsNoTracking()
+            .Select(league => league.CountryName)
+            .Distinct()
+            .CountAsync(cancellationToken);
         var leagues = await dbContext.Leagues.CountAsync(cancellationToken);
         var teams = await dbContext.Teams.CountAsync(cancellationToken);
         var players = await dbContext.Players.CountAsync(cancellationToken);
