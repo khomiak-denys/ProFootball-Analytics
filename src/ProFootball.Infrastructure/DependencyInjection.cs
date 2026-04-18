@@ -1,9 +1,27 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ProFootball.Application.Abstractions.Importing;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Auth.Abstractions;
+using ProFootball.Application.Auth.Commands;
+using ProFootball.Application.Auth.Dtos;
+using ProFootball.Application.Auth.Handlers;
+using ProFootball.Application.Auth.Queries;
 using ProFootball.Application.Abstractions.Persistence;
-using ProFootball.Application.Abstractions.Querying;
+using ProFootball.Application.Country.Dtos;
+using ProFootball.Application.Country.Queries;
+using ProFootball.Application.Common;
+using ProFootball.Application.Dispatching;
+using ProFootball.Application.Importing.Commands;
+using ProFootball.Application.Importing.Dtos;
+using ProFootball.Application.League.Dtos;
+using ProFootball.Application.League.Queries;
+using ProFootball.Application.Match.Dtos;
+using ProFootball.Application.Match.Queries;
+using ProFootball.Application.Player.Dtos;
+using ProFootball.Application.Player.Queries;
+using ProFootball.Application.Team.Dtos;
+using ProFootball.Application.Team.Queries;
 using ProFootball.Infrastructure.Importing;
 using ProFootball.Infrastructure.Persistence;
 using ProFootball.Infrastructure.Persistence.Repositories;
@@ -31,13 +49,32 @@ public static class DependencyInjection
         services.AddDbContext<ProFootballDbContext>(options => options.UseNpgsql(connectionString));
         services.AddDbContextFactory<ProFootballDbContext>(options => options.UseNpgsql(connectionString));
         services.AddScoped<IClubRepository, EfClubRepository>();
-        services.AddScoped<ICountriesLeaguesQueryService, CountriesLeaguesQueryService>();
-        services.AddScoped<ITeamsQueryService, TeamsQueryService>();
-        services.AddScoped<IPlayersQueryService, PlayersQueryService>();
-        services.AddScoped<IMatchesQueryService, MatchesQueryService>();
-        services.AddScoped<IAnalyticsQueryService, AnalyticsQueryService>();
-        services.AddScoped<IDashboardQueryService, DashboardQueryService>();
-        services.AddScoped<IDataImportService, DataImportService>();
+        services.AddScoped<IQueryDispatcher, QueryDispatcher>();
+        services.AddScoped<ICommandDispatcher, CommandDispatcher>();
+
+        services.AddSingleton<IUserSessionStore, InMemorySessionStore>();
+        services.AddScoped<ICommandHandler<SignInCommand>, SignInCommandHandler>();
+        services.AddScoped<ICommandHandler<SignOutCommand>, SignOutCommandHandler>();
+        services.AddScoped<IQueryHandler<GetSessionStateQuery, SessionStateDto>, GetSessionStateQueryHandler>();
+
+        services.AddScoped<ICommandHandler<ImportDataCommand, DataImportResult>, DataImportService>();
+
+        services.AddScoped<IQueryHandler<GetCountriesQuery, IReadOnlyList<CountryDto>>, CountriesLeaguesQueryService>();
+        services.AddScoped<IQueryHandler<GetCountriesWithLeagueCountQuery, IReadOnlyList<CountryLeagueListItemDto>>, CountriesLeaguesQueryService>();
+        services.AddScoped<IQueryHandler<GetCountrySnapshotQuery, CountryLeagueSnapshotDto>, CountriesLeaguesQueryService>();
+        services.AddScoped<IQueryHandler<GetLeaguesQuery, IReadOnlyList<LeagueDto>>, CountriesLeaguesQueryService>();
+
+        services.AddScoped<IQueryHandler<TeamSearchQuery, PagedResult<TeamListItemDto>>, TeamsQueryService>();
+        services.AddScoped<IQueryHandler<GetTeamDetailsQuery, TeamDetailsDto?>, TeamsQueryService>();
+        services.AddScoped<IQueryHandler<PlayerSearchQuery, PagedResult<PlayerListItemDto>>, PlayersQueryService>();
+        services.AddScoped<IQueryHandler<GetPlayerDetailsQuery, PlayerDetailsDto?>, PlayersQueryService>();
+        services.AddScoped<IQueryHandler<GetPlayerTrendQuery, IReadOnlyList<PlayerTrendPointDto>>, AnalyticsQueryService>();
+        services.AddScoped<IQueryHandler<TopPlayersQuery, IReadOnlyList<TopPlayerDto>>, AnalyticsQueryService>();
+
+        services.AddScoped<IQueryHandler<MatchSearchQuery, PagedResult<MatchListItemDto>>, MatchesQueryService>();
+        services.AddScoped<IQueryHandler<GetMatchDetailsQuery, MatchDetailsDto?>, MatchesQueryService>();
+        services.AddScoped<IQueryHandler<GetMatchesBySeasonQuery, IReadOnlyList<MatchesBySeasonDto>>, MatchesQueryService>();
+        services.AddScoped<IQueryHandler<GetDashboardKpiQuery, DashboardKpiDto>, MatchesQueryService>();
 
         return services;
     }
