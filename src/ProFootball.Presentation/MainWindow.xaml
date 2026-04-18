@@ -719,11 +719,9 @@
                                                                    Text="{Binding LeagueCount, StringFormat={}{0} leagues}" />
                                                     </StackPanel>
                                                     <Border Grid.Column="1"
-                                                            Padding="8,4"
+                                                            Style="{StaticResource StatusBadgeStyle}"
                                                             Margin="10,0,0,0"
-                                                            VerticalAlignment="Center"
-                                                            Background="{DynamicResource BadgeSurfaceBrush}"
-                                                            CornerRadius="8">
+                                                            VerticalAlignment="Center">
                                                         <TextBlock FontSize="18"
                                                                    FontWeight="SemiBold"
                                                                    Foreground="{DynamicResource TitleForegroundBrush}"
@@ -1087,10 +1085,9 @@
                                                                    Foreground="{DynamicResource TitleForegroundBrush}"
                                                                    Text="{Binding LongName}" />
                                                         <Border Margin="0,8,0,0"
-                                                                Padding="10,4"
+                                                                Style="{StaticResource StatusBadgeStyle}"
                                                                 HorizontalAlignment="Left"
-                                                                Background="{DynamicResource BadgeSurfaceBrush}"
-                                                                CornerRadius="8">
+                                                                Padding="10,4">
                                                             <TextBlock FontSize="18"
                                                                        Foreground="{DynamicResource TitleForegroundBrush}"
                                                                        Text="{Binding ShortName, TargetNullValue=N/A}" />
