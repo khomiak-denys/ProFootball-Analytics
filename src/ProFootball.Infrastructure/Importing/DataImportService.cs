@@ -2,8 +2,9 @@ using System.Diagnostics;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using ProFootball.Application.Abstractions.Importing;
-using ProFootball.Application.Contracts.Importing;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Importing.Commands;
+using ProFootball.Application.Importing.Dtos;
 using ProFootball.Domain.Entities;
 using ProFootball.Infrastructure.Persistence;
 
@@ -11,10 +12,10 @@ namespace ProFootball.Infrastructure.Importing;
 
 public sealed class DataImportService(
     IDbContextFactory<ProFootballDbContext> dbContextFactory,
-    ILogger<DataImportService> logger) : IDataImportService
+    ILogger<DataImportService> logger) : ICommandHandler<ImportDataCommand, DataImportResult>
 {
-    public async Task<DataImportResult> ImportAsync(
-        DataImportRequest request,
+    public async Task<DataImportResult> HandleAsync(
+        ImportDataCommand request,
         CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(request.SqlitePath);
