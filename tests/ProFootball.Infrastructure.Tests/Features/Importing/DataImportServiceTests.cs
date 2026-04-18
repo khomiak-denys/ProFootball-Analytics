@@ -1,7 +1,7 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging.Abstractions;
-using ProFootball.Application.Contracts.Importing;
+using ProFootball.Application.Importing.Commands;
 using ProFootball.Domain.Entities;
 using ProFootball.Infrastructure.Importing;
 using ProFootball.Infrastructure.Persistence;
@@ -24,7 +24,7 @@ public class DataImportServiceTests
         var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
 
         await Assert.ThrowsAnyAsync<ArgumentException>(() =>
-            service.ImportAsync(new DataImportRequest("   ", BatchSize: 100)));
+            service.HandleAsync(new ImportDataCommand("   ", BatchSize: 100)));
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class DataImportServiceTests
         var missingFilePath = Path.Combine(Path.GetTempPath(), $"missing-{Guid.NewGuid():N}.sqlite");
 
         await Assert.ThrowsAsync<FileNotFoundException>(() =>
-            service.ImportAsync(new DataImportRequest(missingFilePath, BatchSize: 100)));
+            service.HandleAsync(new ImportDataCommand(missingFilePath, BatchSize: 100)));
     }
 
     [Fact]
@@ -63,7 +63,7 @@ public class DataImportServiceTests
             await using var destinationContext = new ProFootballDbContext(options);
             var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
 
-            var result = await service.ImportAsync(new DataImportRequest(sourcePath, BatchSize: 2));
+            var result = await service.HandleAsync(new ImportDataCommand(sourcePath, BatchSize: 2));
 
             Assert.Equal(1, result.CountriesImported);
             Assert.Equal(1, result.LeaguesImported);
@@ -104,11 +104,10 @@ public class DataImportServiceTests
                 .UseSqlite(destinationConnection)
                 .Options;
 
-            await using var destinationContext = new ProFootballDbContext(options);
             var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
 
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
-                service.ImportAsync(new DataImportRequest(sourcePath, BatchSize: 0)));
+                service.HandleAsync(new ImportDataCommand(sourcePath, BatchSize: 0)));
         }
         finally
         {
@@ -133,7 +132,7 @@ public class DataImportServiceTests
                 .Options;
 
             var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
-            var result = await service.ImportAsync(new DataImportRequest(sourcePath, BatchSize: 2));
+            var result = await service.HandleAsync(new ImportDataCommand(sourcePath, BatchSize: 2));
 
             Assert.Equal(1, result.CountriesImported);
             Assert.Equal(1, result.LeaguesImported);
@@ -173,7 +172,7 @@ public class DataImportServiceTests
             var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
 
             await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
-                service.ImportAsync(new DataImportRequest(sourcePath, BatchSize: 1)));
+                service.HandleAsync(new ImportDataCommand(sourcePath, BatchSize: 1)));
 
             var countries = await destinationContext.Countries
                 .AsNoTracking()

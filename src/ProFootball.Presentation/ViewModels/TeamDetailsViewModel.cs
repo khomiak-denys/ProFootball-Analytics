@@ -1,19 +1,20 @@
 using System.Collections.ObjectModel;
-using ProFootball.Application.Abstractions.Querying;
-using ProFootball.Application.Contracts.Queries;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Team.Dtos;
+using ProFootball.Application.Team.Queries;
 using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
 
 public sealed class TeamDetailsViewModel : ObservableObject
 {
-    private readonly ITeamsQueryService _teamsQueryService;
+    private readonly IQueryDispatcher _queryDispatcher;
     private TeamDetailsDto? _details;
     private int? _selectedTeamApiId;
 
-    public TeamDetailsViewModel(ITeamsQueryService teamsQueryService)
+    public TeamDetailsViewModel(IQueryDispatcher queryDispatcher)
     {
-        _teamsQueryService = teamsQueryService;
+        _queryDispatcher = queryDispatcher;
         Attributes = new ObservableCollection<TeamAttributeDto>();
         LoadCommand = new AsyncRelayCommand(LoadAsync, CommandExceptionHandler.Handle, () => SelectedTeamApiId.HasValue);
     }
@@ -49,7 +50,8 @@ public sealed class TeamDetailsViewModel : ObservableObject
             return;
         }
 
-        Details = await _teamsQueryService.GetTeamDetailsAsync(SelectedTeamApiId.Value);
+        Details = await _queryDispatcher.DispatchAsync<GetTeamDetailsQuery, TeamDetailsDto?>(
+            new GetTeamDetailsQuery(SelectedTeamApiId.Value));
         Attributes.Clear();
         if (Details is null)
         {

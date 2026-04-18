@@ -1,16 +1,19 @@
 using Microsoft.EntityFrameworkCore;
-using ProFootball.Application.Abstractions.Querying;
-using ProFootball.Application.Contracts.Common;
-using ProFootball.Application.Contracts.Queries;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Common;
+using ProFootball.Application.Player.Dtos;
+using ProFootball.Application.Player.Queries;
 using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
-public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) : IPlayersQueryService
+public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) :
+    IQueryHandler<PlayerSearchQuery, PagedResult<PlayerListItemDto>>,
+    IQueryHandler<GetPlayerDetailsQuery, PlayerDetailsDto?>
 {
     private const string SqliteProviderName = "Microsoft.EntityFrameworkCore.Sqlite";
 
-    public async Task<PagedResult<PlayerListItemDto>> SearchPlayersAsync(
+    public async Task<PagedResult<PlayerListItemDto>> HandleAsync(
         PlayerSearchQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -323,10 +326,11 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
         return new PagedResult<PlayerListItemDto>(items, totalCount, page, pageSize);
     }
 
-    public async Task<PlayerDetailsDto?> GetPlayerDetailsAsync(
-        int playerApiId,
+    public async Task<PlayerDetailsDto?> HandleAsync(
+        GetPlayerDetailsQuery query,
         CancellationToken cancellationToken = default)
     {
+        var playerApiId = query.PlayerApiId;
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var player = await dbContext.Players
             .AsNoTracking()

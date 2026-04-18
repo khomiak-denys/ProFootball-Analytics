@@ -1,24 +1,21 @@
 using System.Collections.ObjectModel;
-using ProFootball.Application.Abstractions.Querying;
-using ProFootball.Application.Contracts.Analytics;
-using ProFootball.Application.Contracts.Queries;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Player.Dtos;
+using ProFootball.Application.Player.Queries;
 using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
 
 public sealed class PlayerDetailsViewModel : ObservableObject
 {
-    private readonly IPlayersQueryService _playersQueryService;
-    private readonly IAnalyticsQueryService _analyticsQueryService;
+    private readonly IQueryDispatcher _queryDispatcher;
     private PlayerDetailsDto? _details;
     private int? _selectedPlayerApiId;
 
     public PlayerDetailsViewModel(
-        IPlayersQueryService playersQueryService,
-        IAnalyticsQueryService analyticsQueryService)
+        IQueryDispatcher queryDispatcher)
     {
-        _playersQueryService = playersQueryService;
-        _analyticsQueryService = analyticsQueryService;
+        _queryDispatcher = queryDispatcher;
         Attributes = new ObservableCollection<PlayerAttributeDto>();
         TrendPoints = new ObservableCollection<PlayerTrendPointDto>();
         LoadCommand = new AsyncRelayCommand(LoadAsync, CommandExceptionHandler.Handle, () => SelectedPlayerApiId.HasValue);
@@ -57,7 +54,8 @@ public sealed class PlayerDetailsViewModel : ObservableObject
             return;
         }
 
-        Details = await _playersQueryService.GetPlayerDetailsAsync(SelectedPlayerApiId.Value);
+        Details = await _queryDispatcher.DispatchAsync<GetPlayerDetailsQuery, PlayerDetailsDto?>(
+            new GetPlayerDetailsQuery(SelectedPlayerApiId.Value));
         Attributes.Clear();
         TrendPoints.Clear();
 
@@ -71,7 +69,8 @@ public sealed class PlayerDetailsViewModel : ObservableObject
             Attributes.Add(attribute);
         }
 
-        var trend = await _analyticsQueryService.GetPlayerTrendAsync(SelectedPlayerApiId.Value);
+        var trend = await _queryDispatcher.DispatchAsync<GetPlayerTrendQuery, IReadOnlyList<PlayerTrendPointDto>>(
+            new GetPlayerTrendQuery(SelectedPlayerApiId.Value));
         foreach (var point in trend)
         {
             TrendPoints.Add(point);

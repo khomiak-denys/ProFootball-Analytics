@@ -1,16 +1,20 @@
 using Microsoft.EntityFrameworkCore;
-using ProFootball.Application.Abstractions.Querying;
-using ProFootball.Application.Contracts.Analytics;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Player.Dtos;
+using ProFootball.Application.Player.Queries;
 using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
-public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) : IAnalyticsQueryService
+public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) :
+    IQueryHandler<GetPlayerTrendQuery, IReadOnlyList<PlayerTrendPointDto>>,
+    IQueryHandler<TopPlayersQuery, IReadOnlyList<TopPlayerDto>>
 {
-    public async Task<IReadOnlyList<PlayerTrendPointDto>> GetPlayerTrendAsync(
-        int playerApiId,
+    public async Task<IReadOnlyList<PlayerTrendPointDto>> HandleAsync(
+        GetPlayerTrendQuery query,
         CancellationToken cancellationToken = default)
     {
+        var playerApiId = query.PlayerApiId;
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         return await dbContext.PlayerAttributes
             .AsNoTracking()
@@ -23,7 +27,7 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<TopPlayerDto>> GetTopPlayersAsync(
+    public async Task<IReadOnlyList<TopPlayerDto>> HandleAsync(
         TopPlayersQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -87,39 +91,6 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
                               Math.Round(grouped.AverageOverallRating, 2),
                               Math.Round(grouped.AveragePotential, 2),
                               grouped.Samples);
-
-        return await queryResult.ToListAsync(cancellationToken);
-    }
-
-    public async Task<IReadOnlyList<MatchesBySeasonDto>> GetMatchesBySeasonAsync(
-        int? leagueId = null,
-        CancellationToken cancellationToken = default)
-    {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        var matchesQuery = dbContext.Matches.AsNoTracking();
-
-        if (leagueId.HasValue)
-        {
-            matchesQuery = matchesQuery.Where(match => match.LeagueId == leagueId.Value);
-        }
-
-        var groupedQuery = from match in matchesQuery
-                           group match by new { match.Season, match.LeagueId }
-            into grouped
-                           select new
-                           {
-                               grouped.Key.Season,
-                               grouped.Key.LeagueId,
-                               MatchCount = grouped.Count(),
-                           };
-
-        var queryResult = from grouped in groupedQuery
-                          join league in dbContext.Leagues.AsNoTracking() on grouped.LeagueId equals league.Id
-                          orderby grouped.Season, league.Name
-                          select new MatchesBySeasonDto(
-                              grouped.Season,
-                              league.Name,
-                              grouped.MatchCount);
 
         return await queryResult.ToListAsync(cancellationToken);
     }

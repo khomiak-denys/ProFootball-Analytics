@@ -1,18 +1,19 @@
-using ProFootball.Application.Abstractions.Querying;
-using ProFootball.Application.Contracts.Queries;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Match.Dtos;
+using ProFootball.Application.Match.Queries;
 using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
 
 public sealed class MatchDetailsViewModel : ObservableObject
 {
-    private readonly IMatchesQueryService _matchesQueryService;
+    private readonly IQueryDispatcher _queryDispatcher;
     private MatchDetailsDto? _details;
     private int? _selectedMatchApiId;
 
-    public MatchDetailsViewModel(IMatchesQueryService matchesQueryService)
+    public MatchDetailsViewModel(IQueryDispatcher queryDispatcher)
     {
-        _matchesQueryService = matchesQueryService;
+        _queryDispatcher = queryDispatcher;
         LoadCommand = new AsyncRelayCommand(LoadAsync, CommandExceptionHandler.Handle, () => SelectedMatchApiId.HasValue);
     }
 
@@ -45,6 +46,7 @@ public sealed class MatchDetailsViewModel : ObservableObject
             return;
         }
 
-        Details = await _matchesQueryService.GetMatchDetailsAsync(SelectedMatchApiId.Value);
+        Details = await _queryDispatcher.DispatchAsync<GetMatchDetailsQuery, MatchDetailsDto?>(
+            new GetMatchDetailsQuery(SelectedMatchApiId.Value));
     }
 }

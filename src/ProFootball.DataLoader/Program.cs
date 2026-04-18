@@ -1,8 +1,9 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using ProFootball.Application.Abstractions.Importing;
-using ProFootball.Application.Contracts.Importing;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Importing.Commands;
+using ProFootball.Application.Importing.Dtos;
 using ProFootball.Infrastructure;
 
 var sqlitePath = GetArgument(args, "--sqlite");
@@ -45,8 +46,9 @@ try
     started = true;
 
     using var scope = host.Services.CreateScope();
-    var importer = scope.ServiceProvider.GetRequiredService<IDataImportService>();
-    var result = await importer.ImportAsync(new DataImportRequest(sqlitePath, batchSize));
+    var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+    var result = await commandDispatcher.DispatchAsync<ImportDataCommand, DataImportResult>(
+        new ImportDataCommand(sqlitePath, batchSize));
 
     Console.WriteLine("Import completed.");
     Console.WriteLine($"Countries: {result.CountriesImported}");
