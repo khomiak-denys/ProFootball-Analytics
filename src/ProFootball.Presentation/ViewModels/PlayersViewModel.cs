@@ -1,8 +1,10 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows.Threading;
-using ProFootball.Application.Abstractions.Querying;
-using ProFootball.Application.Contracts.Queries;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Common;
+using ProFootball.Application.Player.Dtos;
+using ProFootball.Application.Player.Queries;
 using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
@@ -23,7 +25,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         "ST",
     ];
 
-    private readonly IPlayersQueryService _playersQueryService;
+    private readonly IQueryDispatcher _queryDispatcher;
     private readonly Action<int> _openDetails;
     private readonly DispatcherTimer _nameSearchDebounceTimer;
     private readonly IReadOnlyList<string> _overallRatingOptions;
@@ -45,9 +47,9 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     private long _searchVersion;
     private long _detailsVersion;
 
-    public PlayersViewModel(IPlayersQueryService playersQueryService, Action<int> openDetails)
+    public PlayersViewModel(IQueryDispatcher queryDispatcher, Action<int> openDetails)
     {
-        _playersQueryService = playersQueryService;
+        _queryDispatcher = queryDispatcher;
         _openDetails = openDetails;
 
         _overallRatingOptions = ["All Ratings", "90+", "85+", "80+", "75+"];
@@ -257,7 +259,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
                 Page: Page,
                 PageSize: Math.Max(5, PageSize));
 
-            var result = await _playersQueryService.SearchPlayersAsync(query);
+            var result = await _queryDispatcher.DispatchAsync<PlayerSearchQuery, PagedResult<PlayerListItemDto>>(query);
             if (searchVersion != Volatile.Read(ref _searchVersion))
             {
                 return;
@@ -339,7 +341,8 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
 
         try
         {
-            var details = await _playersQueryService.GetPlayerDetailsAsync(selectedPlayer.PlayerApiId);
+            var details = await _queryDispatcher.DispatchAsync<GetPlayerDetailsQuery, PlayerDetailsDto?>(
+                new GetPlayerDetailsQuery(selectedPlayer.PlayerApiId));
             if (detailsVersion != Volatile.Read(ref _detailsVersion))
             {
                 return;

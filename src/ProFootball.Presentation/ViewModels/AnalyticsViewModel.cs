@@ -2,15 +2,18 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
-using ProFootball.Application.Abstractions.Querying;
-using ProFootball.Application.Contracts.Analytics;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Match.Dtos;
+using ProFootball.Application.Match.Queries;
+using ProFootball.Application.Player.Dtos;
+using ProFootball.Application.Player.Queries;
 using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
 
 public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 {
-    private readonly IAnalyticsQueryService _analyticsQueryService;
+    private readonly IQueryDispatcher _queryDispatcher;
     private readonly IReadOnlyList<string> _metricOptions;
     private IReadOnlyList<TopPlayerDto> _playersSnapshot = Array.Empty<TopPlayerDto>();
 
@@ -38,9 +41,9 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
     private long _visualStateVersion;
     private bool _isUpdatingSelection;
 
-    public AnalyticsViewModel(IAnalyticsQueryService analyticsQueryService)
+    public AnalyticsViewModel(IQueryDispatcher queryDispatcher)
     {
-        _analyticsQueryService = analyticsQueryService;
+        _queryDispatcher = queryDispatcher;
         _metricOptions = ["Overall Rating", "Potential"];
         _selectedMetric = _metricOptions[0];
 
@@ -254,7 +257,7 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
         try
         {
-            _playersSnapshot = await _analyticsQueryService.GetTopPlayersAsync(new TopPlayersQuery(
+            _playersSnapshot = await _queryDispatcher.DispatchAsync<TopPlayersQuery, IReadOnlyList<TopPlayerDto>>(new TopPlayersQuery(
                 Limit: 80,
                 MinOverallRating: null,
                 MinPotential: null,
@@ -350,10 +353,14 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
         var trendTask1 = SelectedPlayer1 is null
             ? Task.FromResult<IReadOnlyList<PlayerTrendPointDto>>(Array.Empty<PlayerTrendPointDto>())
-            : _analyticsQueryService.GetPlayerTrendAsync(SelectedPlayer1.PlayerApiId, cancellationToken);
+            : _queryDispatcher.DispatchAsync<GetPlayerTrendQuery, IReadOnlyList<PlayerTrendPointDto>>(
+                new GetPlayerTrendQuery(SelectedPlayer1.PlayerApiId),
+                cancellationToken);
         var trendTask2 = SelectedPlayer2 is null
             ? Task.FromResult<IReadOnlyList<PlayerTrendPointDto>>(Array.Empty<PlayerTrendPointDto>())
-            : _analyticsQueryService.GetPlayerTrendAsync(SelectedPlayer2.PlayerApiId, cancellationToken);
+            : _queryDispatcher.DispatchAsync<GetPlayerTrendQuery, IReadOnlyList<PlayerTrendPointDto>>(
+                new GetPlayerTrendQuery(SelectedPlayer2.PlayerApiId),
+                cancellationToken);
         await Task.WhenAll(trendTask1, trendTask2);
 
         var playerOneTrend = await trendTask1;

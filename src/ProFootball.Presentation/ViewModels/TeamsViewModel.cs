@@ -1,15 +1,17 @@
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Windows.Threading;
-using ProFootball.Application.Abstractions.Querying;
-using ProFootball.Application.Contracts.Queries;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Common;
+using ProFootball.Application.Team.Dtos;
+using ProFootball.Application.Team.Queries;
 using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
 
 public sealed class TeamsViewModel : ObservableObject, IDisposable
 {
-    private readonly ITeamsQueryService _teamsQueryService;
+    private readonly IQueryDispatcher _queryDispatcher;
     private readonly Action<int> _openDetails;
     private readonly DispatcherTimer _nameSearchDebounceTimer;
     private TeamListItemDto? _selectedTeam;
@@ -28,9 +30,9 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
     private long _searchVersion;
     private long _detailsVersion;
 
-    public TeamsViewModel(ITeamsQueryService teamsQueryService, Action<int> openDetails)
+    public TeamsViewModel(IQueryDispatcher queryDispatcher, Action<int> openDetails)
     {
-        _teamsQueryService = teamsQueryService;
+        _queryDispatcher = queryDispatcher;
         _openDetails = openDetails;
 
         _nameSearchDebounceTimer = new DispatcherTimer
@@ -162,7 +164,7 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
 
         try
         {
-            var result = await _teamsQueryService.SearchTeamsAsync(new TeamSearchQuery(
+            var result = await _queryDispatcher.DispatchAsync<TeamSearchQuery, PagedResult<TeamListItemDto>>(new TeamSearchQuery(
                 Name: NormalizeText(NameFilter, null),
                 SortBy: null,
                 SortDescending: false,
@@ -240,7 +242,8 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
 
         try
         {
-            var details = await _teamsQueryService.GetTeamDetailsAsync(selectedTeam.TeamApiId);
+            var details = await _queryDispatcher.DispatchAsync<GetTeamDetailsQuery, TeamDetailsDto?>(
+                new GetTeamDetailsQuery(selectedTeam.TeamApiId));
             if (detailsVersion != Volatile.Read(ref _detailsVersion))
             {
                 return;
