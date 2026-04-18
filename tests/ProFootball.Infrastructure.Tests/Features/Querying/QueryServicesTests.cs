@@ -1,5 +1,8 @@
-using ProFootball.Application.Contracts.Analytics;
-using ProFootball.Application.Contracts.Queries;
+using ProFootball.Application.Country.Queries;
+using ProFootball.Application.League.Queries;
+using ProFootball.Application.Match.Queries;
+using ProFootball.Application.Player.Queries;
+using ProFootball.Application.Team.Queries;
 using ProFootball.Infrastructure.Querying;
 using Xunit;
 
@@ -13,14 +16,14 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new TeamsQueryService(host.DbContextFactory);
 
-        var firstPage = await service.SearchTeamsAsync(new TeamSearchQuery(
+        var firstPage = await service.HandleAsync(new TeamSearchQuery(
             Name: null,
             SortBy: "teamapiid",
             SortDescending: true,
             Page: 1,
             PageSize: 2));
 
-        var secondPage = await service.SearchTeamsAsync(new TeamSearchQuery(
+        var secondPage = await service.HandleAsync(new TeamSearchQuery(
             Name: null,
             SortBy: "teamapiid",
             SortDescending: true,
@@ -38,7 +41,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new TeamsQueryService(host.DbContextFactory);
 
-        var details = await service.GetTeamDetailsAsync(999999);
+        var details = await service.HandleAsync(new GetTeamDetailsQuery(999999));
 
         Assert.Null(details);
     }
@@ -49,7 +52,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new PlayersQueryService(host.DbContextFactory);
 
-        var result = await service.SearchPlayersAsync(new PlayerSearchQuery(
+        var result = await service.HandleAsync(new PlayerSearchQuery(
             Name: null,
             MinOverallRating: null,
             MaxOverallRating: null,
@@ -75,7 +78,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new PlayersQueryService(host.DbContextFactory);
 
-        var result = await service.SearchPlayersAsync(new PlayerSearchQuery(
+        var result = await service.HandleAsync(new PlayerSearchQuery(
             Name: "kEvIn",
             MinOverallRating: null,
             MaxOverallRating: null,
@@ -99,7 +102,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new PlayersQueryService(host.DbContextFactory);
 
-        var details = await service.GetPlayerDetailsAsync(9002);
+        var details = await service.HandleAsync(new GetPlayerDetailsQuery(9002));
 
         Assert.NotNull(details);
         Assert.Equal(3, details!.Attributes.Count);
@@ -114,7 +117,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new MatchesQueryService(host.DbContextFactory);
 
-        var result = await service.SearchMatchesAsync(new MatchSearchQuery(
+        var result = await service.HandleAsync(new MatchSearchQuery(
             LeagueId: 10,
             Season: "2024/2025",
             TeamApiId: 100,
@@ -135,7 +138,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new MatchesQueryService(host.DbContextFactory);
 
-        var details = await service.GetMatchDetailsAsync(77777);
+        var details = await service.HandleAsync(new GetMatchDetailsQuery(77777));
 
         Assert.Null(details);
     }
@@ -146,7 +149,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new CountriesLeaguesQueryService(host.DbContextFactory);
 
-        var leagues = await service.GetLeaguesAsync(countryId: 1);
+        var leagues = await service.HandleAsync(new GetLeaguesQuery(1));
 
         Assert.Equal(2, leagues.Count);
         Assert.All(leagues, league => Assert.Equal(1, league.CountryId));
@@ -158,7 +161,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new CountriesLeaguesQueryService(host.DbContextFactory);
 
-        var countries = await service.GetCountriesWithLeagueCountAsync();
+        var countries = await service.HandleAsync(new GetCountriesWithLeagueCountQuery());
         var emptyCountry = Assert.Single(countries.Where(country => country.Id == 3));
 
         Assert.Equal(0, emptyCountry.LeagueCount);
@@ -170,7 +173,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new CountriesLeaguesQueryService(host.DbContextFactory);
 
-        var snapshot = await service.GetCountrySnapshotAsync(3);
+        var snapshot = await service.HandleAsync(new GetCountrySnapshotQuery(3));
 
         Assert.Empty(snapshot.LeagueCards);
         Assert.Equal(0, snapshot.Summary.TotalClubs);
@@ -184,7 +187,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new CountriesLeaguesQueryService(host.DbContextFactory);
 
-        var snapshot = await service.GetCountrySnapshotAsync(1);
+        var snapshot = await service.HandleAsync(new GetCountrySnapshotQuery(1));
 
         Assert.Equal(2, snapshot.LeagueCards.Count);
         Assert.Equal(4, snapshot.Summary.TotalClubs);
@@ -198,7 +201,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new AnalyticsQueryService(host.DbContextFactory);
 
-        var topPlayers = await service.GetTopPlayersAsync(new TopPlayersQuery(
+        var topPlayers = await service.HandleAsync(new TopPlayersQuery(
             Limit: 500,
             MinOverallRating: null,
             MinPotential: null,
@@ -217,8 +220,9 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new AnalyticsQueryService(host.DbContextFactory);
 
-        var allLeagues = await service.GetMatchesBySeasonAsync();
-        var filtered = await service.GetMatchesBySeasonAsync(leagueId: 10);
+        var matchService = new MatchesQueryService(host.DbContextFactory);
+        var allLeagues = await matchService.HandleAsync(new GetMatchesBySeasonQuery());
+        var filtered = await matchService.HandleAsync(new GetMatchesBySeasonQuery(10));
 
         Assert.Equal(3, allLeagues.Count);
         var single = Assert.Single(filtered);
@@ -231,9 +235,8 @@ public class QueryServicesTests
     public async Task Dashboard_GetKpis_ShouldReturnSeededCounts()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new DashboardQueryService(host.DbContextFactory);
-
-        var kpis = await service.GetKpisAsync();
+        var service = new MatchesQueryService(host.DbContextFactory);
+        var kpis = await service.HandleAsync(new GetDashboardKpiQuery());
 
         Assert.Equal(3, kpis.Countries);
         Assert.Equal(3, kpis.Leagues);
