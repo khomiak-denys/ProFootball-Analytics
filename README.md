@@ -57,6 +57,16 @@ Create local `.env` from `.env.example` and set values as needed.
 - `Release` build logs: `Warning` and above.
 - Log records include timestamp, level, source context, message, and exception stacktrace.
 
+## UI Theme System
+
+- Toolkit: `ModernWpfUI` with shared token dictionaries in `src/ProFootball.Presentation/Themes`.
+- Runtime theme toggle is available in the header (`Light` / `Dark`) and persists per-user in:
+  - `%LOCALAPPDATA%\ProFootball\theme.settings.json`
+- Core tokens:
+  - Light: `Background #f8f9fa`, `Card #ffffff`, `Border #dee2e6`, `Text #1a1d1f`, `Muted #6c757d`
+  - Dark: `Background #0f1214`, `Card #1a1d1f`, `Border #2d3236`, `Text #f8f9fa`, `Muted #9ca3af`
+  - Primary accent: `#22c55e`
+
 ## Commands Cheat Sheet
 
 ```powershell
