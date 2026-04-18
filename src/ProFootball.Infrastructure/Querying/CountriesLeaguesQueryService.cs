@@ -71,12 +71,12 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
         GetCountrySnapshotQuery query,
         CancellationToken cancellationToken = default)
     {
-        var countryName = query.CountryName.Trim();
-        if (countryName.Length == 0)
+        if (string.IsNullOrWhiteSpace(query.CountryName))
         {
             return new CountryLeagueSnapshotDto(Array.Empty<LeagueCountryCardDto>(), new CountryLeagueSummaryDto(0, 0, 0));
         }
 
+        var countryName = query.CountryName.Trim();
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var cards = await GetLeagueCardsCoreAsync(dbContext, countryName, cancellationToken);
         var activeLeagues = cards.Count;
