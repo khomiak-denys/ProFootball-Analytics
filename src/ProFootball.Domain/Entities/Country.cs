@@ -8,9 +8,14 @@ public sealed class Country
 
     public Country(int id, string name)
     {
+        if (name is null)
+        {
+            throw new ArgumentNullException(nameof(name), "Name cannot be null or whitespace.");
+        }
+
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException("Name cannot be empty.", nameof(name));
+            throw new ArgumentException("Name cannot be null or whitespace.", nameof(name));
         }
 
         Id = id;

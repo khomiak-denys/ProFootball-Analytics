@@ -15,13 +15,18 @@ public class FootballClubTests
         Assert.Equal(1927, club.FoundedYear);
     }
 
+    [Fact]
+    public void Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => new FootballClub(null!, 1927));
+    }
+
     [Theory]
-    [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Constructor_ShouldThrow_WhenNameIsMissing(string? name)
+    public void Constructor_ShouldThrowArgumentException_WhenNameIsWhitespace(string name)
     {
-        Assert.Throws<ArgumentException>(() => new FootballClub(name!, 1927));
+        Assert.Throws<ArgumentException>(() => new FootballClub(name, 1927));
     }
 
     [Theory]

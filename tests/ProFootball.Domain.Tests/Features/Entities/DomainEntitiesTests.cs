@@ -5,13 +5,18 @@ namespace ProFootball.Domain.Tests.Features.Entities;
 
 public class DomainEntitiesTests
 {
+    [Fact]
+    public void Country_Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => new Country(1, null!));
+    }
+
     [Theory]
-    [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Country_Constructor_ShouldThrow_WhenNameIsMissing(string? name)
+    public void Country_Constructor_ShouldThrowArgumentException_WhenNameIsWhitespace(string name)
     {
-        Assert.Throws<ArgumentException>(() => new Country(1, name!));
+        Assert.Throws<ArgumentException>(() => new Country(1, name));
     }
 
     [Fact]
@@ -23,13 +28,18 @@ public class DomainEntitiesTests
         Assert.Equal("Ukraine", country.Name);
     }
 
+    [Fact]
+    public void League_Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => new League(2, 1, null!));
+    }
+
     [Theory]
-    [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void League_Constructor_ShouldThrow_WhenNameIsMissing(string? name)
+    public void League_Constructor_ShouldThrowArgumentException_WhenNameIsWhitespace(string name)
     {
-        Assert.Throws<ArgumentException>(() => new League(2, 1, name!));
+        Assert.Throws<ArgumentException>(() => new League(2, 1, name));
     }
 
     [Fact]
@@ -42,13 +52,18 @@ public class DomainEntitiesTests
         Assert.Equal("Premier League", league.Name);
     }
 
+    [Fact]
+    public void Team_Constructor_ShouldThrowArgumentNullException_WhenLongNameIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => new Team(10, 1001, 2001, null!, "DYK"));
+    }
+
     [Theory]
-    [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Team_Constructor_ShouldThrow_WhenLongNameIsMissing(string? longName)
+    public void Team_Constructor_ShouldThrowArgumentException_WhenLongNameIsWhitespace(string longName)
     {
-        Assert.Throws<ArgumentException>(() => new Team(10, 1001, 2001, longName!, "DYK"));
+        Assert.Throws<ArgumentException>(() => new Team(10, 1001, 2001, longName, "DYK"));
     }
 
     [Fact]
@@ -63,13 +78,18 @@ public class DomainEntitiesTests
         Assert.Equal("DYK", team.ShortName);
     }
 
+    [Fact]
+    public void Player_Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() => new Player(11, 1101, 2101, null!, DateTime.UtcNow, 182, 78));
+    }
+
     [Theory]
-    [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Player_Constructor_ShouldThrow_WhenNameIsMissing(string? name)
+    public void Player_Constructor_ShouldThrowArgumentException_WhenNameIsWhitespace(string name)
     {
-        Assert.Throws<ArgumentException>(() => new Player(11, 1101, 2101, name!, DateTime.UtcNow, 182, 78));
+        Assert.Throws<ArgumentException>(() => new Player(11, 1101, 2101, name, DateTime.UtcNow, 182, 78));
     }
 
     [Fact]
@@ -87,14 +107,20 @@ public class DomainEntitiesTests
         Assert.Equal(78, player.Weight);
     }
 
+    [Fact]
+    public void FootballMatch_Constructor_ShouldThrowArgumentNullException_WhenSeasonIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            new FootballMatch(22, 1, 2, null!, DateTime.UtcNow, 33001, 100, 200, 2, 1));
+    }
+
     [Theory]
-    [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void FootballMatch_Constructor_ShouldThrow_WhenSeasonIsMissing(string? season)
+    public void FootballMatch_Constructor_ShouldThrowArgumentException_WhenSeasonIsWhitespace(string season)
     {
         Assert.Throws<ArgumentException>(() =>
-            new FootballMatch(22, 1, 2, season!, DateTime.UtcNow, 33001, 100, 200, 2, 1));
+            new FootballMatch(22, 1, 2, season, DateTime.UtcNow, 33001, 100, 200, 2, 1));
     }
 
     [Fact]
