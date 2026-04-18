@@ -125,7 +125,7 @@
                         BorderThickness="0,1,0,0">
                     <TextBlock FontSize="12"
                                Foreground="{DynamicResource SidebarSecondaryForegroundBrush}"
-                               Text="{Binding Dashboard.CurrentYear, StringFormat=&#169; {0} ProFootball Analytics}" />
+                               Text="{Binding Dashboard.CurrentYear, StringFormat={}© {0} ProFootball Analytics}" />
                 </Border>
             </Grid>
         </Border>
