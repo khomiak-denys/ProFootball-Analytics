@@ -57,15 +57,10 @@ internal sealed class QueryingTestHost : IAsyncDisposable
 
     private static async Task SeedAsync(ProFootballDbContext dbContext)
     {
-        dbContext.Countries.AddRange(
-            new Country(1, "England"),
-            new Country(2, "Spain"),
-            new Country(3, "Emptyland"));
-
         dbContext.Leagues.AddRange(
-            new League(10, 1, "Premier League"),
-            new League(11, 1, "Championship"),
-            new League(20, 2, "La Liga"));
+            new League(10, "England", "Premier League"),
+            new League(11, "England", "Championship"),
+            new League(20, "Spain", "La Liga"));
 
         dbContext.Teams.AddRange(
             new Team(1, 100, 1000, "Arsenal", "ARS"),
@@ -91,9 +86,9 @@ internal sealed class QueryingTestHost : IAsyncDisposable
             new TeamAttribute(3, 200, 2000, new DateTime(2024, 1, 5, 0, 0, 0, DateTimeKind.Utc), 68, 70, 72, 71));
 
         dbContext.Matches.AddRange(
-            new FootballMatch(1, 1, 10, "2024/2025", new DateTime(2024, 8, 10, 0, 0, 0, DateTimeKind.Utc), 5001, 100, 300, 2, 1),
-            new FootballMatch(2, 1, 11, "2024/2025", new DateTime(2024, 8, 11, 0, 0, 0, DateTimeKind.Utc), 5002, 300, 100, 1, 1),
-            new FootballMatch(3, 2, 20, "2023/2024", new DateTime(2024, 1, 20, 0, 0, 0, DateTimeKind.Utc), 5003, 200, 400, 3, 0));
+            new FootballMatch(1, "England", 10, "2024/2025", new DateTime(2024, 8, 10, 0, 0, 0, DateTimeKind.Utc), 5001, 100, 300, 2, 1),
+            new FootballMatch(2, "England", 11, "2024/2025", new DateTime(2024, 8, 11, 0, 0, 0, DateTimeKind.Utc), 5002, 300, 100, 1, 1),
+            new FootballMatch(3, "Spain", 20, "2023/2024", new DateTime(2024, 1, 20, 0, 0, 0, DateTimeKind.Utc), 5003, 200, 400, 3, 0));
 
         await dbContext.SaveChangesAsync();
     }

@@ -1,3 +1,3 @@
 namespace ProFootball.Application.Country.Dtos;
 
-public sealed record CountryLeagueListItemDto(int Id, string Name, int LeagueCount);
+public sealed record CountryLeagueListItemDto(string Name, int LeagueCount);

@@ -1,7 +1,7 @@
 namespace ProFootball.Application.Importing.Dtos;
 
 public sealed record DataImportResult(
-    int CountriesImported,
+    int CountriesResolved,
     int LeaguesImported,
     int TeamsImported,
     int PlayersImported,

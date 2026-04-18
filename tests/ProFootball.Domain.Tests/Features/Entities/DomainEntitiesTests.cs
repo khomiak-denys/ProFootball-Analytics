@@ -6,32 +6,23 @@ namespace ProFootball.Domain.Tests.Features.Entities;
 public class DomainEntitiesTests
 {
     [Fact]
-    public void Country_Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
+    public void League_Constructor_ShouldThrowArgumentNullException_WhenCountryNameIsNull()
     {
-        Assert.Throws<ArgumentNullException>(() => new Country(1, null!));
+        Assert.Throws<ArgumentNullException>(() => new League(2, null!, "Premier League"));
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public void Country_Constructor_ShouldThrowArgumentException_WhenNameIsWhitespace(string name)
+    public void League_Constructor_ShouldThrowArgumentException_WhenCountryNameIsWhitespace(string countryName)
     {
-        Assert.Throws<ArgumentException>(() => new Country(1, name));
-    }
-
-    [Fact]
-    public void Country_Constructor_ShouldTrimName()
-    {
-        var country = new Country(1, "  Ukraine  ");
-
-        Assert.Equal(1, country.Id);
-        Assert.Equal("Ukraine", country.Name);
+        Assert.Throws<ArgumentException>(() => new League(2, countryName, "Premier League"));
     }
 
     [Fact]
     public void League_Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
     {
-        Assert.Throws<ArgumentNullException>(() => new League(2, 1, null!));
+        Assert.Throws<ArgumentNullException>(() => new League(2, "England", null!));
     }
 
     [Theory]
@@ -39,16 +30,16 @@ public class DomainEntitiesTests
     [InlineData("   ")]
     public void League_Constructor_ShouldThrowArgumentException_WhenNameIsWhitespace(string name)
     {
-        Assert.Throws<ArgumentException>(() => new League(2, 1, name));
+        Assert.Throws<ArgumentException>(() => new League(2, "England", name));
     }
 
     [Fact]
     public void League_Constructor_ShouldSetFields()
     {
-        var league = new League(2, 1, "  Premier League ");
+        var league = new League(2, " England ", "  Premier League ");
 
         Assert.Equal(2, league.Id);
-        Assert.Equal(1, league.CountryId);
+        Assert.Equal("England", league.CountryName);
         Assert.Equal("Premier League", league.Name);
     }
 
@@ -108,10 +99,26 @@ public class DomainEntitiesTests
     }
 
     [Fact]
+    public void FootballMatch_Constructor_ShouldThrowArgumentNullException_WhenCountryNameIsNull()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            new FootballMatch(22, null!, 2, "2014/2015", DateTime.UtcNow, 33001, 100, 200, 2, 1));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void FootballMatch_Constructor_ShouldThrowArgumentException_WhenCountryNameIsWhitespace(string countryName)
+    {
+        Assert.Throws<ArgumentException>(() =>
+            new FootballMatch(22, countryName, 2, "2014/2015", DateTime.UtcNow, 33001, 100, 200, 2, 1));
+    }
+
+    [Fact]
     public void FootballMatch_Constructor_ShouldThrowArgumentNullException_WhenSeasonIsNull()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new FootballMatch(22, 1, 2, null!, DateTime.UtcNow, 33001, 100, 200, 2, 1));
+            new FootballMatch(22, "England", 2, null!, DateTime.UtcNow, 33001, 100, 200, 2, 1));
     }
 
     [Theory]
@@ -120,17 +127,17 @@ public class DomainEntitiesTests
     public void FootballMatch_Constructor_ShouldThrowArgumentException_WhenSeasonIsWhitespace(string season)
     {
         Assert.Throws<ArgumentException>(() =>
-            new FootballMatch(22, 1, 2, season, DateTime.UtcNow, 33001, 100, 200, 2, 1));
+            new FootballMatch(22, "England", 2, season, DateTime.UtcNow, 33001, 100, 200, 2, 1));
     }
 
     [Fact]
     public void FootballMatch_Constructor_ShouldSetFieldsAndTrimSeason()
     {
         var date = new DateTime(2015, 3, 10, 0, 0, 0, DateTimeKind.Utc);
-        var match = new FootballMatch(22, 1, 2, " 2014/2015 ", date, 33001, 100, 200, 2, 1);
+        var match = new FootballMatch(22, " England ", 2, " 2014/2015 ", date, 33001, 100, 200, 2, 1);
 
         Assert.Equal(22, match.Id);
-        Assert.Equal(1, match.CountryId);
+        Assert.Equal("England", match.CountryName);
         Assert.Equal(2, match.LeagueId);
         Assert.Equal("2014/2015", match.Season);
         Assert.Equal(date, match.Date);

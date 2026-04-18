@@ -59,12 +59,12 @@ public class CqrsDispatcherAndContractsTests
     {
         var today = DateTime.UtcNow.Date;
 
-        var country = new CountryDto(1, "England");
-        var countryListItem = new CountryLeagueListItemDto(1, "England", 2);
+        var country = new CountryDto("England");
+        var countryListItem = new CountryLeagueListItemDto("England", 2);
         var summary = new CountryLeagueSummaryDto(40, 2, 2);
         var leagueCard = new LeagueCountryCardDto(1, "Premier League", "2025/26", 20, 380);
         var snapshot = new CountryLeagueSnapshotDto([leagueCard], summary);
-        var league = new LeagueDto(1, "Premier League", 1, "England");
+        var league = new LeagueDto(1, "Premier League", "England");
 
         var team = new TeamListItemDto(100, "Arsenal", "ARS", 1000);
         var teamAttribute = new TeamAttributeDto(today, 70, 71, 72, 73);
@@ -91,10 +91,10 @@ public class CqrsDispatcherAndContractsTests
         var matchesBySeasonQuery = new GetMatchesBySeasonQuery(1);
         var dashboardQuery = new GetDashboardKpiQuery();
 
-        var leaguesQuery = new GetLeaguesQuery(1);
+        var leaguesQuery = new GetLeaguesQuery("England");
         var countriesQuery = new GetCountriesQuery();
         var countriesWithCountQuery = new GetCountriesWithLeagueCountQuery();
-        var snapshotQuery = new GetCountrySnapshotQuery(1);
+        var snapshotQuery = new GetCountrySnapshotQuery("England");
         var importCommand = new ImportDataCommand("db.sqlite", 1000);
         var importResult = new DataImportResult(1, 2, 3, 4, 5, 6, 7, 8, TimeSpan.FromSeconds(1));
 
@@ -103,7 +103,6 @@ public class CqrsDispatcherAndContractsTests
         Assert.Equal(40, summary.TotalClubs);
         Assert.Equal("Premier League", leagueCard.LeagueName);
         Assert.Single(snapshot.LeagueCards);
-        Assert.Equal(1, league.CountryId);
         Assert.Equal("Premier League", league.Name);
         Assert.Equal("England", league.CountryName);
 
@@ -212,13 +211,13 @@ public class CqrsDispatcherAndContractsTests
         Assert.Equal(1, matchesBySeasonQuery.LeagueId);
         Assert.NotNull(dashboardQuery);
 
-        Assert.Equal(1, leaguesQuery.CountryId);
+        Assert.Equal("England", leaguesQuery.CountryName);
         Assert.NotNull(countriesQuery);
         Assert.NotNull(countriesWithCountQuery);
-        Assert.Equal(1, snapshotQuery.CountryId);
+        Assert.Equal("England", snapshotQuery.CountryName);
         Assert.Equal("db.sqlite", importCommand.SqlitePath);
         Assert.Equal(1000, importCommand.BatchSize);
-        Assert.Equal(1, importResult.CountriesImported);
+        Assert.Equal(1, importResult.CountriesResolved);
         Assert.Equal(2, importResult.LeaguesImported);
         Assert.Equal(3, importResult.TeamsImported);
         Assert.Equal(4, importResult.PlayersImported);

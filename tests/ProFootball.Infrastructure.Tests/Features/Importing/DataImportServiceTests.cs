@@ -65,7 +65,7 @@ public class DataImportServiceTests
 
             var result = await service.HandleAsync(new ImportDataCommand(sourcePath, BatchSize: 2));
 
-            Assert.Equal(1, result.CountriesImported);
+            Assert.Equal(1, result.CountriesResolved);
             Assert.Equal(1, result.LeaguesImported);
             Assert.Equal(1, result.TeamsImported);
             Assert.Equal(1, result.PlayersImported);
@@ -74,7 +74,6 @@ public class DataImportServiceTests
             Assert.Equal(1, result.PlayerAttributesImported);
             Assert.Equal(7, result.SkippedRows);
 
-            Assert.Equal(1, await destinationContext.Countries.CountAsync());
             Assert.Equal(1, await destinationContext.Leagues.CountAsync());
             Assert.Equal(1, await destinationContext.Teams.CountAsync());
             Assert.Equal(1, await destinationContext.Players.CountAsync());
@@ -134,7 +133,7 @@ public class DataImportServiceTests
             var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
             var result = await service.HandleAsync(new ImportDataCommand(sourcePath, BatchSize: 2));
 
-            Assert.Equal(1, result.CountriesImported);
+            Assert.Equal(1, result.CountriesResolved);
             Assert.Equal(1, result.LeaguesImported);
             Assert.Equal(1, result.TeamsImported);
             Assert.Equal(1, result.PlayersImported);
@@ -166,7 +165,7 @@ public class DataImportServiceTests
 
             await using var destinationContext = new ProFootballDbContext(options);
             await destinationContext.Database.EnsureCreatedAsync();
-            destinationContext.Countries.Add(new Country(77, "Baseline Country"));
+            destinationContext.Leagues.Add(new League(77, "Baseline Country", "Baseline League"));
             await destinationContext.SaveChangesAsync();
 
             var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
@@ -174,14 +173,15 @@ public class DataImportServiceTests
             await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
                 service.HandleAsync(new ImportDataCommand(sourcePath, BatchSize: 1)));
 
-            var countries = await destinationContext.Countries
+            var leagues = await destinationContext.Leagues
                 .AsNoTracking()
-                .OrderBy(country => country.Id)
+                .OrderBy(league => league.Id)
                 .ToListAsync();
 
-            Assert.Single(countries);
-            Assert.Equal(77, countries[0].Id);
-            Assert.Equal("Baseline Country", countries[0].Name);
+            Assert.Single(leagues);
+            Assert.Equal(77, leagues[0].Id);
+            Assert.Equal("Baseline League", leagues[0].Name);
+            Assert.Equal("Baseline Country", leagues[0].CountryName);
         }
         finally
         {
@@ -254,8 +254,15 @@ public class DataImportServiceTests
         var statements = new[]
         {
             "CREATE TABLE Country (id INTEGER, name TEXT);",
+            "CREATE TABLE League (id INTEGER, country_id INTEGER, name TEXT);",
+            "CREATE TABLE Team (id INTEGER, team_api_id INTEGER, team_fifa_api_id INTEGER, team_long_name TEXT, team_short_name TEXT);",
+            "CREATE TABLE Player (id INTEGER, player_api_id INTEGER, player_fifa_api_id INTEGER, player_name TEXT, birthday TEXT, height INTEGER, weight INTEGER);",
+            "CREATE TABLE [Match] (id INTEGER, country_id INTEGER, league_id INTEGER, season TEXT, date TEXT, match_api_id INTEGER, home_team_api_id INTEGER, away_team_api_id INTEGER, home_team_goal INTEGER, away_team_goal INTEGER);",
+            "CREATE TABLE Team_Attributes (id INTEGER, team_fifa_api_id INTEGER, team_api_id INTEGER, date TEXT, buildUpPlaySpeed INTEGER, buildUpPlayPassing INTEGER, chanceCreationPassing INTEGER, defencePressure INTEGER);",
+            "CREATE TABLE Player_Attributes (id INTEGER, player_fifa_api_id INTEGER, player_api_id INTEGER, date TEXT, overall_rating INTEGER, potential INTEGER, preferred_foot TEXT, attacking_work_rate TEXT, defensive_work_rate TEXT);",
             "INSERT INTO Country VALUES (1, 'Ukraine');",
-            "INSERT INTO Country VALUES (1, 'Duplicate Country');",
+            "INSERT INTO League VALUES (1, 1, 'League One');",
+            "INSERT INTO League VALUES (1, 1, 'League Duplicate');",
         };
 
         foreach (var statement in statements)

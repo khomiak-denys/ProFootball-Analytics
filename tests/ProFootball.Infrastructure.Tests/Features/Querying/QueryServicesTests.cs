@@ -149,22 +149,24 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new CountriesLeaguesQueryService(host.DbContextFactory);
 
-        var leagues = await service.HandleAsync(new GetLeaguesQuery(1));
+        var leagues = await service.HandleAsync(new GetLeaguesQuery("England"));
 
         Assert.Equal(2, leagues.Count);
-        Assert.All(leagues, league => Assert.Equal(1, league.CountryId));
+        Assert.All(leagues, league => Assert.Equal("England", league.CountryName));
     }
 
     [Fact]
-    public async Task CountriesLeagues_GetCountriesWithLeagueCount_ShouldIncludeCountriesWithoutLeagues()
+    public async Task CountriesLeagues_GetCountriesWithLeagueCount_ShouldReturnDistinctCountries()
     {
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new CountriesLeaguesQueryService(host.DbContextFactory);
 
         var countries = await service.HandleAsync(new GetCountriesWithLeagueCountQuery());
-        var emptyCountry = Assert.Single(countries.Where(country => country.Id == 3));
+        var england = Assert.Single(countries.Where(country => country.Name == "England"));
+        var spain = Assert.Single(countries.Where(country => country.Name == "Spain"));
 
-        Assert.Equal(0, emptyCountry.LeagueCount);
+        Assert.Equal(2, england.LeagueCount);
+        Assert.Equal(1, spain.LeagueCount);
     }
 
     [Fact]
@@ -173,7 +175,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new CountriesLeaguesQueryService(host.DbContextFactory);
 
-        var snapshot = await service.HandleAsync(new GetCountrySnapshotQuery(3));
+        var snapshot = await service.HandleAsync(new GetCountrySnapshotQuery("Emptyland"));
 
         Assert.Empty(snapshot.LeagueCards);
         Assert.Equal(0, snapshot.Summary.TotalClubs);
@@ -187,7 +189,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new CountriesLeaguesQueryService(host.DbContextFactory);
 
-        var snapshot = await service.HandleAsync(new GetCountrySnapshotQuery(1));
+        var snapshot = await service.HandleAsync(new GetCountrySnapshotQuery("England"));
 
         Assert.Equal(2, snapshot.LeagueCards.Count);
         Assert.Equal(4, snapshot.Summary.TotalClubs);
@@ -236,7 +238,7 @@ public class QueryServicesTests
         var service = new MatchesQueryService(host.DbContextFactory);
         var kpis = await service.HandleAsync(new GetDashboardKpiQuery());
 
-        Assert.Equal(3, kpis.Countries);
+        Assert.Equal(2, kpis.Countries);
         Assert.Equal(3, kpis.Leagues);
         Assert.Equal(4, kpis.Teams);
         Assert.Equal(3, kpis.Players);

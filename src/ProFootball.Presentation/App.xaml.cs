@@ -1,9 +1,12 @@
 using System.Windows;
+using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ProFootball.Infrastructure;
 using ProFootball.Presentation.ViewModels;
+using Serilog;
+using Serilog.Events;
 
 namespace ProFootball.Presentation;
 
@@ -14,7 +17,27 @@ public partial class App : System.Windows.Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
+        var logsDirectory = Path.Combine(AppContext.BaseDirectory, "logs");
+        Directory.CreateDirectory(logsDirectory);
+        var logFilePath = Path.Combine(logsDirectory, "profootball-.log");
+#if DEBUG
+        const LogEventLevel minimumLogLevel = LogEventLevel.Debug;
+#else
+        const LogEventLevel minimumLogLevel = LogEventLevel.Warning;
+#endif
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Is(minimumLogLevel)
+            .Enrich.FromLogContext()
+            .WriteTo.File(
+                logFilePath,
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 14,
+                shared: true,
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] ({SourceContext}) {Message:lj}{NewLine}{Exception}")
+            .CreateLogger();
+
         _host = Host.CreateDefaultBuilder()
+            .UseSerilog()
             .ConfigureAppConfiguration((_, configurationBuilder) =>
             {
                 configurationBuilder.SetBasePath(AppContext.BaseDirectory);
@@ -50,6 +73,8 @@ public partial class App : System.Windows.Application
             _host.Dispose();
             _host = null;
         }
+
+        Log.CloseAndFlush();
 
         base.OnExit(e);
     }

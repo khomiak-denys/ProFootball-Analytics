@@ -26,6 +26,7 @@ dotnet restore ProFootball.slnx
 ```powershell
 dotnet run --project .\src\ProFootball.DataLoader\ProFootball.DataLoader.csproj -- --sqlite "C:\path\to\database.sqlite"
 ```
+`DataLoader` resolves `country_id` from SQLite into text `CountryName` fields used by the final model.
 
 ### Test
 ```powershell
@@ -47,6 +48,14 @@ Create local `.env` from `.env.example` and set values as needed.
 | `ASPNETCORE_ENVIRONMENT` | No | `Development` | Environment name for configuration behavior. |
 
 `*` Required if `ConnectionStrings:ProFootballDb` is absent from `appsettings.json`.
+
+## Logging
+
+- Logs are written to `logs/` next to the executable (`AppContext.BaseDirectory`).
+- File name pattern: `profootball-.log` (daily rolling, retain last 14 files).
+- `Debug` build logs: `Debug` and above.
+- `Release` build logs: `Warning` and above.
+- Log records include timestamp, level, source context, message, and exception stacktrace.
 
 ## Commands Cheat Sheet
 

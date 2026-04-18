@@ -19,10 +19,13 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
         CancellationToken cancellationToken = default)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        return await dbContext.Countries
+        return await dbContext.Leagues
             .AsNoTracking()
-            .OrderBy(country => country.Name)
-            .Select(country => new CountryDto(country.Id, country.Name))
+            .Where(league => !string.IsNullOrWhiteSpace(league.CountryName))
+            .Select(league => league.CountryName)
+            .Distinct()
+            .OrderBy(countryName => countryName)
+            .Select(countryName => new CountryDto(countryName))
             .ToListAsync(cancellationToken);
     }
 
@@ -30,24 +33,21 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
         GetLeaguesQuery query,
         CancellationToken cancellationToken = default)
     {
-        var countryId = query.CountryId;
+        var countryName = query.CountryName?.Trim();
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        var leaguesQuery = from league in dbContext.Leagues.AsNoTracking()
-                           join country in dbContext.Countries.AsNoTracking() on league.CountryId equals country.Id
-                           select new { league, country };
+        var leaguesQuery = dbContext.Leagues.AsNoTracking();
 
-        if (countryId.HasValue)
+        if (!string.IsNullOrWhiteSpace(countryName))
         {
-            leaguesQuery = leaguesQuery.Where(item => item.league.CountryId == countryId.Value);
+            leaguesQuery = leaguesQuery.Where(league => league.CountryName == countryName);
         }
 
         return await leaguesQuery
-            .OrderBy(item => item.league.Name)
-            .Select(item => new LeagueDto(
-                item.league.Id,
-                item.league.Name,
-                item.country.Id,
-                item.country.Name))
+            .OrderBy(league => league.Name)
+            .Select(league => new LeagueDto(
+                league.Id,
+                league.Name,
+                league.CountryName))
             .ToListAsync(cancellationToken);
     }
 
@@ -56,14 +56,14 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
         CancellationToken cancellationToken = default)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        return await (from country in dbContext.Countries.AsNoTracking()
-                      join league in dbContext.Leagues.AsNoTracking()
-                          on country.Id equals league.CountryId into leagues
-                      orderby country.Name
-                      select new CountryLeagueListItemDto(
-                          country.Id,
-                          country.Name,
-                          leagues.Count()))
+        return await dbContext.Leagues
+            .AsNoTracking()
+            .Where(league => !string.IsNullOrWhiteSpace(league.CountryName))
+            .GroupBy(league => league.CountryName)
+            .OrderBy(grouped => grouped.Key)
+            .Select(grouped => new CountryLeagueListItemDto(
+                grouped.Key,
+                grouped.Count()))
             .ToListAsync(cancellationToken);
     }
 
@@ -71,9 +71,14 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
         GetCountrySnapshotQuery query,
         CancellationToken cancellationToken = default)
     {
-        var countryId = query.CountryId;
+        if (string.IsNullOrWhiteSpace(query.CountryName))
+        {
+            return new CountryLeagueSnapshotDto(Array.Empty<LeagueCountryCardDto>(), new CountryLeagueSummaryDto(0, 0, 0));
+        }
+
+        var countryName = query.CountryName.Trim();
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        var cards = await GetLeagueCardsCoreAsync(dbContext, countryId, cancellationToken);
+        var cards = await GetLeagueCardsCoreAsync(dbContext, countryName, cancellationToken);
         var activeLeagues = cards.Count;
         var summary = new CountryLeagueSummaryDto(
             TotalClubs: cards.Sum(card => card.TeamsCount),
@@ -143,12 +148,12 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
 
     private static async Task<IReadOnlyList<LeagueCountryCardDto>> GetLeagueCardsCoreAsync(
         ProFootballDbContext dbContext,
-        int countryId,
+        string countryName,
         CancellationToken cancellationToken)
     {
         var leagues = await dbContext.Leagues
             .AsNoTracking()
-            .Where(league => league.CountryId == countryId)
+            .Where(league => league.CountryName == countryName)
             .OrderBy(league => league.Name)
             .Select(league => new
             {
@@ -164,7 +169,7 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
 
         var seasonalAggregates = await dbContext.Matches
             .AsNoTracking()
-            .Where(match => match.CountryId == countryId)
+            .Where(match => match.CountryName == countryName)
             .GroupBy(match => new
             {
                 match.LeagueId,

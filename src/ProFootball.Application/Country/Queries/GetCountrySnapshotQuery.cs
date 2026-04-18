@@ -3,4 +3,4 @@ using ProFootball.Application.Country.Dtos;
 
 namespace ProFootball.Application.Country.Queries;
 
-public sealed record GetCountrySnapshotQuery(int CountryId) : IQuery<CountryLeagueSnapshotDto>;
+public sealed record GetCountrySnapshotQuery(string CountryName) : IQuery<CountryLeagueSnapshotDto>;
