@@ -1,14 +1,19 @@
 using Microsoft.EntityFrameworkCore;
-using ProFootball.Application.Abstractions.Querying;
-using ProFootball.Application.Contracts.Common;
-using ProFootball.Application.Contracts.Queries;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Common;
+using ProFootball.Application.Match.Dtos;
+using ProFootball.Application.Match.Queries;
 using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
-public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) : IMatchesQueryService
+public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) :
+    IQueryHandler<MatchSearchQuery, PagedResult<MatchListItemDto>>,
+    IQueryHandler<GetMatchDetailsQuery, MatchDetailsDto?>,
+    IQueryHandler<GetMatchesBySeasonQuery, IReadOnlyList<MatchesBySeasonDto>>,
+    IQueryHandler<GetDashboardKpiQuery, DashboardKpiDto>
 {
-    public async Task<PagedResult<MatchListItemDto>> SearchMatchesAsync(
+    public async Task<PagedResult<MatchListItemDto>> HandleAsync(
         MatchSearchQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -96,10 +101,11 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
         return new PagedResult<MatchListItemDto>(items, totalCount, page, pageSize);
     }
 
-    public async Task<MatchDetailsDto?> GetMatchDetailsAsync(
-        int matchApiId,
+    public async Task<MatchDetailsDto?> HandleAsync(
+        GetMatchDetailsQuery query,
         CancellationToken cancellationToken = default)
     {
+        var matchApiId = query.MatchApiId;
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var match = await (from item in dbContext.Matches.AsNoTracking()
                            where item.MatchApiId == matchApiId
@@ -124,5 +130,52 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
             .SingleOrDefaultAsync(cancellationToken);
 
         return match;
+    }
+
+    public async Task<IReadOnlyList<MatchesBySeasonDto>> HandleAsync(
+        GetMatchesBySeasonQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        var matchesQuery = dbContext.Matches.AsNoTracking();
+
+        if (query.LeagueId.HasValue)
+        {
+            matchesQuery = matchesQuery.Where(match => match.LeagueId == query.LeagueId.Value);
+        }
+
+        var groupedQuery = from match in matchesQuery
+                           group match by new { match.Season, match.LeagueId }
+            into grouped
+                           select new
+                           {
+                               grouped.Key.Season,
+                               grouped.Key.LeagueId,
+                               MatchCount = grouped.Count(),
+                           };
+
+        var queryResult = from grouped in groupedQuery
+                          join league in dbContext.Leagues.AsNoTracking() on grouped.LeagueId equals league.Id
+                          orderby grouped.Season, league.Name
+                          select new MatchesBySeasonDto(
+                              grouped.Season,
+                              league.Name,
+                              grouped.MatchCount);
+
+        return await queryResult.ToListAsync(cancellationToken);
+    }
+
+    public async Task<DashboardKpiDto> HandleAsync(
+        GetDashboardKpiQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        var countries = await dbContext.Countries.CountAsync(cancellationToken);
+        var leagues = await dbContext.Leagues.CountAsync(cancellationToken);
+        var teams = await dbContext.Teams.CountAsync(cancellationToken);
+        var players = await dbContext.Players.CountAsync(cancellationToken);
+        var matches = await dbContext.Matches.CountAsync(cancellationToken);
+
+        return new DashboardKpiDto(countries, leagues, teams, players, matches);
     }
 }
