@@ -8,15 +8,7 @@ public sealed class Team
 
     public Team(int id, int teamApiId, int? teamFifaApiId, string longName, string? shortName)
     {
-        if (longName is null)
-        {
-            throw new ArgumentNullException(nameof(longName), "Long name cannot be null or whitespace.");
-        }
-
-        if (string.IsNullOrWhiteSpace(longName))
-        {
-            throw new ArgumentException("Long name cannot be null or whitespace.", nameof(longName));
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(longName);
 
         Id = id;
         TeamApiId = teamApiId;

@@ -18,15 +18,7 @@ public sealed class FootballMatch
         int? homeTeamGoal,
         int? awayTeamGoal)
     {
-        if (season is null)
-        {
-            throw new ArgumentNullException(nameof(season), "Season cannot be null or whitespace.");
-        }
-
-        if (string.IsNullOrWhiteSpace(season))
-        {
-            throw new ArgumentException("Season cannot be null or whitespace.", nameof(season));
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(season);
 
         Id = id;
         CountryId = countryId;
