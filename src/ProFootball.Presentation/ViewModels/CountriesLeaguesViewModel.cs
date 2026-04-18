@@ -118,8 +118,9 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
             RaisePropertyChanged(nameof(TotalCountries));
             RaisePropertyChanged(nameof(TotalLeagues));
 
-            var previouslySelectedCountryId = SelectedCountry?.Id;
-            var nextSelection = countries.FirstOrDefault(country => country.Id == previouslySelectedCountryId)
+            var previouslySelectedCountryName = SelectedCountry?.Name;
+            var nextSelection = countries.FirstOrDefault(country =>
+                    string.Equals(country.Name, previouslySelectedCountryName, StringComparison.Ordinal))
                 ?? countries.FirstOrDefault();
 
             if (!ReferenceEquals(_selectedCountry, nextSelection))
@@ -156,15 +157,15 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
 
             ErrorMessage = null;
 
-            var selectedCountryId = SelectedCountry?.Id;
-            if (!selectedCountryId.HasValue)
+            var selectedCountryName = SelectedCountry?.Name;
+            if (string.IsNullOrWhiteSpace(selectedCountryName))
             {
                 ClearCountrySnapshot();
                 return;
             }
 
             var snapshot = await _queryDispatcher.DispatchAsync<GetCountrySnapshotQuery, CountryLeagueSnapshotDto>(
-                new GetCountrySnapshotQuery(selectedCountryId.Value),
+                new GetCountrySnapshotQuery(selectedCountryName),
                 reloadToken);
             var cards = snapshot.LeagueCards;
             var summary = snapshot.Summary;
@@ -184,7 +185,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "Failed to load country snapshot for country {CountryId}.", SelectedCountry?.Id);
+            _logger.LogError(exception, "Failed to load country snapshot for country {CountryName}.", SelectedCountry?.Name);
             ErrorMessage = "Failed to load leagues data.";
             ClearCountrySnapshot();
         }
