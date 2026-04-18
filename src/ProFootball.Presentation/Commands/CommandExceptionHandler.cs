@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Windows;
+using Serilog;
 
 namespace ProFootball.Presentation.Commands;
 
@@ -12,6 +13,7 @@ public static class CommandExceptionHandler
             return;
         }
 
+        Log.Error(exception, "UI command execution failed.");
         Trace.TraceError(exception.ToString());
 
         try
