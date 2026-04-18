@@ -1,13 +1,22 @@
 using Microsoft.EntityFrameworkCore;
-using ProFootball.Application.Abstractions.Querying;
-using ProFootball.Application.Contracts.Queries;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Country.Dtos;
+using ProFootball.Application.Country.Queries;
+using ProFootball.Application.League.Dtos;
+using ProFootball.Application.League.Queries;
 using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
-public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) : ICountriesLeaguesQueryService
+public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) :
+    IQueryHandler<GetCountriesQuery, IReadOnlyList<CountryDto>>,
+    IQueryHandler<GetLeaguesQuery, IReadOnlyList<LeagueDto>>,
+    IQueryHandler<GetCountriesWithLeagueCountQuery, IReadOnlyList<CountryLeagueListItemDto>>,
+    IQueryHandler<GetCountrySnapshotQuery, CountryLeagueSnapshotDto>
 {
-    public async Task<IReadOnlyList<CountryDto>> GetCountriesAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<CountryDto>> HandleAsync(
+        GetCountriesQuery query,
+        CancellationToken cancellationToken = default)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         return await dbContext.Countries
@@ -17,21 +26,22 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<LeagueDto>> GetLeaguesAsync(
-        int? countryId = null,
+    public async Task<IReadOnlyList<LeagueDto>> HandleAsync(
+        GetLeaguesQuery query,
         CancellationToken cancellationToken = default)
     {
+        var countryId = query.CountryId;
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        var query = from league in dbContext.Leagues.AsNoTracking()
-                    join country in dbContext.Countries.AsNoTracking() on league.CountryId equals country.Id
-                    select new { league, country };
+        var leaguesQuery = from league in dbContext.Leagues.AsNoTracking()
+                           join country in dbContext.Countries.AsNoTracking() on league.CountryId equals country.Id
+                           select new { league, country };
 
         if (countryId.HasValue)
         {
-            query = query.Where(item => item.league.CountryId == countryId.Value);
+            leaguesQuery = leaguesQuery.Where(item => item.league.CountryId == countryId.Value);
         }
 
-        return await query
+        return await leaguesQuery
             .OrderBy(item => item.league.Name)
             .Select(item => new LeagueDto(
                 item.league.Id,
@@ -41,7 +51,8 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<CountryLeagueListItemDto>> GetCountriesWithLeagueCountAsync(
+    public async Task<IReadOnlyList<CountryLeagueListItemDto>> HandleAsync(
+        GetCountriesWithLeagueCountQuery query,
         CancellationToken cancellationToken = default)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -56,18 +67,11 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<LeagueCountryCardDto>> GetLeagueCardsAsync(
-        int countryId,
+    public async Task<CountryLeagueSnapshotDto> HandleAsync(
+        GetCountrySnapshotQuery query,
         CancellationToken cancellationToken = default)
     {
-        var snapshot = await GetCountrySnapshotAsync(countryId, cancellationToken);
-        return snapshot.LeagueCards;
-    }
-
-    public async Task<CountryLeagueSnapshotDto> GetCountrySnapshotAsync(
-        int countryId,
-        CancellationToken cancellationToken = default)
-    {
+        var countryId = query.CountryId;
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var cards = await GetLeagueCardsCoreAsync(dbContext, countryId, cancellationToken);
         var activeLeagues = cards.Count;
