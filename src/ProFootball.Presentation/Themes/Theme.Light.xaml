@@ -1,0 +1,43 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Color x:Key="Color.Background">#F8F9FA</Color>
+    <Color x:Key="Color.Card">#FFFFFF</Color>
+    <Color x:Key="Color.Primary">#22C55E</Color>
+    <Color x:Key="Color.Border">#DEE2E6</Color>
+    <Color x:Key="Color.Sidebar">#1A1D1F</Color>
+    <Color x:Key="Color.Text">#1A1D1F</Color>
+    <Color x:Key="Color.MutedText">#6C757D</Color>
+    <Color x:Key="Color.HeaderBackground">#FFFFFF</Color>
+
+    <SolidColorBrush x:Key="ShellMainBackgroundBrush" Color="{StaticResource Color.Background}" />
+    <SolidColorBrush x:Key="ShellSidebarBrush" Color="{StaticResource Color.Sidebar}" />
+    <SolidColorBrush x:Key="CardBackgroundBrush" Color="{StaticResource Color.Card}" />
+    <SolidColorBrush x:Key="CardBorderBrush" Color="{StaticResource Color.Border}" />
+    <SolidColorBrush x:Key="SubtleBorderBrush" Color="{StaticResource Color.Border}" />
+    <SolidColorBrush x:Key="TitleForegroundBrush" Color="{StaticResource Color.Text}" />
+    <SolidColorBrush x:Key="MutedForegroundBrush" Color="{StaticResource Color.MutedText}" />
+    <SolidColorBrush x:Key="SuccessForegroundBrush" Color="{StaticResource Color.Primary}" />
+    <SolidColorBrush x:Key="SidebarSelectedBackgroundBrush" Color="{StaticResource Color.Primary}" />
+
+    <SolidColorBrush x:Key="DangerForegroundBrush" Color="#EF4444" />
+    <SolidColorBrush x:Key="SurfaceMutedBrush" Color="#F1F5F9" />
+    <SolidColorBrush x:Key="SelectionSurfaceBrush" Color="#EEF2F7" />
+    <SolidColorBrush x:Key="SelectionActiveSurfaceBrush" Color="#E7F7EC" />
+    <SolidColorBrush x:Key="BadgeSurfaceBrush" Color="#E5E7EB" />
+    <SolidColorBrush x:Key="ChartAxisBrush" Color="#94A3B8" />
+    <SolidColorBrush x:Key="ChartGridBrush" Color="#CBD5E1" />
+    <SolidColorBrush x:Key="RadarFillBrush" Color="#7D22C55E" />
+    <SolidColorBrush x:Key="SidebarHoverBrush" Color="#23282B" />
+    <SolidColorBrush x:Key="SidebarFocusBackgroundBrush" Color="#2D3236" />
+    <SolidColorBrush x:Key="SidebarFocusBorderBrush" Color="#22C55E" />
+    <SolidColorBrush x:Key="SidebarSecondaryForegroundBrush" Color="#F8F9FA" Opacity="0.75" />
+    <SolidColorBrush x:Key="SidebarDividerBrush" Color="#2D3236" />
+    <SolidColorBrush x:Key="SuccessSoftBackgroundBrush" Color="#EAF8EF" />
+    <SolidColorBrush x:Key="BlueAccentBrush" Color="#3B82F6" />
+    <SolidColorBrush x:Key="BlueAccentFillBrush" Color="#663B82F6" />
+    <SolidColorBrush x:Key="AmberAccentBrush" Color="#F59E0B" />
+    <SolidColorBrush x:Key="SegmentBackgroundBrush" Color="#E5E7EB" />
+    <SolidColorBrush x:Key="SegmentSelectedBackgroundBrush" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="PanelMutedBackgroundBrush" Color="#EEF2F7" />
+    <SolidColorBrush x:Key="HeaderBackgroundBrush" Color="{StaticResource Color.HeaderBackground}" />
+</ResourceDictionary>
