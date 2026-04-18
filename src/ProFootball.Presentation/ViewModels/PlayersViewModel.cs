@@ -77,6 +77,12 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
 
     public ObservableCollection<PlayerAttributeDto> SelectedPlayerHistory { get; }
 
+    public IReadOnlyList<PlayerTrendPointDto> SelectedPlayerTrendPoints =>
+        SelectedPlayerHistory
+            .OrderBy(attribute => attribute.Date)
+            .Select(attribute => new PlayerTrendPointDto(attribute.Date, attribute.OverallRating, attribute.Potential))
+            .ToList();
+
     public IReadOnlyList<string> OverallRatingOptions => _overallRatingOptions;
 
     public IReadOnlyList<string> PreferredFootOptions => _preferredFootOptions;
@@ -360,6 +366,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
 
             UpdateRadarPolygonPoints();
             RaiseSelectedPlayerPropertiesChanged();
+            RaisePropertyChanged(nameof(SelectedPlayerTrendPoints));
         }
         catch (Exception exception)
         {
@@ -384,6 +391,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         _selectedPlayerDetails = null;
         SelectedPlayerHistory.Clear();
         RadarPolygonPoints = string.Empty;
+        RaisePropertyChanged(nameof(SelectedPlayerTrendPoints));
         RaiseSelectedPlayerPropertiesChanged();
     }
 
