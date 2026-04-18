@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
-using ProFootball.Application.Contracts.Analytics;
+using ProFootball.Application.Player.Dtos;
 
 namespace ProFootball.Presentation.Converters;
 
