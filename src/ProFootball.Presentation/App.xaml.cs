@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ProFootball.Infrastructure;
+using ProFootball.Presentation.Services;
 using ProFootball.Presentation.ViewModels;
 using Serilog;
 using Serilog.Events;
@@ -47,6 +48,7 @@ public partial class App : System.Windows.Application
             .ConfigureServices((context, services) =>
             {
                 services.AddInfrastructure(context.Configuration);
+                services.AddSingleton<IThemeService, ThemeService>();
                 services.AddScoped<MainViewModel>();
                 services.AddScoped<MainWindow>();
             })
@@ -55,6 +57,8 @@ public partial class App : System.Windows.Application
         _host.Start();
 
         _uiScope = _host.Services.CreateScope();
+        var themeService = _uiScope.ServiceProvider.GetRequiredService<IThemeService>();
+        themeService.Initialize();
         var mainWindow = _uiScope.ServiceProvider.GetRequiredService<MainWindow>();
         MainWindow = mainWindow;
         mainWindow.Show();
