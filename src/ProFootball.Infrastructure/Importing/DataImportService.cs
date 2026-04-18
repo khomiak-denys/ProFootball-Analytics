@@ -50,11 +50,11 @@ public sealed class DataImportService(
             await sqliteConnection.OpenAsync(cancellationToken);
 
             var skipped = 0;
-            var countries = await ImportCountriesAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-            var leagues = await ImportLeaguesAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+            var countryLookup = await ReadCountryLookupAsync(sqliteConnection, value => skipped += value, cancellationToken);
+            var leagues = await ImportLeaguesAsync(dbContext, sqliteConnection, countryLookup, batchSize, value => skipped += value, cancellationToken);
             var teams = await ImportTeamsAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
             var players = await ImportPlayersAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-            var matches = await ImportMatchesAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+            var matches = await ImportMatchesAsync(dbContext, sqliteConnection, countryLookup, batchSize, value => skipped += value, cancellationToken);
             var teamAttributes = await ImportTeamAttributesAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
             var playerAttributes = await ImportPlayerAttributesAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
 
@@ -63,7 +63,7 @@ public sealed class DataImportService(
             stopwatch.Stop();
 
             return new DataImportResult(
-                countries,
+                countryLookup.Count,
                 leagues,
                 teams,
                 players,
@@ -99,7 +99,6 @@ public sealed class DataImportService(
         await dbContext.Players.ExecuteDeleteAsync(cancellationToken);
         await dbContext.Teams.ExecuteDeleteAsync(cancellationToken);
         await dbContext.Leagues.ExecuteDeleteAsync(cancellationToken);
-        await dbContext.Countries.ExecuteDeleteAsync(cancellationToken);
     }
 
     private static async Task PrepareDatabaseAsync(ProFootballDbContext dbContext, CancellationToken cancellationToken)
@@ -114,10 +113,8 @@ public sealed class DataImportService(
         await dbContext.Database.EnsureCreatedAsync(cancellationToken);
     }
 
-    private async Task<int> ImportCountriesAsync(
-        ProFootballDbContext dbContext,
+    private async Task<Dictionary<int, string>> ReadCountryLookupAsync(
         SqliteConnection sqliteConnection,
-        int batchSize,
         Action<int> addSkipped,
         CancellationToken cancellationToken)
     {
@@ -125,9 +122,8 @@ public sealed class DataImportService(
         await using var command = sqliteConnection.CreateCommand();
         command.CommandText = sql;
 
-        var imported = 0;
         var skipped = 0;
-        var batch = new List<Country>(batchSize);
+        var countryLookup = new Dictionary<int, string>();
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
@@ -140,23 +136,19 @@ public sealed class DataImportService(
                 continue;
             }
 
-            batch.Add(new Country(id.Value, name));
-            if (batch.Count >= batchSize)
-            {
-                imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
-            }
+            countryLookup[id.Value] = name;
         }
 
-        imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
         addSkipped(skipped);
 
-        logger.LogInformation("Imported countries: {Imported}, skipped: {Skipped}", imported, skipped);
-        return imported;
+        logger.LogInformation("Resolved countries from SQLite: {Resolved}, skipped: {Skipped}", countryLookup.Count, skipped);
+        return countryLookup;
     }
 
     private async Task<int> ImportLeaguesAsync(
         ProFootballDbContext dbContext,
         SqliteConnection sqliteConnection,
+        IReadOnlyDictionary<int, string> countryLookup,
         int batchSize,
         Action<int> addSkipped,
         CancellationToken cancellationToken)
@@ -175,13 +167,16 @@ public sealed class DataImportService(
             var id = SqliteValueParser.ReadInt32(reader, 0);
             var countryId = SqliteValueParser.ReadInt32(reader, 1);
             var name = SqliteValueParser.ReadString(reader, 2);
-            if (!id.HasValue || !countryId.HasValue || string.IsNullOrWhiteSpace(name))
+            if (!id.HasValue
+                || !countryId.HasValue
+                || string.IsNullOrWhiteSpace(name)
+                || !countryLookup.TryGetValue(countryId.Value, out var countryName))
             {
                 skipped++;
                 continue;
             }
 
-            batch.Add(new League(id.Value, countryId.Value, name));
+            batch.Add(new League(id.Value, countryName, name));
             if (batch.Count >= batchSize)
             {
                 imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
@@ -286,6 +281,7 @@ public sealed class DataImportService(
     private async Task<int> ImportMatchesAsync(
         ProFootballDbContext dbContext,
         SqliteConnection sqliteConnection,
+        IReadOnlyDictionary<int, string> countryLookup,
         int batchSize,
         Action<int> addSkipped,
         CancellationToken cancellationToken)
@@ -321,7 +317,8 @@ public sealed class DataImportService(
                 || !matchApiId.HasValue
                 || !homeTeamApiId.HasValue
                 || !awayTeamApiId.HasValue
-                || string.IsNullOrWhiteSpace(season))
+                || string.IsNullOrWhiteSpace(season)
+                || !countryLookup.TryGetValue(countryId.Value, out var countryName))
             {
                 skipped++;
                 continue;
@@ -329,7 +326,7 @@ public sealed class DataImportService(
 
             batch.Add(new FootballMatch(
                 id.Value,
-                countryId.Value,
+                countryName,
                 leagueId.Value,
                 season,
                 date.Value,
