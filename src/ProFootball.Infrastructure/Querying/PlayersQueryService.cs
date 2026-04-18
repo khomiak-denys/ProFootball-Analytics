@@ -33,20 +33,40 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
         int skip,
         CancellationToken cancellationToken)
     {
-        var latestAttributesQuery = dbContext.PlayerAttributes
-            .AsNoTracking()
+        var playerAttributes = dbContext.PlayerAttributes.AsNoTracking();
+        var latestDatesQuery = playerAttributes
             .GroupBy(attribute => attribute.PlayerApiId)
-            .Select(group => group
-                .OrderByDescending(attribute => attribute.Date)
-                .ThenByDescending(attribute => attribute.Id)
-                .Select(attribute => new
-                {
-                    attribute.PlayerApiId,
-                    attribute.OverallRating,
-                    attribute.Potential,
-                    attribute.PreferredFoot,
-                })
-                .First());
+            .Select(group => new
+            {
+                PlayerApiId = group.Key,
+                Date = group.Max(attribute => attribute.Date),
+            });
+
+        var latestDateRowsQuery =
+            from attribute in playerAttributes
+            join latestDate in latestDatesQuery
+                on new { attribute.PlayerApiId, attribute.Date } equals new { latestDate.PlayerApiId, latestDate.Date }
+            select attribute;
+
+        var latestIdsQuery = latestDateRowsQuery
+            .GroupBy(attribute => attribute.PlayerApiId)
+            .Select(group => new
+            {
+                PlayerApiId = group.Key,
+                Id = group.Max(attribute => attribute.Id),
+            });
+
+        var latestAttributesQuery =
+            from attribute in playerAttributes
+            join latestId in latestIdsQuery
+                on new { attribute.PlayerApiId, attribute.Id } equals new { latestId.PlayerApiId, latestId.Id }
+            select new
+            {
+                attribute.PlayerApiId,
+                attribute.OverallRating,
+                attribute.Potential,
+                attribute.PreferredFoot,
+            };
 
         var projectedQuery =
             from player in dbContext.Players.AsNoTracking()
