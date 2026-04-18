@@ -8,7 +8,7 @@ public sealed class FootballMatch
 
     public FootballMatch(
         int id,
-        int countryId,
+        string countryName,
         int leagueId,
         string season,
         DateTime date,
@@ -18,10 +18,11 @@ public sealed class FootballMatch
         int? homeTeamGoal,
         int? awayTeamGoal)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(countryName);
         ArgumentException.ThrowIfNullOrWhiteSpace(season);
 
         Id = id;
-        CountryId = countryId;
+        CountryName = countryName.Trim();
         LeagueId = leagueId;
         Season = season.Trim();
         Date = date;
@@ -34,7 +35,7 @@ public sealed class FootballMatch
 
     public int Id { get; private set; }
 
-    public int CountryId { get; private set; }
+    public string CountryName { get; private set; } = string.Empty;
 
     public int LeagueId { get; private set; }
 
@@ -51,8 +52,6 @@ public sealed class FootballMatch
     public int? HomeTeamGoal { get; private set; }
 
     public int? AwayTeamGoal { get; private set; }
-
-    public Country? Country { get; private set; }
 
     public League? League { get; private set; }
 }
