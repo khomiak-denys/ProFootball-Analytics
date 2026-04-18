@@ -175,8 +175,9 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
         var playersQuery = dbContext.Players.AsNoTracking();
         if (!string.IsNullOrWhiteSpace(query.Name))
         {
-            var normalizedName = query.Name.Trim().ToLowerInvariant();
-            playersQuery = playersQuery.Where(player => player.Name.ToLower().Contains(normalizedName));
+            var pattern = LikePattern.Contains(query.Name.Trim());
+            playersQuery = playersQuery.Where(player =>
+                EF.Functions.Like(EF.Functions.Collate(player.Name, "NOCASE"), pattern, "\\"));
         }
 
         if (query.MinHeight.HasValue)

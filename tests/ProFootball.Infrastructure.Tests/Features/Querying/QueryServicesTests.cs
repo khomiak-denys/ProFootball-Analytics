@@ -70,6 +70,30 @@ public class QueryServicesTests
     }
 
     [Fact]
+    public async Task Players_Search_ShouldApplyCaseInsensitiveNameFilter_InSqliteFallback()
+    {
+        await using var host = await QueryingTestHost.CreateAsync();
+        var service = new PlayersQueryService(host.DbContextFactory);
+
+        var result = await service.SearchPlayersAsync(new PlayerSearchQuery(
+            Name: "kEvIn",
+            MinOverallRating: null,
+            MaxOverallRating: null,
+            MinPotential: null,
+            MaxPotential: null,
+            MinHeight: null,
+            MaxHeight: null,
+            PreferredFoot: null,
+            SortBy: "height",
+            SortDescending: false,
+            Page: 1,
+            PageSize: 10));
+
+        var player = Assert.Single(result.Items);
+        Assert.Equal(9001, player.PlayerApiId);
+    }
+
+    [Fact]
     public async Task Players_GetDetails_ShouldReturnAttributesOrderedByDateThenIdDesc()
     {
         await using var host = await QueryingTestHost.CreateAsync();
