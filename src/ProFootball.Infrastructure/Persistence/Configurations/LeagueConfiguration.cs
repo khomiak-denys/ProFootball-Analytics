@@ -18,12 +18,11 @@ public sealed class LeagueConfiguration : IEntityTypeConfiguration<League>
             .HasMaxLength(200)
             .IsRequired();
 
-        builder.HasIndex(league => league.Name);
-        builder.HasIndex(league => league.CountryId);
+        builder.Property(league => league.CountryName)
+            .HasMaxLength(120)
+            .IsRequired();
 
-        builder.HasOne(league => league.Country)
-            .WithMany()
-            .HasForeignKey(league => league.CountryId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasIndex(league => league.Name);
+        builder.HasIndex(league => league.CountryName);
     }
 }

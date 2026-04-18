@@ -18,17 +18,17 @@ public sealed class FootballMatchConfiguration : IEntityTypeConfiguration<Footba
             .HasMaxLength(16)
             .IsRequired();
 
+        builder.Property(match => match.CountryName)
+            .HasMaxLength(120)
+            .IsRequired();
+
         builder.HasIndex(match => match.MatchApiId).IsUnique();
         builder.HasIndex(match => match.Date);
         builder.HasIndex(match => match.Season);
+        builder.HasIndex(match => match.CountryName);
         builder.HasIndex(match => match.LeagueId);
         builder.HasIndex(match => match.HomeTeamApiId);
         builder.HasIndex(match => match.AwayTeamApiId);
-
-        builder.HasOne(match => match.Country)
-            .WithMany()
-            .HasForeignKey(match => match.CountryId)
-            .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(match => match.League)
             .WithMany()
