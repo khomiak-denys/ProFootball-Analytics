@@ -171,34 +171,56 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
         CancellationToken cancellationToken)
     {
         var playerAttributes = dbContext.PlayerAttributes.AsNoTracking();
-        var projectedQuery = dbContext.Players
-            .AsNoTracking()
-            .Select(player => new
+        var latestDatesQuery = playerAttributes
+            .GroupBy(attribute => attribute.PlayerApiId)
+            .Select(group => new
+            {
+                PlayerApiId = group.Key,
+                Date = group.Max(attribute => attribute.Date),
+            });
+
+        var latestDateRowsQuery =
+            from attribute in playerAttributes
+            join latestDate in latestDatesQuery
+                on new { attribute.PlayerApiId, attribute.Date } equals new { latestDate.PlayerApiId, latestDate.Date }
+            select attribute;
+
+        var latestIdsQuery = latestDateRowsQuery
+            .GroupBy(attribute => attribute.PlayerApiId)
+            .Select(group => new
+            {
+                PlayerApiId = group.Key,
+                Id = group.Max(attribute => attribute.Id),
+            });
+
+        var latestAttributesQuery =
+            from attribute in playerAttributes
+            join latestId in latestIdsQuery
+                on new { attribute.PlayerApiId, attribute.Id } equals new { latestId.PlayerApiId, latestId.Id }
+            select new
+            {
+                attribute.PlayerApiId,
+                attribute.OverallRating,
+                attribute.Potential,
+                attribute.PreferredFoot,
+            };
+
+        var projectedQuery =
+            from player in dbContext.Players.AsNoTracking()
+            join latest in latestAttributesQuery
+                on player.PlayerApiId equals latest.PlayerApiId into latestJoin
+            from latest in latestJoin.DefaultIfEmpty()
+            select new
             {
                 player.PlayerApiId,
                 player.Name,
                 player.Birthday,
                 player.Height,
                 player.Weight,
-                OverallRating = playerAttributes
-                    .Where(attribute => attribute.PlayerApiId == player.PlayerApiId)
-                    .OrderByDescending(attribute => attribute.Date)
-                    .ThenByDescending(attribute => attribute.Id)
-                    .Select(attribute => attribute.OverallRating)
-                    .FirstOrDefault(),
-                Potential = playerAttributes
-                    .Where(attribute => attribute.PlayerApiId == player.PlayerApiId)
-                    .OrderByDescending(attribute => attribute.Date)
-                    .ThenByDescending(attribute => attribute.Id)
-                    .Select(attribute => attribute.Potential)
-                    .FirstOrDefault(),
-                PreferredFoot = playerAttributes
-                    .Where(attribute => attribute.PlayerApiId == player.PlayerApiId)
-                    .OrderByDescending(attribute => attribute.Date)
-                    .ThenByDescending(attribute => attribute.Id)
-                    .Select(attribute => attribute.PreferredFoot)
-                    .FirstOrDefault(),
-            });
+                OverallRating = latest == null ? null : latest.OverallRating,
+                Potential = latest == null ? null : latest.Potential,
+                PreferredFoot = latest == null ? null : latest.PreferredFoot,
+            };
 
         if (!string.IsNullOrWhiteSpace(query.Name))
         {
