@@ -1,7 +1,0 @@
-namespace ProFootball.Application.Contracts.Common;
-
-public sealed record PagedResult<T>(
-    IReadOnlyList<T> Items,
-    int TotalCount,
-    int Page,
-    int PageSize);
