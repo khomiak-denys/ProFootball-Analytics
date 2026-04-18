@@ -67,7 +67,9 @@ dotnet run --project .\src\ProFootball.DataLoader\ProFootball.DataLoader.csproj 
 - `src/ProFootball.Infrastructure`: EF Core + PostgreSQL persistence, migrations, query services, and SQLite import service.
 - `src/ProFootball.Presentation`: WPF MVVM client with dashboard, list/detail pages, and analytics views.
 - `src/ProFootball.DataLoader`: console data-loader for importing SQLite dataset into PostgreSQL.
-- `tests/ProFootball.Application.Tests`: xUnit tests with coverage threshold.
+- `tests/ProFootball.Domain.Tests`: xUnit domain tests (entities, invariants, validation).
+- `tests/ProFootball.Application.Tests`: xUnit application tests (auth/session behavior).
+- `tests/ProFootball.Infrastructure.Tests`: xUnit infrastructure tests (importing, querying, helpers).
 - `docs/adr`: architecture decision records.
 
 ## Architecture Overview
@@ -90,7 +92,7 @@ The solution follows a layered architecture where core business concepts stay in
 
 - Formatting/linting: `dotnet format`
 - Tests: `xUnit`
-- Coverage threshold: `70%` line coverage (`Directory.Build.targets`)
+- Coverage threshold: `70%` line coverage for core test projects (`Directory.Build.targets`)
 - Pre-commit hook: `.githooks/pre-commit` (enable with `git config core.hooksPath .githooks`)
 
 ## MVP Scope

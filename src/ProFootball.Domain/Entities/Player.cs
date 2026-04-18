@@ -16,6 +16,7 @@ public sealed class Player
         int? weight)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
         Id = id;
         PlayerApiId = playerApiId;
         PlayerFifaApiId = playerFifaApiId;

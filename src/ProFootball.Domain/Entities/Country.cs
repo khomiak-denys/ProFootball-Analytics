@@ -9,6 +9,7 @@ public sealed class Country
     public Country(int id, string name)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
         Id = id;
         Name = name.Trim();
     }

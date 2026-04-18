@@ -9,6 +9,7 @@ public sealed class Team
     public Team(int id, int teamApiId, int? teamFifaApiId, string longName, string? shortName)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(longName);
+
         Id = id;
         TeamApiId = teamApiId;
         TeamFifaApiId = teamFifaApiId;

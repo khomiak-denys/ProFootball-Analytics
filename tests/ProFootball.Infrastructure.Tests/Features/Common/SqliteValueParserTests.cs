@@ -2,7 +2,7 @@ using Microsoft.Data.Sqlite;
 using ProFootball.Infrastructure.Importing;
 using Xunit;
 
-namespace ProFootball.Application.Tests;
+namespace ProFootball.Infrastructure.Tests.Features.Common;
 
 public class SqliteValueParserTests
 {
@@ -34,6 +34,33 @@ public class SqliteValueParserTests
         Assert.Null(SqliteValueParser.ReadInt32(reader, 2));
         Assert.Null(SqliteValueParser.ReadInt32(reader, 3));
         Assert.Equal(18, SqliteValueParser.ReadInt32(reader, 4));
+    }
+
+    [Fact]
+    public async Task ReadInt32_ShouldReturnNull_WhenValueIsOutOfRange()
+    {
+        await using var connection = new SqliteConnection("Data Source=:memory:");
+        await connection.OpenAsync();
+
+        await using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "CREATE TABLE parser_case (value_long INTEGER, value_text TEXT)";
+            await command.ExecuteNonQueryAsync();
+        }
+
+        await using (var insert = connection.CreateCommand())
+        {
+            insert.CommandText = $"INSERT INTO parser_case (value_long, value_text) VALUES ({(long)int.MaxValue + 1}, ' {(long)int.MaxValue + 1} ')";
+            await insert.ExecuteNonQueryAsync();
+        }
+
+        await using var select = connection.CreateCommand();
+        select.CommandText = "SELECT value_long, value_text FROM parser_case";
+        await using var reader = await select.ExecuteReaderAsync();
+        Assert.True(await reader.ReadAsync());
+
+        Assert.Null(SqliteValueParser.ReadInt32(reader, 0));
+        Assert.Null(SqliteValueParser.ReadInt32(reader, 1));
     }
 
     [Fact]

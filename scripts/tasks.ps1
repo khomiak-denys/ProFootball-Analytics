@@ -25,8 +25,11 @@ switch ($Task) {
     }
     "clean" {
         dotnet clean $solution
-        if (Test-Path .\tests\ProFootball.Application.Tests\TestResults) {
-            Remove-Item -Recurse -Force .\tests\ProFootball.Application.Tests\TestResults
+        Get-ChildItem .\tests -Directory | ForEach-Object {
+            $testResultsPath = Join-Path $_.FullName "TestResults"
+            if (Test-Path $testResultsPath) {
+                Remove-Item -Recurse -Force $testResultsPath
+            }
         }
     }
 }

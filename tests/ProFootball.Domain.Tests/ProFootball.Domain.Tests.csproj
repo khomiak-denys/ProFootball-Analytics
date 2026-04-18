@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ProFootball.Application\ProFootball.Application.csproj" />
+    <ProjectReference Include="..\..\src\ProFootball.Domain\ProFootball.Domain.csproj" />
   </ItemGroup>
 
 </Project>

@@ -19,6 +19,7 @@ public sealed class FootballMatch
         int? awayTeamGoal)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(season);
+
         Id = id;
         CountryId = countryId;
         LeagueId = leagueId;

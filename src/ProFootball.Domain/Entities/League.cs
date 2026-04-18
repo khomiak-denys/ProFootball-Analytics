@@ -9,6 +9,7 @@ public sealed class League
     public League(int id, int countryId, string name)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
         Id = id;
         CountryId = countryId;
         Name = name.Trim();
