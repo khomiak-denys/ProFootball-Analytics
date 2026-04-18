@@ -209,6 +209,24 @@
                 </Setter.Value>
             </Setter>
         </Style>
+
+        <Style x:Key="PlayersFilterTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Height" Value="42" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMutedBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="{DynamicResource TitleForegroundBrush}" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+        </Style>
+
+        <Style x:Key="PlayersFilterComboBoxStyle" TargetType="ComboBox" BasedOn="{StaticResource QuickFilterComboBoxStyle}">
+            <Setter Property="Height" Value="42" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceMutedBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -1381,9 +1399,9 @@
                     <TabItem Header="Players" Tag="{x:Static viewModels:AppTab.Players}">
                         <Grid Margin="6,2,6,2">
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="280" />
+                                <ColumnDefinition Width="250" />
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="390" />
+                                <ColumnDefinition Width="350" />
                             </Grid.ColumnDefinitions>
 
                             <Border Grid.Column="0"
@@ -1399,43 +1417,28 @@
                                                Foreground="{DynamicResource TitleForegroundBrush}"
                                                Text="Filters" />
                                     <TextBlock Margin="0,26,0,0"
-                                               FontSize="30"
+                                                                                             FontSize="26"
                                                Foreground="{DynamicResource TitleForegroundBrush}"
                                                Text="Player Name" />
                                     <TextBox Margin="0,8,0,0"
-                                             Height="44"
-                                             Padding="14,0"
-                                             FontSize="20"
-                                             BorderBrush="{DynamicResource SubtleBorderBrush}"
-                                             BorderThickness="1"
-                                             Background="{DynamicResource SurfaceMutedBrush}"
+                                                                                         Style="{StaticResource PlayersFilterTextBoxStyle}"
                                              Text="{Binding Players.NameFilter, UpdateSourceTrigger=PropertyChanged}" />
 
                                     <TextBlock Margin="0,22,0,0"
-                                               FontSize="30"
+                                                                                             FontSize="26"
                                                Foreground="{DynamicResource TitleForegroundBrush}"
                                                Text="Overall Rating" />
                                     <ComboBox Margin="0,8,0,0"
-                                              Height="44"
-                                              Padding="12,0"
-                                              FontSize="20"
-                                              BorderBrush="{DynamicResource SubtleBorderBrush}"
-                                              BorderThickness="1"
-                                              Background="{DynamicResource SurfaceMutedBrush}"
+                                                                                            Style="{StaticResource PlayersFilterComboBoxStyle}"
                                               ItemsSource="{Binding Players.OverallRatingOptions}"
                                               SelectedItem="{Binding Players.SelectedOverallRatingOption, Mode=TwoWay}" />
 
                                     <TextBlock Margin="0,22,0,0"
-                                               FontSize="30"
+                                                                                             FontSize="26"
                                                Foreground="{DynamicResource TitleForegroundBrush}"
                                                Text="Preferred Foot" />
                                     <ComboBox Margin="0,8,0,0"
-                                              Height="44"
-                                              Padding="12,0"
-                                              FontSize="20"
-                                              BorderBrush="{DynamicResource SubtleBorderBrush}"
-                                              BorderThickness="1"
-                                              Background="{DynamicResource SurfaceMutedBrush}"
+                                                                                            Style="{StaticResource PlayersFilterComboBoxStyle}"
                                               ItemsSource="{Binding Players.PreferredFootOptions}"
                                               SelectedItem="{Binding Players.SelectedPreferredFootOption, Mode=TwoWay}" />
                                     <TextBlock Margin="0,12,0,0"
@@ -1474,6 +1477,7 @@
                                               ItemsSource="{Binding Players.Players}"
                                               SelectedItem="{Binding Players.SelectedPlayer, Mode=TwoWay}"
                                               AutoGenerateColumns="False"
+                                              RowHeaderWidth="0"
                                               HeadersVisibility="Column"
                                               CanUserAddRows="False"
                                               CanUserDeleteRows="False"
@@ -1481,8 +1485,8 @@
                                               IsReadOnly="True">
                                         <DataGrid.RowStyle>
                                             <Style TargetType="DataGridRow">
-                                                <Setter Property="FontSize" Value="20" />
-                                                <Setter Property="MinHeight" Value="40" />
+                                                <Setter Property="FontSize" Value="16" />
+                                                <Setter Property="MinHeight" Value="34" />
                                                 <Setter Property="Background" Value="White" />
                                                 <Style.Triggers>
                                                     <Trigger Property="IsSelected" Value="True">
@@ -1494,12 +1498,12 @@
                                         </DataGrid.RowStyle>
                                         <DataGrid.Columns>
                                             <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
-                                            <DataGridTextColumn Header="Position" Binding="{Binding Position}" Width="98" />
-                                            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="70" />
-                                            <DataGridTextColumn Header="Overall" Binding="{Binding OverallRating}" Width="95" />
-                                            <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="95" />
-                                            <DataGridTextColumn Header="Foot" Binding="{Binding PreferredFoot}" Width="85" />
-                                            <DataGridTextColumn Header="Height" Binding="{Binding HeightDisplay}" Width="110" />
+                                            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="65" />
+                                            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="52" />
+                                            <DataGridTextColumn Header="Rating" Binding="{Binding OverallRating}" Width="58" />
+                                            <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="72" />
+                                            <DataGridTextColumn Header="Foot" Binding="{Binding PreferredFoot}" Width="58" />
+                                            <DataGridTextColumn Header="Height" Binding="{Binding HeightDisplay}" Width="72" />
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </Grid>
@@ -1681,15 +1685,14 @@
                                                 <TextBlock Canvas.Left="0" Canvas.Top="86" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="Physical" />
                                             </Canvas>
                                         </Grid>
-                                        <DataGrid Margin="0,16,0,0"
-                                                  HeadersVisibility="Column"
-                                                  AutoGenerateColumns="False"
-                                                  CanUserAddRows="False"
-                                                  CanUserDeleteRows="False"
-                                                  IsReadOnly="True"
-                                                  ItemsSource="{Binding Players.SelectedPlayerHistory}">
-                                            <DataGrid.Style>
-                                                <Style TargetType="DataGrid">
+                                        <Border Margin="0,16,0,0"
+                                                Padding="8"
+                                                Background="{DynamicResource SurfaceMutedBrush}"
+                                                BorderBrush="{DynamicResource SubtleBorderBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="8">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
                                                     <Setter Property="Visibility" Value="Collapsed" />
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding Players.IsOverviewSelected}" Value="False">
@@ -1697,14 +1700,65 @@
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
-                                            </DataGrid.Style>
-                                            <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=\{0:yyyy-MM-dd\}}" Width="130" />
-                                                <DataGridTextColumn Header="Overall" Binding="{Binding OverallRating}" Width="80" />
-                                                <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="80" />
-                                                <DataGridTextColumn Header="Foot" Binding="{Binding PreferredFoot}" Width="80" />
-                                            </DataGrid.Columns>
-                                        </DataGrid>
+                                            </Border.Style>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="220" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+
+                                                <Canvas Width="334" Height="220" HorizontalAlignment="Center">
+                                                    <Line X1="26" Y1="16" X2="26" Y2="196" Stroke="{DynamicResource ChartAxisBrush}" StrokeThickness="1" />
+                                                    <Line X1="26" Y1="196" X2="320" Y2="196" Stroke="{DynamicResource ChartAxisBrush}" StrokeThickness="1" />
+
+                                                    <Line X1="26" Y1="142" X2="320" Y2="142" Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1" StrokeDashArray="2,2" />
+                                                    <Line X1="26" Y1="96" X2="320" Y2="96" Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1" StrokeDashArray="2,2" />
+                                                    <Line X1="26" Y1="50" X2="320" Y2="50" Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1" StrokeDashArray="2,2" />
+
+                                                    <Polyline Points="{Binding Players.SelectedPlayerTrendPoints, Converter={StaticResource TrendToPointsConverter}, ConverterParameter=overall}"
+                                                              Stroke="{DynamicResource SuccessForegroundBrush}"
+                                                              StrokeThickness="2.2">
+                                                        <Polyline.RenderTransform>
+                                                            <TranslateTransform X="16" Y="28" />
+                                                        </Polyline.RenderTransform>
+                                                    </Polyline>
+                                                    <Polyline Points="{Binding Players.SelectedPlayerTrendPoints, Converter={StaticResource TrendToPointsConverter}, ConverterParameter=potential}"
+                                                              Stroke="{DynamicResource BlueAccentBrush}"
+                                                              StrokeThickness="2.2">
+                                                        <Polyline.RenderTransform>
+                                                            <TranslateTransform X="16" Y="28" />
+                                                        </Polyline.RenderTransform>
+                                                    </Polyline>
+
+                                                    <TextBlock Canvas.Left="2" Canvas.Top="188" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="80" />
+                                                    <TextBlock Canvas.Left="2" Canvas.Top="134" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="84" />
+                                                    <TextBlock Canvas.Left="2" Canvas.Top="88" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="88" />
+                                                    <TextBlock Canvas.Left="2" Canvas.Top="42" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="95" />
+                                                </Canvas>
+
+                                                <ItemsControl Grid.Row="1" Margin="26,4,14,0" ItemsSource="{Binding Players.SelectedPlayerTrendPoints}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <UniformGrid Rows="1" />
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <TextBlock HorizontalAlignment="Center"
+                                                                       FontSize="12"
+                                                                       Foreground="{DynamicResource MutedForegroundBrush}"
+                                                                       Text="{Binding Date, StringFormat={}{0:yyyy-MM}}" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                                <StackPanel Grid.Row="2" Margin="0,8,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
+                                                    <TextBlock FontSize="14" Foreground="{DynamicResource SuccessForegroundBrush}" Text="- Overall" />
+                                                    <TextBlock Margin="10,0,0,0" FontSize="14" Foreground="{DynamicResource BlueAccentBrush}" Text="- Potential" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
                                     </StackPanel>
                                 </Border>
                             </Grid>
