@@ -104,7 +104,6 @@ public class DataImportServiceTests
                 .UseSqlite(destinationConnection)
                 .Options;
 
-            await using var destinationContext = new ProFootballDbContext(options);
             var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
 
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>

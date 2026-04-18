@@ -218,8 +218,6 @@ public class QueryServicesTests
     public async Task Analytics_GetMatchesBySeason_ShouldRespectOptionalLeagueFilter()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new AnalyticsQueryService(host.DbContextFactory);
-
         var matchService = new MatchesQueryService(host.DbContextFactory);
         var allLeagues = await matchService.HandleAsync(new GetMatchesBySeasonQuery());
         var filtered = await matchService.HandleAsync(new GetMatchesBySeasonQuery(10));
