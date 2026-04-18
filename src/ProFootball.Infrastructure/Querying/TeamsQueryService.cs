@@ -1,15 +1,18 @@
 using Microsoft.EntityFrameworkCore;
-using ProFootball.Application.Abstractions.Querying;
-using ProFootball.Application.Contracts.Common;
-using ProFootball.Application.Contracts.Queries;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Common;
+using ProFootball.Application.Team.Dtos;
+using ProFootball.Application.Team.Queries;
 using ProFootball.Domain.Entities;
 using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
-public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) : ITeamsQueryService
+public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) :
+    IQueryHandler<TeamSearchQuery, PagedResult<TeamListItemDto>>,
+    IQueryHandler<GetTeamDetailsQuery, TeamDetailsDto?>
 {
-    public async Task<PagedResult<TeamListItemDto>> SearchTeamsAsync(
+    public async Task<PagedResult<TeamListItemDto>> HandleAsync(
         TeamSearchQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -40,10 +43,11 @@ public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> db
         return new PagedResult<TeamListItemDto>(items, totalCount, page, pageSize);
     }
 
-    public async Task<TeamDetailsDto?> GetTeamDetailsAsync(
-        int teamApiId,
+    public async Task<TeamDetailsDto?> HandleAsync(
+        GetTeamDetailsQuery query,
         CancellationToken cancellationToken = default)
     {
+        var teamApiId = query.TeamApiId;
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var team = await dbContext.Teams
             .AsNoTracking()
