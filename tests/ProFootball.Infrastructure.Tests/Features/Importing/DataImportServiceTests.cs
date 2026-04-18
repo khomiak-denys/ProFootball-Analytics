@@ -21,9 +21,9 @@ public class DataImportServiceTests
             .UseSqlite(destinationConnection)
             .Options;
 
-            var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
+        var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
 
-            await Assert.ThrowsAnyAsync<ArgumentException>(() =>
+        await Assert.ThrowsAnyAsync<ArgumentException>(() =>
             service.HandleAsync(new ImportDataCommand("   ", BatchSize: 100)));
     }
 

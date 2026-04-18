@@ -27,8 +27,9 @@ public class CqrsDispatcherAndContractsTests
         services.AddScoped<IQueryHandler<TestQuery, int>, TestQueryHandler>();
         services.AddScoped<IQueryDispatcher, QueryDispatcher>();
 
-        await using var provider = services.BuildServiceProvider().CreateAsyncScope();
-        var dispatcher = provider.ServiceProvider.GetRequiredService<IQueryDispatcher>();
+        using var rootProvider = services.BuildServiceProvider();
+        await using var scope = rootProvider.CreateAsyncScope();
+        var dispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
 
         var result = await dispatcher.DispatchAsync<TestQuery, int>(new TestQuery(5));
 
@@ -43,8 +44,9 @@ public class CqrsDispatcherAndContractsTests
         services.AddScoped<ICommandHandler<TestResultCommand, string>, TestResultCommandHandler>();
         services.AddScoped<ICommandDispatcher, CommandDispatcher>();
 
-        await using var provider = services.BuildServiceProvider().CreateAsyncScope();
-        var dispatcher = provider.ServiceProvider.GetRequiredService<ICommandDispatcher>();
+        using var rootProvider = services.BuildServiceProvider();
+        await using var scope = rootProvider.CreateAsyncScope();
+        var dispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
 
         await dispatcher.DispatchAsync(new TestCommand());
         var result = await dispatcher.DispatchAsync<TestResultCommand, string>(new TestResultCommand("ok"));
@@ -55,6 +57,8 @@ public class CqrsDispatcherAndContractsTests
     [Fact]
     public void Contracts_ShouldRetainAssignedValues()
     {
+        var today = DateTime.UtcNow.Date;
+
         var country = new CountryDto(1, "England");
         var countryListItem = new CountryLeagueListItemDto(1, "England", 2);
         var summary = new CountryLeagueSummaryDto(40, 2, 2);
@@ -63,23 +67,23 @@ public class CqrsDispatcherAndContractsTests
         var league = new LeagueDto(1, "Premier League", 1, "England");
 
         var team = new TeamListItemDto(100, "Arsenal", "ARS", 1000);
-        var teamAttribute = new TeamAttributeDto(DateTime.UtcNow.Date, 70, 71, 72, 73);
+        var teamAttribute = new TeamAttributeDto(today, 70, 71, 72, 73);
         var teamDetails = new TeamDetailsDto(team, [teamAttribute]);
         var teamSearch = new TeamSearchQuery("ars", "shortname", false, 2, 15);
         var teamDetailsQuery = new GetTeamDetailsQuery(100);
 
-        var player = new PlayerListItemDto(9001, "Kevin", DateTime.UtcNow.Date.AddYears(-30), 181, 76, 91, 92, "Right");
-        var playerAttribute = new PlayerAttributeDto(DateTime.UtcNow.Date, 91, 92, "Right", "high", "medium");
-        var playerDetails = new PlayerDetailsDto(9001, 5001, "Kevin", DateTime.UtcNow.Date.AddYears(-30), 181, 76, [playerAttribute]);
-        var trendPoint = new PlayerTrendPointDto(DateTime.UtcNow.Date, 91, 92);
+        var player = new PlayerListItemDto(9001, "Kevin", today.AddYears(-30), 181, 76, 91, 92, "Right");
+        var playerAttribute = new PlayerAttributeDto(today, 91, 92, "Right", "high", "medium");
+        var playerDetails = new PlayerDetailsDto(9001, 5001, "Kevin", today.AddYears(-30), 181, 76, [playerAttribute]);
+        var trendPoint = new PlayerTrendPointDto(today, 91, 92);
         var topPlayer = new TopPlayerDto(9001, "Kevin", 90.5, 91.3, 25);
         var playerSearch = new PlayerSearchQuery("kev", 80, null, null, null, null, null, null, "overallrating", true, 1, 20);
         var playerDetailsQuery = new GetPlayerDetailsQuery(9001);
         var playerTrendQuery = new GetPlayerTrendQuery(9001);
         var topPlayersQuery = new TopPlayersQuery(10, 85, 88, "Right", "overall", true);
 
-        var match = new MatchListItemDto(5001, DateTime.UtcNow.Date, "2025/26", "Premier League", "England", 100, "Arsenal", 200, "Chelsea", 2, 1);
-        var matchDetails = new MatchDetailsDto(5001, DateTime.UtcNow.Date, "2025/26", "Premier League", "England", 100, "Arsenal", 200, "Chelsea", 2, 1);
+        var match = new MatchListItemDto(5001, today, "2025/26", "Premier League", "England", 100, "Arsenal", 200, "Chelsea", 2, 1);
+        var matchDetails = new MatchDetailsDto(5001, today, "2025/26", "Premier League", "England", 100, "Arsenal", 200, "Chelsea", 2, 1);
         var bySeason = new MatchesBySeasonDto("2025/26", "Premier League", 380);
         var kpi = new DashboardKpiDto(5, 10, 20, 500, 3800);
         var matchSearch = new MatchSearchQuery(1, "2025/26", 100, null, null, "date", true, 1, 25);
@@ -107,7 +111,7 @@ public class CqrsDispatcherAndContractsTests
         Assert.Equal(100, team.TeamApiId);
         Assert.Equal("ARS", team.ShortName);
         Assert.Equal(1000, team.TeamFifaApiId);
-        Assert.Equal(DateTime.UtcNow.Date, teamAttribute.Date);
+        Assert.Equal(today, teamAttribute.Date);
         Assert.Equal(70, teamAttribute.BuildUpPlaySpeed);
         Assert.Equal(71, teamAttribute.BuildUpPlayPassing);
         Assert.Equal(72, teamAttribute.ChanceCreationPassing);
@@ -128,7 +132,7 @@ public class CqrsDispatcherAndContractsTests
         Assert.Equal(91, player.OverallRating);
         Assert.Equal(92, player.Potential);
         Assert.Equal("Right", player.PreferredFoot);
-        Assert.Equal(DateTime.UtcNow.Date, playerAttribute.Date);
+        Assert.Equal(today, playerAttribute.Date);
         Assert.Equal(91, playerAttribute.OverallRating);
         Assert.Equal(92, playerAttribute.Potential);
         Assert.Equal("Right", playerAttribute.PreferredFoot);
@@ -141,7 +145,7 @@ public class CqrsDispatcherAndContractsTests
         Assert.Single(playerDetails.Attributes);
         Assert.Equal(91, trendPoint.OverallRating);
         Assert.Equal(92, trendPoint.Potential);
-        Assert.Equal(DateTime.UtcNow.Date, trendPoint.Date);
+        Assert.Equal(today, trendPoint.Date);
         Assert.Equal("Kevin", topPlayer.PlayerName);
         Assert.Equal(90.5, topPlayer.AverageOverallRating);
         Assert.Equal(91.3, topPlayer.AveragePotential);
@@ -168,7 +172,7 @@ public class CqrsDispatcherAndContractsTests
         Assert.True(topPlayersQuery.SortDescending);
 
         Assert.Equal(5001, match.MatchApiId);
-        Assert.Equal(DateTime.UtcNow.Date, match.Date);
+        Assert.Equal(today, match.Date);
         Assert.Equal("2025/26", match.Season);
         Assert.Equal("England", match.CountryName);
         Assert.Equal(100, match.HomeTeamApiId);
@@ -178,7 +182,7 @@ public class CqrsDispatcherAndContractsTests
         Assert.Equal(2, match.HomeTeamGoal);
         Assert.Equal(1, match.AwayTeamGoal);
         Assert.Equal("Premier League", matchDetails.LeagueName);
-        Assert.Equal(DateTime.UtcNow.Date, matchDetails.Date);
+        Assert.Equal(today, matchDetails.Date);
         Assert.Equal("2025/26", matchDetails.Season);
         Assert.Equal("England", matchDetails.CountryName);
         Assert.Equal(100, matchDetails.HomeTeamApiId);
