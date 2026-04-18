@@ -24,30 +24,6 @@
             <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
-            <Setter Property="RenderTransform">
-                <Setter.Value>
-                    <ScaleTransform ScaleX="1" ScaleY="1" />
-                </Setter.Value>
-            </Setter>
-            <Style.Resources>
-                <Storyboard x:Key="CardMouseEnterStoryboard">
-                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" To="1.01" Duration="0:0:0.2" />
-                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" To="1.01" Duration="0:0:0.2" />
-                </Storyboard>
-                <Storyboard x:Key="CardMouseLeaveStoryboard">
-                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" To="1" Duration="0:0:0.2" />
-                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" To="1" Duration="0:0:0.2" />
-                </Storyboard>
-            </Style.Resources>
-            <Style.Triggers>
-                <EventTrigger RoutedEvent="MouseEnter">
-                    <BeginStoryboard Storyboard="{StaticResource CardMouseEnterStoryboard}" />
-                </EventTrigger>
-                <EventTrigger RoutedEvent="MouseLeave">
-                    <BeginStoryboard Storyboard="{StaticResource CardMouseLeaveStoryboard}" />
-                </EventTrigger>
-            </Style.Triggers>
         </Style>
 
         <Style x:Key="DashboardPanelStyle" TargetType="Border">
@@ -56,30 +32,6 @@
             <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
-            <Setter Property="RenderTransform">
-                <Setter.Value>
-                    <ScaleTransform ScaleX="1" ScaleY="1" />
-                </Setter.Value>
-            </Setter>
-            <Style.Resources>
-                <Storyboard x:Key="PanelMouseEnterStoryboard">
-                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" To="1.01" Duration="0:0:0.2" />
-                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" To="1.01" Duration="0:0:0.2" />
-                </Storyboard>
-                <Storyboard x:Key="PanelMouseLeaveStoryboard">
-                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleX" To="1" Duration="0:0:0.2" />
-                    <DoubleAnimation Storyboard.TargetProperty="RenderTransform.ScaleY" To="1" Duration="0:0:0.2" />
-                </Storyboard>
-            </Style.Resources>
-            <Style.Triggers>
-                <EventTrigger RoutedEvent="MouseEnter">
-                    <BeginStoryboard Storyboard="{StaticResource PanelMouseEnterStoryboard}" />
-                </EventTrigger>
-                <EventTrigger RoutedEvent="MouseLeave">
-                    <BeginStoryboard Storyboard="{StaticResource PanelMouseLeaveStoryboard}" />
-                </EventTrigger>
-            </Style.Triggers>
         </Style>
 
         <Style x:Key="DashboardMetricLabelStyle" TargetType="TextBlock">
@@ -146,6 +98,8 @@
         </Style>
 
         <Style x:Key="ContentOnlyTabControlStyle" TargetType="TabControl">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="BorderBrush" Value="Transparent" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TabControl">
@@ -158,6 +112,51 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <Style x:Key="QuickFilterComboBoxItemStyle" TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{DynamicResource TitleForegroundBrush}" />
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}" />
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="ItemBorder"
+                                Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource PanelMutedBackgroundBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource PanelMutedBackgroundBrush}" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="QuickFilterComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Height" Value="42" />
+            <Setter Property="Padding" Value="12,0" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Foreground" Value="{DynamicResource TitleForegroundBrush}" />
+            <Setter Property="ItemContainerStyle" Value="{StaticResource QuickFilterComboBoxItemStyle}" />
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource SuccessForegroundBrush}" />
+                </Trigger>
+                <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                    <Setter Property="BorderBrush" Value="{DynamicResource SuccessForegroundBrush}" />
+                </Trigger>
+            </Style.Triggers>
         </Style>
     </Window.Resources>
     <Grid>
@@ -273,7 +272,7 @@
                         BorderThickness="0,1,0,0">
                     <TextBlock FontSize="12"
                                Foreground="{DynamicResource SidebarSecondaryForegroundBrush}"
-                               Text="© 2026 ProFootball Analytics" />
+                               Text="{Binding Dashboard.CurrentYear, StringFormat=© {0} ProFootball Analytics}" />
                 </Border>
             </Grid>
         </Border>
@@ -389,9 +388,14 @@
 
                                     <Border Style="{StaticResource DashboardCardStyle}">
                                         <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
                                             <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Leagues" />
-                                            <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Leagues}" />
-                                            <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="{DynamicResource SuccessForegroundBrush}" Text="+5 this year" />
+                                            <TextBlock Grid.Row="1" Margin="0,8,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Leagues}" />
+                                            <TextBlock Grid.Row="2" Margin="0,8,0,0" FontSize="14" Foreground="{DynamicResource SuccessForegroundBrush}" Text="+5 this year" />
                                             <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="{DynamicResource SuccessSoftBackgroundBrush}" CornerRadius="10">
                                                 <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{DynamicResource SuccessForegroundBrush}" Text="&#xE7BF;" />
                                             </Border>
@@ -400,33 +404,48 @@
 
                                     <Border Style="{StaticResource DashboardCardStyle}">
                                         <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
                                             <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Teams" />
-                                            <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Teams}" />
-                                            <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="{DynamicResource SuccessForegroundBrush}" Text="+8 this month" />
+                                            <TextBlock Grid.Row="1" Margin="0,8,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Teams}" />
+                                            <TextBlock Grid.Row="2" Margin="0,8,0,0" FontSize="14" Foreground="{DynamicResource SuccessForegroundBrush}" Text="+8 this month" />
                                             <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="{DynamicResource SuccessSoftBackgroundBrush}" CornerRadius="10">
-                                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{DynamicResource SuccessForegroundBrush}" Text="&#xE72E;" />
+                                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{DynamicResource SuccessForegroundBrush}" Text="&#xE7EF;" />
                                             </Border>
                                         </Grid>
                                     </Border>
 
                                     <Border Style="{StaticResource DashboardCardStyle}">
                                         <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
                                             <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Players" />
-                                            <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Players}" />
-                                            <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="{DynamicResource DangerForegroundBrush}" Text="-3 this month" />
+                                            <TextBlock Grid.Row="1" Margin="0,8,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Players}" />
+                                            <TextBlock Grid.Row="2" Margin="0,8,0,0" FontSize="14" Foreground="{DynamicResource SuccessForegroundBrush}" Text="+3 this month" />
                                             <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="{DynamicResource SuccessSoftBackgroundBrush}" CornerRadius="10">
-                                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{DynamicResource SuccessForegroundBrush}" Text="&#xE716;" />
+                                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{DynamicResource SuccessForegroundBrush}" Text="&#xE77B;" />
                                             </Border>
                                         </Grid>
                                     </Border>
 
                                     <Border Style="{StaticResource DashboardCardStyle}" Margin="0">
                                         <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
                                             <TextBlock Style="{StaticResource DashboardMetricLabelStyle}" Text="Matches" />
-                                            <TextBlock Margin="0,34,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Matches}" />
-                                            <TextBlock Margin="0,70,0,0" FontSize="14" Foreground="{DynamicResource SuccessForegroundBrush}" Text="+24 this week" />
+                                            <TextBlock Grid.Row="1" Margin="0,8,0,0" Style="{StaticResource DashboardMetricValueStyle}" Text="{Binding Dashboard.Matches}" />
+                                            <TextBlock Grid.Row="2" Margin="0,8,0,0" FontSize="14" Foreground="{DynamicResource SuccessForegroundBrush}" Text="+24 this week" />
                                             <Border HorizontalAlignment="Right" VerticalAlignment="Top" Padding="10" Background="{DynamicResource SuccessSoftBackgroundBrush}" CornerRadius="10">
-                                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{DynamicResource SuccessForegroundBrush}" Text="&#xE787;" />
+                                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="26" Foreground="{DynamicResource SuccessForegroundBrush}" Text="&#xE8FD;" />
                                             </Border>
                                         </Grid>
                                     </Border>
@@ -434,56 +453,46 @@
 
                                 <Border Margin="0,0,0,14"
                                         Style="{StaticResource DashboardPanelStyle}">
-                                    <DockPanel LastChildFill="False">
-                                        <TextBlock DockPanel.Dock="Left"
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="26" />
+                                            <ColumnDefinition Width="210" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="230" />
+                                            <ColumnDefinition Width="12" />
+                                            <ColumnDefinition Width="112" />
+                                            <ColumnDefinition Width="16" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
                                                    VerticalAlignment="Center"
                                                    Style="{StaticResource DashboardSectionTitleStyle}"
                                                    Text="Quick Filters" />
-                                        <Border Width="210"
-                                                Height="42"
-                                                Margin="26,0,12,0"
-                                                Background="{DynamicResource CardBackgroundBrush}"
-                                                BorderBrush="{DynamicResource CardBorderBrush}"
-                                                BorderThickness="1"
-                                                CornerRadius="8">
-                                            <Grid Margin="12,0,12,0">
-                                                <TextBlock VerticalAlignment="Center"
-                                                           FontSize="15"
-                                                           Foreground="{DynamicResource TitleForegroundBrush}"
-                                                           Text="2025/2026" />
-                                                <TextBlock HorizontalAlignment="Right"
-                                                           VerticalAlignment="Center"
-                                                           FontFamily="Segoe MDL2 Assets"
-                                                           FontSize="18"
-                                                           Foreground="{DynamicResource ChartAxisBrush}"
-                                                           Text="&#xE70D;" />
-                                            </Grid>
-                                        </Border>
-                                        <Border Width="230"
-                                                Height="42"
-                                                Background="{DynamicResource CardBackgroundBrush}"
-                                                BorderBrush="{DynamicResource CardBorderBrush}"
-                                                BorderThickness="1"
-                                                CornerRadius="8">
-                                            <Grid Margin="12,0,12,0">
-                                                <TextBlock VerticalAlignment="Center"
-                                                           FontSize="15"
-                                                           Foreground="{DynamicResource TitleForegroundBrush}"
-                                                           Text="All Leagues" />
-                                                <TextBlock HorizontalAlignment="Right"
-                                                           VerticalAlignment="Center"
-                                                           FontFamily="Segoe MDL2 Assets"
-                                                           FontSize="18"
-                                                           Foreground="{DynamicResource ChartAxisBrush}"
-                                                           Text="&#xE70D;" />
-                                            </Grid>
-                                        </Border>
-                                        <Button Width="112"
-                                                Height="42"
-                                                Margin="12,0,0,0"
+                                        <ComboBox Grid.Column="2"
+                                                  Style="{StaticResource QuickFilterComboBoxStyle}"
+                                                  ItemsSource="{Binding Dashboard.SeasonOptions}"
+                                                  SelectedItem="{Binding Dashboard.SelectedSeason, Mode=TwoWay}" />
+                                        <ComboBox Grid.Column="4"
+                                                  Style="{StaticResource QuickFilterComboBoxStyle}"
+                                                  TextSearch.TextPath="Name"
+                                                  ItemsSource="{Binding Dashboard.LeagueOptions}"
+                                                  SelectedItem="{Binding Dashboard.SelectedLeague, Mode=TwoWay}">
+                                            <ComboBox.ItemTemplate>
+                                                <DataTemplate>
+                                                    <TextBlock Text="{Binding Name}" />
+                                                </DataTemplate>
+                                            </ComboBox.ItemTemplate>
+                                        </ComboBox>
+                                        <Button Grid.Column="6"
                                                 Content="Refresh KPI"
                                                 Command="{Binding Dashboard.RefreshCommand}" />
-                                    </DockPanel>
+                                        <TextBlock Grid.Column="8"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="14"
+                                                   Foreground="{DynamicResource MutedForegroundBrush}"
+                                                   Text="{Binding Dashboard.CurrentDateLabel, StringFormat=As of {0}}" />
+                                    </Grid>
                                 </Border>
 
                                 <Grid Margin="0,0,0,14">
@@ -509,7 +518,8 @@
                                                         <RowDefinition Height="Auto" />
                                                         <RowDefinition Height="Auto" />
                                                     </Grid.RowDefinitions>
-                                                    <Canvas Width="640" Height="220" HorizontalAlignment="Center">
+                                                    <Viewbox Stretch="Uniform" StretchDirection="DownOnly" MaxWidth="560" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Canvas Width="640" Height="220">
                                                         <Line X1="40" Y1="20" X2="40" Y2="200" Stroke="{DynamicResource ChartAxisBrush}" StrokeThickness="1.2" />
                                                         <Line X1="40" Y1="200" X2="620" Y2="200" Stroke="{DynamicResource ChartAxisBrush}" StrokeThickness="1.2" />
 
@@ -536,6 +546,7 @@
                                                         <TextBlock Canvas.Left="12" Canvas.Top="142" FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="77" />
                                                         <TextBlock Canvas.Left="12" Canvas.Top="76" FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="80" />
                                                     </Canvas>
+                                                    </Viewbox>
 
                                                     <UniformGrid Grid.Row="1" Columns="6" Margin="44,-4,10,0">
                                                         <TextBlock HorizontalAlignment="Center" FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="Jan" />
@@ -573,7 +584,8 @@
                                                         <RowDefinition Height="*" />
                                                         <RowDefinition Height="Auto" />
                                                     </Grid.RowDefinitions>
-                                                    <Canvas Width="640" Height="220" HorizontalAlignment="Center">
+                                                    <Viewbox Stretch="Uniform" StretchDirection="DownOnly" MaxWidth="560" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                    <Canvas Width="640" Height="220">
                                                         <Line X1="40" Y1="20" X2="40" Y2="200" Stroke="{DynamicResource ChartAxisBrush}" StrokeThickness="1.2" />
                                                         <Line X1="40" Y1="200" X2="620" Y2="200" Stroke="{DynamicResource ChartAxisBrush}" StrokeThickness="1.2" />
 
@@ -587,11 +599,12 @@
                                                         <Rectangle Width="100" Height="150" Canvas.Left="475" Canvas.Top="50" Fill="{DynamicResource SuccessForegroundBrush}" />
 
                                                         <TextBlock Canvas.Left="8" Canvas.Top="193" FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="0" />
-                                                        <TextBlock Canvas.Left="2" Canvas.Top="120" FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="40000" />
-                                                        <TextBlock Canvas.Left="2" Canvas.Top="78" FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="80000" />
-                                                        <TextBlock Canvas.Left="0" Canvas.Top="36" FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="120000" />
-                                                        <TextBlock Canvas.Left="0" Canvas.Top="10" FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="160000" />
+                                                        <TextBlock Canvas.Left="10" Canvas.Top="120" FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="40" />
+                                                        <TextBlock Canvas.Left="10" Canvas.Top="78" FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="80" />
+                                                        <TextBlock Canvas.Left="2" Canvas.Top="36" FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="120" />
+                                                        <TextBlock Canvas.Left="2" Canvas.Top="10" FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="160" />
                                                     </Canvas>
+                                                    </Viewbox>
                                                     <UniformGrid Grid.Row="1" Columns="4" Margin="42,-4,10,0">
                                                         <TextBlock HorizontalAlignment="Center" FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="Goals" />
                                                         <TextBlock HorizontalAlignment="Center" FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="Assists" />
@@ -608,35 +621,66 @@
                                     <StackPanel>
                                         <TextBlock Style="{StaticResource DashboardSectionTitleStyle}"
                                                    Text="Recent Matches" />
-                                        <Border Height="120"
+                                        <Border MinHeight="120"
                                                 Margin="0,14,0,0"
                                                 Background="{DynamicResource SurfaceMutedBrush}"
                                                 BorderBrush="{DynamicResource SubtleBorderBrush}"
                                                 BorderThickness="1"
                                                 CornerRadius="8">
                                             <Grid Margin="14,8,14,8">
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="*" />
-                                                    <RowDefinition Height="*" />
-                                                    <RowDefinition Height="*" />
-                                                </Grid.RowDefinitions>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="110" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="110" />
-                                                </Grid.ColumnDefinitions>
+                                                <ItemsControl ItemsSource="{Binding Dashboard.RecentMatches}">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid Margin="0,0,0,8">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="110" />
+                                                                    <ColumnDefinition Width="*" />
+                                                                    <ColumnDefinition Width="110" />
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock VerticalAlignment="Center"
+                                                                           FontSize="19"
+                                                                           Foreground="{DynamicResource MutedForegroundBrush}"
+                                                                           Text="{Binding Date, StringFormat={}{0:dd MMM}}" />
+                                                                <TextBlock Grid.Column="1"
+                                                                           VerticalAlignment="Center"
+                                                                           Margin="0,0,0,0"
+                                                                           FontSize="21"
+                                                                           Foreground="{DynamicResource TitleForegroundBrush}">
+                                                                    <Run Text="{Binding HomeTeamName}" />
+                                                                    <Run Text=" vs " />
+                                                                    <Run Text="{Binding AwayTeamName}" />
+                                                                </TextBlock>
+                                                                <TextBlock Grid.Column="2"
+                                                                           VerticalAlignment="Center"
+                                                                           HorizontalAlignment="Right"
+                                                                           FontSize="21"
+                                                                           FontWeight="SemiBold"
+                                                                           Foreground="{DynamicResource SuccessForegroundBrush}">
+                                                                    <Run Text="{Binding HomeTeamGoal, Converter={StaticResource NullableIntTextConverter}}" />
+                                                                    <Run Text=" - " />
+                                                                    <Run Text="{Binding AwayTeamGoal, Converter={StaticResource NullableIntTextConverter}}" />
+                                                                </TextBlock>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
 
-                                                <TextBlock VerticalAlignment="Center" FontSize="19" Foreground="{DynamicResource MutedForegroundBrush}" Text="03 Jun" />
-                                                <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="21" Foreground="{DynamicResource TitleForegroundBrush}" Text="Dynamo Kyiv vs Shakhtar" />
-                                                <TextBlock Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="21" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="2 - 1" />
-
-                                                <TextBlock Grid.Row="1" VerticalAlignment="Center" FontSize="19" Foreground="{DynamicResource MutedForegroundBrush}" Text="01 Jun" />
-                                                <TextBlock Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" FontSize="21" Foreground="{DynamicResource TitleForegroundBrush}" Text="Lviv FC vs Odesa" />
-                                                <TextBlock Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="21" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="1 - 1" />
-
-                                                <TextBlock Grid.Row="2" VerticalAlignment="Center" FontSize="19" Foreground="{DynamicResource MutedForegroundBrush}" Text="30 May" />
-                                                <TextBlock Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" FontSize="21" Foreground="{DynamicResource TitleForegroundBrush}" Text="Dnipro vs Karpaty" />
-                                                <TextBlock Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right" FontSize="21" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="3 - 0" />
+                                                <TextBlock HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           FontSize="18"
+                                                           Foreground="{DynamicResource MutedForegroundBrush}"
+                                                           Text="No recent matches for selected filters.">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Dashboard.RecentMatches.Count}" Value="0">
+                                                                    <Setter Property="Visibility" Value="Visible" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
                                             </Grid>
                                         </Border>
                                     </StackPanel>
