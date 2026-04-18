@@ -1,0 +1,98 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="AnalyticsTrendLabelTemplate">
+        <TextBlock HorizontalAlignment="Center"
+                   FontSize="16"
+                   Foreground="{DynamicResource MutedForegroundBrush}"
+                   Text="{Binding Label}" />
+    </DataTemplate>
+
+    <DataTemplate x:Key="AnalyticsTopPerformerBarTemplate">
+        <Grid Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock VerticalAlignment="Center"
+                       FontSize="16"
+                       Foreground="{DynamicResource MutedForegroundBrush}"
+                       Text="{Binding PlayerLabel}" />
+            <Border Grid.Column="1"
+                    Height="24"
+                    Margin="8,0"
+                    Background="{DynamicResource SelectionSurfaceBrush}"
+                    CornerRadius="5">
+                <Rectangle HorizontalAlignment="Left"
+                           Fill="{DynamicResource SuccessForegroundBrush}"
+                           Width="{Binding BarWidth}" />
+            </Border>
+            <TextBlock Grid.Column="2"
+                       VerticalAlignment="Center"
+                       FontSize="16"
+                       FontWeight="SemiBold"
+                       Text="{Binding Value, StringFormat={}{0:0.#}}" />
+        </Grid>
+    </DataTemplate>
+
+    <DataTemplate x:Key="AnalyticsGoalsAssistsBarTemplate">
+        <StackPanel>
+            <Grid Height="170">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Rectangle Grid.Column="0"
+                           Width="24"
+                           VerticalAlignment="Bottom"
+                           Fill="{DynamicResource SuccessForegroundBrush}"
+                           Height="{Binding GoalsBarHeight}" />
+                <Rectangle Grid.Column="1"
+                           Width="24"
+                           VerticalAlignment="Bottom"
+                           Fill="{DynamicResource BlueAccentBrush}"
+                           Height="{Binding AssistsBarHeight}" />
+            </Grid>
+            <TextBlock Margin="0,8,0,0"
+                       HorizontalAlignment="Center"
+                       FontSize="14"
+                       Foreground="{DynamicResource MutedForegroundBrush}"
+                       Text="{Binding PlayerLabel}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="AnalyticsTopPerformerCardTemplate">
+        <Border Margin="0,0,10,0"
+                Padding="12"
+                Background="{DynamicResource SelectionSurfaceBrush}"
+                BorderBrush="{DynamicResource CardBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="10">
+            <StackPanel>
+                <TextBlock FontSize="18"
+                           FontWeight="SemiBold"
+                           Text="{Binding Rank, StringFormat=#{0}}" />
+                <TextBlock Margin="0,4,0,0"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           Text="{Binding PlayerName}" />
+                <TextBlock Margin="0,10,0,0"
+                           FontSize="15"
+                           Text="{Binding Rating, StringFormat=Rating: {0}}" />
+                <TextBlock Margin="0,4,0,0"
+                           FontSize="15"
+                           Text="{Binding Goals, StringFormat=Est. Goals: {0}}" />
+                <TextBlock Margin="0,4,0,0"
+                           FontSize="15"
+                           Text="{Binding Assists, StringFormat=Est. Assists: {0}}" />
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+
+    <DataTemplate x:Key="PlayersTrendPointDateTemplate">
+        <TextBlock HorizontalAlignment="Center"
+                   FontSize="12"
+                   Foreground="{DynamicResource MutedForegroundBrush}"
+                   Text="{Binding Date, StringFormat={}{0:yyyy-MM}}" />
+    </DataTemplate>
+</ResourceDictionary>

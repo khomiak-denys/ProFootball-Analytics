@@ -1,0 +1,266 @@
+<UserControl x:Class="ProFootball.Presentation.Views.TeamsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:ProFootball.Presentation.ViewModels"
+             mc:Ignorable="d">
+                        <Grid Margin="6,2,6,2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="410" />
+                                <ColumnDefinition Width="16" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Border Grid.Column="0"
+                                    Padding="16"
+                                    Background="{DynamicResource CardBackgroundBrush}"
+                                    BorderBrush="{DynamicResource CardBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="12">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock VerticalAlignment="Center"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   FontSize="20"
+                                                   Foreground="{DynamicResource MutedForegroundBrush}"
+                                                   Text="&#xE721;" />
+                                        <TextBox Grid.Column="1"
+                                                 Margin="10,0,0,0"
+                                                 Height="42"
+                                                 Padding="6,0"
+                                                 FontSize="22"
+                                                 BorderThickness="0"
+                                                 Background="Transparent"
+                                                 Text="{Binding Teams.NameFilter, UpdateSourceTrigger=PropertyChanged}" />
+                                    </Grid>
+
+                                    <StackPanel Grid.Row="1"
+                                                Margin="0,10,0,0"
+                                                Orientation="Horizontal">
+                                        <TextBlock FontSize="16"
+                                                   Foreground="{DynamicResource MutedForegroundBrush}"
+                                                   Text="{Binding Teams.TotalCount, StringFormat=Total: {0}}" />
+                                        <TextBlock Margin="14,0,0,0"
+                                                   FontSize="16"
+                                                   Foreground="{DynamicResource MutedForegroundBrush}"
+                                                   Text="{Binding Teams.IsLoadingList, StringFormat=Loading: {0}}" />
+                                    </StackPanel>
+
+                                    <ListBox Grid.Row="2"
+                                             Margin="0,14,0,0"
+                                             Background="Transparent"
+                                             BorderThickness="0"
+                                             ItemsSource="{Binding Teams.Teams}"
+                                             SelectedItem="{Binding Teams.SelectedTeam, Mode=TwoWay}"
+                                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                        <ListBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <Border Margin="0,0,0,10"
+                                                        Padding="16"
+                                                        BorderBrush="Transparent"
+                                                        BorderThickness="1"
+                                                        CornerRadius="10">
+                                                    <Border.Style>
+                                                        <Style TargetType="Border">
+                                                            <Setter Property="Background" Value="{DynamicResource SelectionSurfaceBrush}" />
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
+                                                                    <Setter Property="Background" Value="{DynamicResource SelectionActiveSurfaceBrush}" />
+                                                                    <Setter Property="BorderBrush" Value="{DynamicResource SuccessForegroundBrush}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Border.Style>
+                                                    <StackPanel>
+                                                        <TextBlock FontSize="34"
+                                                                   FontWeight="SemiBold"
+                                                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                                                   Text="{Binding LongName}" />
+                                                        <Border Margin="0,8,0,0"
+                                                                Style="{StaticResource StatusBadgeStyle}"
+                                                                HorizontalAlignment="Left"
+                                                                Padding="10,4">
+                                                            <TextBlock FontSize="18"
+                                                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                                                       Text="{Binding ShortName, TargetNullValue=N/A}" />
+                                                        </Border>
+                                                    </StackPanel>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ListBox.ItemTemplate>
+                                        <ListBox.ItemContainerStyle>
+                                            <Style TargetType="ListBoxItem">
+                                                <Setter Property="Padding" Value="0" />
+                                                <Setter Property="Margin" Value="0" />
+                                                <Setter Property="BorderThickness" Value="0" />
+                                                <Setter Property="Background" Value="Transparent" />
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsSelected" Value="True">
+                                                        <Setter Property="Background" Value="Transparent" />
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ListBox.ItemContainerStyle>
+                                    </ListBox>
+                                </Grid>
+                            </Border>
+
+                            <Grid Grid.Column="2">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="16" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="16" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <Border Padding="18"
+                                        Background="{DynamicResource CardBackgroundBrush}"
+                                        BorderBrush="{DynamicResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="12">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="90" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <TextBlock FontSize="58"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                                   Text="{Binding Teams.SelectedTeamName}" />
+                                        <TextBlock Grid.Row="1"
+                                                   Margin="0,6,0,0"
+                                                   FontSize="32"
+                                                   Foreground="{DynamicResource MutedForegroundBrush}"
+                                                   Text="Team Profile" />
+                                        <Border Grid.Column="1"
+                                                Padding="10,6"
+                                                HorizontalAlignment="Right"
+                                                VerticalAlignment="Top"
+                                                Background="{DynamicResource SuccessForegroundBrush}"
+                                                CornerRadius="8">
+                                            <TextBlock FontSize="34"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="White"
+                                                       Text="{Binding Teams.SelectedTeamShortName}" />
+                                        </Border>
+
+                                        <Grid Grid.Row="2"
+                                              Grid.ColumnSpan="2"
+                                              Margin="0,22,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="20" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="20" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="Build Up Play" />
+                                                <TextBlock Margin="0,6,0,0" FontSize="50" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Teams.BuildUpPlayScore}" />
+                                                <ProgressBar Height="10" Margin="0,10,0,0" Value="{Binding Teams.BuildUpPlayScore, Mode=OneWay}" Maximum="100" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2">
+                                                <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="Chance Creation" />
+                                                <TextBlock Margin="0,6,0,0" FontSize="50" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Teams.ChanceCreationScore}" />
+                                                <ProgressBar Height="10" Margin="0,10,0,0" Value="{Binding Teams.ChanceCreationScore, Mode=OneWay}" Maximum="100" />
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="4">
+                                                <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="Defence" />
+                                                <TextBlock Margin="0,6,0,0" FontSize="50" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Teams.DefenceScore}" />
+                                                <ProgressBar Height="10" Margin="0,10,0,0" Value="{Binding Teams.DefenceScore, Mode=OneWay}" Maximum="100" />
+                                            </StackPanel>
+                                        </Grid>
+                                    </Grid>
+                                </Border>
+
+                                <Border Grid.Row="2"
+                                        Padding="18"
+                                        Background="{DynamicResource CardBackgroundBrush}"
+                                        BorderBrush="{DynamicResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="12">
+                                    <StackPanel>
+                                        <TextBlock FontSize="40"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                                   Text="Tactical Style Indicators" />
+                                        <ItemsControl Margin="0,20,0,0" ItemsSource="{Binding Teams.TacticalMetrics}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="0,0,0,12">
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto" />
+                                                            <RowDefinition Height="Auto" />
+                                                        </Grid.RowDefinitions>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="*" />
+                                                            <ColumnDefinition Width="Auto" />
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock FontSize="24"
+                                                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                                                   Text="{Binding Name}" />
+                                                        <TextBlock Grid.Column="1"
+                                                                   FontSize="24"
+                                                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                                                   Text="{Binding Value}" />
+                                                        <ProgressBar Grid.Row="1"
+                                                                     Grid.ColumnSpan="2"
+                                                                     Height="10"
+                                                                     Margin="0,8,0,0"
+                                                                     Value="{Binding Value, Mode=OneWay}"
+                                                                     Maximum="100" />
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </Border>
+
+                                <Border Grid.Row="4"
+                                        Padding="18"
+                                        Background="{DynamicResource CardBackgroundBrush}"
+                                        BorderBrush="{DynamicResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="12">
+                                    <StackPanel>
+                                        <TextBlock FontSize="40"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                                   Text="Team Attribute Trends" />
+                                        <Viewbox Height="220" Margin="0,16,0,0" Stretch="Fill" StretchDirection="Both">
+                                            <Canvas Width="742" Height="220" Background="{DynamicResource SurfaceMutedBrush}">
+                                                <Line X1="30" Y1="20" X2="30" Y2="196" Stroke="{DynamicResource ChartAxisBrush}" StrokeThickness="1" />
+                                                <Line X1="30" Y1="196" X2="742" Y2="196" Stroke="{DynamicResource ChartAxisBrush}" StrokeThickness="1" />
+                                                <Polyline Stroke="{DynamicResource SuccessForegroundBrush}"
+                                                          StrokeThickness="3"
+                                                          Points="{Binding Teams.TeamTrendPolylinePoints}" />
+                                            </Canvas>
+                                        </Viewbox>
+                                        <TextBlock Margin="0,8,0,0"
+                                                   FontSize="16"
+                                                   Foreground="{DynamicResource DangerForegroundBrush}"
+                                                   Text="{Binding Teams.ErrorMessage}" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Grid>
+                    
+</UserControl>

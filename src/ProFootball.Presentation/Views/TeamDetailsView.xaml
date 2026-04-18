@@ -1,0 +1,28 @@
+<UserControl x:Class="ProFootball.Presentation.Views.TeamDetailsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:ProFootball.Presentation.ViewModels"
+             mc:Ignorable="d">
+                        <DockPanel Margin="8">
+                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,8">
+                                <TextBlock Margin="0,6,6,0" Text="TeamApiId:" />
+                                <TextBox Width="120" Margin="0,0,8,0" Text="{Binding TeamDetails.SelectedTeamApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Width="100" Content="Load" Command="{Binding TeamDetails.LoadCommand}" />
+                            </StackPanel>
+                            <StackPanel>
+                                <TextBlock FontSize="20" FontWeight="SemiBold" Text="{Binding TeamDetails.Details.Team.LongName}" />
+                                <DataGrid Margin="0,8,0,0" ItemsSource="{Binding TeamDetails.Attributes}" AutoGenerateColumns="False" IsReadOnly="True">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=\{0:yyyy-MM-dd\}}" Width="130" />
+                                        <DataGridTextColumn Header="Speed" Binding="{Binding BuildUpPlaySpeed}" Width="90" />
+                                        <DataGridTextColumn Header="Passing" Binding="{Binding BuildUpPlayPassing}" Width="90" />
+                                        <DataGridTextColumn Header="Chance" Binding="{Binding ChanceCreationPassing}" Width="90" />
+                                        <DataGridTextColumn Header="Pressure" Binding="{Binding DefencePressure}" Width="90" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+                        </DockPanel>
+                    
+</UserControl>
