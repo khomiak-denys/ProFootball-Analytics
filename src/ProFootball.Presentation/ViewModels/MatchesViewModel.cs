@@ -1,14 +1,17 @@
 using System.Collections.ObjectModel;
-using ProFootball.Application.Abstractions.Querying;
-using ProFootball.Application.Contracts.Queries;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Common;
+using ProFootball.Application.League.Dtos;
+using ProFootball.Application.League.Queries;
+using ProFootball.Application.Match.Dtos;
+using ProFootball.Application.Match.Queries;
 using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
 
 public sealed class MatchesViewModel : ObservableObject
 {
-    private readonly IMatchesQueryService _matchesQueryService;
-    private readonly ICountriesLeaguesQueryService _countriesLeaguesQueryService;
+    private readonly IQueryDispatcher _queryDispatcher;
     private readonly Action<int> _openDetails;
     private MatchListItemDto? _selectedMatch;
     private LeagueDto? _selectedLeague;
@@ -19,12 +22,10 @@ public sealed class MatchesViewModel : ObservableObject
     private int _totalCount;
 
     public MatchesViewModel(
-        IMatchesQueryService matchesQueryService,
-        ICountriesLeaguesQueryService countriesLeaguesQueryService,
+        IQueryDispatcher queryDispatcher,
         Action<int> openDetails)
     {
-        _matchesQueryService = matchesQueryService;
-        _countriesLeaguesQueryService = countriesLeaguesQueryService;
+        _queryDispatcher = queryDispatcher;
         _openDetails = openDetails;
 
         Matches = new ObservableCollection<MatchListItemDto>();
@@ -135,7 +136,7 @@ public sealed class MatchesViewModel : ObservableObject
     public async Task LoadLeaguesAsync()
     {
         Leagues.Clear();
-        var leagues = await _countriesLeaguesQueryService.GetLeaguesAsync();
+        var leagues = await _queryDispatcher.DispatchAsync<GetLeaguesQuery, IReadOnlyList<LeagueDto>>(new GetLeaguesQuery());
         foreach (var league in leagues)
         {
             Leagues.Add(league);
@@ -144,7 +145,7 @@ public sealed class MatchesViewModel : ObservableObject
 
     public async Task SearchAsync()
     {
-        var result = await _matchesQueryService.SearchMatchesAsync(new MatchSearchQuery(
+        var result = await _queryDispatcher.DispatchAsync<MatchSearchQuery, PagedResult<MatchListItemDto>>(new MatchSearchQuery(
             SelectedLeague?.Id,
             string.IsNullOrWhiteSpace(Season) ? null : Season.Trim(),
             TeamApiId,

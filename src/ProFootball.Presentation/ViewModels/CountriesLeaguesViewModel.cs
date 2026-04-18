@@ -1,14 +1,16 @@
 using System.Collections.ObjectModel;
 using Microsoft.Extensions.Logging;
-using ProFootball.Application.Abstractions.Querying;
-using ProFootball.Application.Contracts.Queries;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Country.Dtos;
+using ProFootball.Application.Country.Queries;
+using ProFootball.Application.League.Dtos;
 using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
 
 public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
 {
-    private readonly ICountriesLeaguesQueryService _service;
+    private readonly IQueryDispatcher _queryDispatcher;
     private readonly ILogger<CountriesLeaguesViewModel> _logger;
     private readonly SemaphoreSlim _reloadLock = new(1, 1);
     private CancellationTokenSource? _reloadCts;
@@ -21,10 +23,10 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     private int _divisions;
 
     public CountriesLeaguesViewModel(
-        ICountriesLeaguesQueryService service,
+        IQueryDispatcher queryDispatcher,
         ILogger<CountriesLeaguesViewModel> logger)
     {
-        _service = service;
+        _queryDispatcher = queryDispatcher;
         _logger = logger;
         Countries = new ObservableCollection<CountryLeagueListItemDto>();
         LeagueCards = new ObservableCollection<LeagueCountryCardDto>();
@@ -105,7 +107,8 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         {
             ErrorMessage = null;
 
-            var countries = await _service.GetCountriesWithLeagueCountAsync();
+            var countries = await _queryDispatcher.DispatchAsync<GetCountriesWithLeagueCountQuery, IReadOnlyList<CountryLeagueListItemDto>>(
+                new GetCountriesWithLeagueCountQuery());
             Countries.Clear();
             foreach (var country in countries)
             {
@@ -160,7 +163,9 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
                 return;
             }
 
-            var snapshot = await _service.GetCountrySnapshotAsync(selectedCountryId.Value, reloadToken);
+            var snapshot = await _queryDispatcher.DispatchAsync<GetCountrySnapshotQuery, CountryLeagueSnapshotDto>(
+                new GetCountrySnapshotQuery(selectedCountryId.Value),
+                reloadToken);
             var cards = snapshot.LeagueCards;
             var summary = snapshot.Summary;
 

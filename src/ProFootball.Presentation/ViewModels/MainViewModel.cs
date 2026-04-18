@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using ProFootball.Application.Abstractions.Querying;
+using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
@@ -10,27 +10,22 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly ILogger<MainViewModel> _logger;
 
     public MainViewModel(
-        IDashboardQueryService dashboardQueryService,
-        ICountriesLeaguesQueryService countriesLeaguesQueryService,
-        ITeamsQueryService teamsQueryService,
-        IPlayersQueryService playersQueryService,
-        IMatchesQueryService matchesQueryService,
-        IAnalyticsQueryService analyticsQueryService,
+        IQueryDispatcher queryDispatcher,
         ILoggerFactory loggerFactory)
     {
         _logger = loggerFactory.CreateLogger<MainViewModel>();
-        Dashboard = new DashboardViewModel(dashboardQueryService);
+        Dashboard = new DashboardViewModel(queryDispatcher);
         CountriesLeagues = new CountriesLeaguesViewModel(
-            countriesLeaguesQueryService,
+            queryDispatcher,
             loggerFactory.CreateLogger<CountriesLeaguesViewModel>());
-        TeamDetails = new TeamDetailsViewModel(teamsQueryService);
-        PlayerDetails = new PlayerDetailsViewModel(playersQueryService, analyticsQueryService);
-        MatchDetails = new MatchDetailsViewModel(matchesQueryService);
+        TeamDetails = new TeamDetailsViewModel(queryDispatcher);
+        PlayerDetails = new PlayerDetailsViewModel(queryDispatcher);
+        MatchDetails = new MatchDetailsViewModel(queryDispatcher);
 
-        Teams = new TeamsViewModel(teamsQueryService, OpenTeamDetails);
-        Players = new PlayersViewModel(playersQueryService, OpenPlayerDetails);
-        Matches = new MatchesViewModel(matchesQueryService, countriesLeaguesQueryService, OpenMatchDetails);
-        Analytics = new AnalyticsViewModel(analyticsQueryService);
+        Teams = new TeamsViewModel(queryDispatcher, OpenTeamDetails);
+        Players = new PlayersViewModel(queryDispatcher, OpenPlayerDetails);
+        Matches = new MatchesViewModel(queryDispatcher, OpenMatchDetails);
+        Analytics = new AnalyticsViewModel(queryDispatcher);
 
         LoadInitialDataCommand = new AsyncRelayCommand(LoadInitialDataAsync, OnBackgroundCommandException);
     }

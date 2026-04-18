@@ -1,11 +1,13 @@
-using ProFootball.Application.Abstractions.Querying;
+using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Match.Dtos;
+using ProFootball.Application.Match.Queries;
 using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
 
 public sealed class DashboardViewModel : ObservableObject
 {
-    private readonly IDashboardQueryService _dashboardQueryService;
+    private readonly IQueryDispatcher _queryDispatcher;
 
     private int _countries;
     private int _leagues;
@@ -13,9 +15,9 @@ public sealed class DashboardViewModel : ObservableObject
     private int _players;
     private int _matches;
 
-    public DashboardViewModel(IDashboardQueryService dashboardQueryService)
+    public DashboardViewModel(IQueryDispatcher queryDispatcher)
     {
-        _dashboardQueryService = dashboardQueryService;
+        _queryDispatcher = queryDispatcher;
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, CommandExceptionHandler.Handle);
     }
 
@@ -53,7 +55,7 @@ public sealed class DashboardViewModel : ObservableObject
 
     public async Task RefreshAsync()
     {
-        var kpis = await _dashboardQueryService.GetKpisAsync();
+        var kpis = await _queryDispatcher.DispatchAsync<GetDashboardKpiQuery, DashboardKpiDto>(new GetDashboardKpiQuery());
         Countries = kpis.Countries;
         Leagues = kpis.Leagues;
         Teams = kpis.Teams;
