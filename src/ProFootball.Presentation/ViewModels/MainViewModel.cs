@@ -106,6 +106,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public string ThemeToggleLabel => IsDarkTheme ? "Light" : "Dark";
 
+    public string ThemeToggleGlyph => IsDarkTheme ? "\uE706" : "\uE708";
+
     public async Task LoadInitialDataAsync()
     {
         await Dashboard.RefreshAsync();
@@ -148,6 +150,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _themeService.ToggleTheme();
         RaisePropertyChanged(nameof(IsDarkTheme));
         RaisePropertyChanged(nameof(ThemeToggleLabel));
+        RaisePropertyChanged(nameof(ThemeToggleGlyph));
     }
 
     public void Dispose()

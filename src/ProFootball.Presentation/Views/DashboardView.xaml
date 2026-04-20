@@ -6,6 +6,16 @@
              xmlns:viewModels="clr-namespace:ProFootball.Presentation.ViewModels"
              mc:Ignorable="d">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ScrollViewer.Style>
+                                <Style TargetType="ScrollViewer">
+                                    <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Dashboard.RecentMatches.Count}" Value="0">
+                                            <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ScrollViewer.Style>
                             <StackPanel Margin="6,2,6,2">
                                 <UniformGrid Columns="5" Margin="0,0,0,14">
                                     <Border Style="{StaticResource DashboardCardStyle}">

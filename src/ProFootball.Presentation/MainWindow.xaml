@@ -18,116 +18,117 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="{DynamicResource ShellSidebarBrush}">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+        <Border Grid.Column="0"
+                Background="{DynamicResource ShellSidebarBrush}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
 
-                <StackPanel Margin="24,28,24,22">
-                    <TextBlock FontSize="22"
-                               FontWeight="Bold"
-                               Foreground="White"
-                               Text="ProFootball Analytics" />
-                    <TextBlock Margin="0,8,0,0"
-                               FontSize="14"
-                               Foreground="{DynamicResource SidebarSecondaryForegroundBrush}"
-                               Text="Data Analysis Platform" />
-                </StackPanel>
+                    <StackPanel Margin="24,28,24,22">
+                        <TextBlock FontSize="22"
+                                   FontWeight="Bold"
+                                   Foreground="White"
+                                   Text="ProFootball Analytics" />
+                        <TextBlock Margin="0,8,0,0"
+                                   FontSize="14"
+                                   Foreground="{DynamicResource SidebarSecondaryForegroundBrush}"
+                                   Text="Data Analysis Platform" />
+                    </StackPanel>
 
-                <ListBox Grid.Row="1"
-                         Margin="16,6,16,16"
-                         Background="Transparent"
-                         BorderThickness="0"
-                         SelectedValuePath="Tag"
-                         SelectedValue="{Binding SelectedSidebarTab, Mode=TwoWay}"
-                         PreviewMouseLeftButtonUp="OnSidebarItemMouseLeftButtonUp"
-                         ItemContainerStyle="{StaticResource SidebarNavItemStyle}">
-                    <ListBoxItem Tag="{x:Static viewModels:AppTab.Dashboard}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                       FontSize="19"
-                                       Foreground="White"
-                                       Text="&#xE80F;" />
-                            <TextBlock Margin="14,0,0,0"
-                                       FontSize="16"
-                                       Foreground="White"
-                                       Text="Dashboard" />
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem Tag="{x:Static viewModels:AppTab.Players}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                       FontSize="19"
-                                       Foreground="White"
-                                       Text="&#xE716;" />
-                            <TextBlock Margin="14,0,0,0"
-                                       FontSize="16"
-                                       Foreground="White"
-                                       Text="Players" />
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem Tag="{x:Static viewModels:AppTab.Teams}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                       FontSize="19"
-                                       Foreground="White"
-                                       Text="&#xE72E;" />
-                            <TextBlock Margin="14,0,0,0"
-                                       FontSize="16"
-                                       Foreground="White"
-                                       Text="Teams" />
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem Tag="{x:Static viewModels:AppTab.Matches}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                       FontSize="19"
-                                       Foreground="White"
-                                       Text="&#xE787;" />
-                            <TextBlock Margin="14,0,0,0"
-                                       FontSize="16"
-                                       Foreground="White"
-                                       Text="Matches" />
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem Tag="{x:Static viewModels:AppTab.CountriesLeagues}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                       FontSize="19"
-                                       Foreground="White"
-                                       Text="&#xE909;" />
-                            <TextBlock Margin="14,0,0,0"
-                                       FontSize="16"
-                                       Foreground="White"
-                                       Text="Leagues" />
-                        </StackPanel>
-                    </ListBoxItem>
-                    <ListBoxItem Tag="{x:Static viewModels:AppTab.Analytics}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock FontFamily="Segoe MDL2 Assets"
-                                       FontSize="19"
-                                       Foreground="White"
-                                       Text="&#xE9D2;" />
-                            <TextBlock Margin="14,0,0,0"
-                                       FontSize="16"
-                                       Foreground="White"
-                                       Text="Analytics" />
-                        </StackPanel>
-                    </ListBoxItem>
-                </ListBox>
+                    <ListBox Grid.Row="1"
+                             Margin="16,6,16,16"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             SelectedValuePath="Tag"
+                             SelectedValue="{Binding SelectedSidebarTab, Mode=TwoWay}"
+                             PreviewMouseLeftButtonUp="OnSidebarItemMouseLeftButtonUp"
+                             ItemContainerStyle="{StaticResource SidebarNavItemStyle}">
+                        <ListBoxItem Tag="{x:Static viewModels:AppTab.Dashboard}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                           FontSize="19"
+                                           Foreground="White"
+                                           Text="&#xE80F;" />
+                                <TextBlock Margin="14,0,0,0"
+                                           FontSize="16"
+                                           Foreground="White"
+                                           Text="Dashboard" />
+                            </StackPanel>
+                        </ListBoxItem>
+                        <ListBoxItem Tag="{x:Static viewModels:AppTab.Players}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                           FontSize="19"
+                                           Foreground="White"
+                                           Text="&#xE716;" />
+                                <TextBlock Margin="14,0,0,0"
+                                           FontSize="16"
+                                           Foreground="White"
+                                           Text="Players" />
+                            </StackPanel>
+                        </ListBoxItem>
+                        <ListBoxItem Tag="{x:Static viewModels:AppTab.Teams}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                           FontSize="19"
+                                           Foreground="White"
+                                           Text="&#xE72E;" />
+                                <TextBlock Margin="14,0,0,0"
+                                           FontSize="16"
+                                           Foreground="White"
+                                           Text="Teams" />
+                            </StackPanel>
+                        </ListBoxItem>
+                        <ListBoxItem Tag="{x:Static viewModels:AppTab.Matches}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                           FontSize="19"
+                                           Foreground="White"
+                                           Text="&#xE787;" />
+                                <TextBlock Margin="14,0,0,0"
+                                           FontSize="16"
+                                           Foreground="White"
+                                           Text="Matches" />
+                            </StackPanel>
+                        </ListBoxItem>
+                        <ListBoxItem Tag="{x:Static viewModels:AppTab.CountriesLeagues}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                           FontSize="19"
+                                           Foreground="White"
+                                           Text="&#xE909;" />
+                                <TextBlock Margin="14,0,0,0"
+                                           FontSize="16"
+                                           Foreground="White"
+                                           Text="Leagues" />
+                            </StackPanel>
+                        </ListBoxItem>
+                        <ListBoxItem Tag="{x:Static viewModels:AppTab.Analytics}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock FontFamily="Segoe MDL2 Assets"
+                                           FontSize="19"
+                                           Foreground="White"
+                                           Text="&#xE9D2;" />
+                                <TextBlock Margin="14,0,0,0"
+                                           FontSize="16"
+                                           Foreground="White"
+                                           Text="Analytics" />
+                            </StackPanel>
+                        </ListBoxItem>
+                    </ListBox>
 
-                <Border Grid.Row="2"
-                        Padding="16,20"
-                        BorderBrush="{DynamicResource SidebarDividerBrush}"
-                        BorderThickness="0,1,0,0">
-                    <TextBlock FontSize="12"
-                               Foreground="{DynamicResource SidebarSecondaryForegroundBrush}"
-                               Text="{Binding Dashboard.CurrentYear, StringFormat={}© {0} ProFootball Analytics}" />
-                </Border>
-            </Grid>
+                    <Border Grid.Row="2"
+                            Padding="16,20"
+                            BorderBrush="{DynamicResource SidebarDividerBrush}"
+                            BorderThickness="0,1,0,0">
+                        <TextBlock FontSize="12"
+                                   Foreground="{DynamicResource SidebarSecondaryForegroundBrush}"
+                                   Text="{Binding Dashboard.CurrentYear, StringFormat={}© {0} ProFootball Analytics}" />
+                    </Border>
+                </Grid>
         </Border>
 
         <Grid Grid.Column="1">
@@ -144,46 +145,55 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock VerticalAlignment="Center"
                                FontSize="24"
                                FontWeight="Medium"
                                Foreground="{DynamicResource TitleForegroundBrush}"
                                Text="{Binding CurrentSectionTitle}" />
-                    <StackPanel Grid.Column="1"
+                    <Border Grid.Column="1"
+                            Width="430"
+                            Height="40"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Background="{DynamicResource SurfaceMutedBrush}"
+                            BorderBrush="{DynamicResource SubtleBorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="8">
+                        <Grid Margin="14,0,14,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock VerticalAlignment="Center"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="14"
+                                       Foreground="{DynamicResource ChartAxisBrush}"
+                                       Text="&#xE721;" />
+                            <TextBlock Grid.Column="1"
+                                       Margin="10,0,0,0"
+                                       VerticalAlignment="Center"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource MutedForegroundBrush}"
+                                       Text="Search players, teams, matches..." />
+                        </Grid>
+                    </Border>
+                    <StackPanel Grid.Column="2"
                                 Orientation="Horizontal"
                                 HorizontalAlignment="Right"
                                 VerticalAlignment="Center">
-                        <Border Width="430"
+                        <Button Width="40"
                                 Height="40"
-                                VerticalAlignment="Center"
-                                Background="{DynamicResource SurfaceMutedBrush}"
-                                BorderBrush="{DynamicResource SubtleBorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="8">
-                            <Grid Margin="14,0,14,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock VerticalAlignment="Center"
-                                           FontFamily="Segoe MDL2 Assets"
-                                           FontSize="14"
-                                           Foreground="{DynamicResource ChartAxisBrush}"
-                                           Text="&#xE721;" />
-                                <TextBlock Grid.Column="1"
-                                           Margin="10,0,0,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="16"
-                                           Foreground="{DynamicResource MutedForegroundBrush}"
-                                           Text="Search players, teams, matches..." />
-                            </Grid>
-                        </Border>
-                        <Button Margin="12,0,0,0"
-                                Width="108"
-                                Height="40"
+                                Padding="0"
                                 Command="{Binding ToggleThemeCommand}"
-                                Content="{Binding ThemeToggleLabel}" />
+                                ToolTip="Toggle theme">
+                            <TextBlock HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="18"
+                                       Text="{Binding ThemeToggleGlyph}" />
+                        </Button>
                         <Border Margin="12,0,0,0"
                                 Padding="12,0"
                                 Height="40"
