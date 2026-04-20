@@ -16,6 +16,8 @@ public sealed class ThemeService : IThemeService
 {
     private const string LightDictionary = "Themes/Theme.Light.xaml";
     private const string DarkDictionary = "Themes/Theme.Dark.xaml";
+    private const string MaterialDesignLightDictionary = "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml";
+    private const string MaterialDesignDarkDictionary = "pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Dark.xaml";
 
     private readonly string _settingsPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -51,6 +53,9 @@ public sealed class ThemeService : IThemeService
         }
 
         var themeSource = new Uri(theme == AppThemeMode.Light ? LightDictionary : DarkDictionary, UriKind.Relative);
+        var materialThemeSource = new Uri(
+            theme == AppThemeMode.Light ? MaterialDesignLightDictionary : MaterialDesignDarkDictionary,
+            UriKind.Absolute);
         var resources = app.Resources.MergedDictionaries;
 
         var existingTheme = resources.FirstOrDefault(dict =>
@@ -66,10 +71,30 @@ public sealed class ThemeService : IThemeService
 
         if (existingTheme.Source == themeSource)
         {
+            // Keep going - material dictionary may still need update.
+        }
+        else
+        {
+            existingTheme.Source = themeSource;
+        }
+
+        var existingMaterialTheme = resources.FirstOrDefault(dict =>
+            dict.Source is not null &&
+            (dict.Source.OriginalString.EndsWith("MaterialDesignTheme.Light.xaml", StringComparison.OrdinalIgnoreCase)
+             || dict.Source.OriginalString.EndsWith("MaterialDesignTheme.Dark.xaml", StringComparison.OrdinalIgnoreCase)));
+
+        if (existingMaterialTheme is null)
+        {
+            resources.Insert(0, new ResourceDictionary { Source = materialThemeSource });
             return;
         }
 
-        existingTheme.Source = themeSource;
+        if (existingMaterialTheme.Source == materialThemeSource)
+        {
+            return;
+        }
+
+        existingMaterialTheme.Source = materialThemeSource;
     }
 
     private AppThemeMode? ReadThemeFromStorage()
