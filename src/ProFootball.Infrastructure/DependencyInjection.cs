@@ -72,6 +72,7 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<TopPlayersQuery, IReadOnlyList<TopPlayerDto>>, AnalyticsQueryService>();
 
         services.AddScoped<IQueryHandler<MatchSearchQuery, PagedResult<MatchListItemDto>>, MatchesQueryService>();
+        services.AddScoped<IQueryHandler<GetMatchTeamsQuery, IReadOnlyList<TeamListItemDto>>, MatchesQueryService>();
         services.AddScoped<IQueryHandler<GetMatchDetailsQuery, MatchDetailsDto?>, MatchesQueryService>();
         services.AddScoped<IQueryHandler<GetMatchesBySeasonQuery, IReadOnlyList<MatchesBySeasonDto>>, MatchesQueryService>();
         services.AddScoped<IQueryHandler<GetDashboardKpiQuery, DashboardKpiDto>, MatchesQueryService>();

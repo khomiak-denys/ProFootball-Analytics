@@ -115,6 +115,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         await Teams.SearchAsync();
         await Players.SearchAsync();
         await Matches.LoadLeaguesAsync();
+        await Matches.LoadTeamOptionsAsync();
         await Matches.SearchAsync();
         await Analytics.RefreshAllAsync();
     }
