@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Presentation.Commands;
+using ProFootball.Presentation.Services;
 
 namespace ProFootball.Presentation.ViewModels;
 
@@ -8,11 +9,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 {
     private AppTab _selectedTab = AppTab.Dashboard;
     private readonly ILogger<MainViewModel> _logger;
+    private readonly IThemeService _themeService;
 
     public MainViewModel(
         IQueryDispatcher queryDispatcher,
+        IThemeService themeService,
         ILoggerFactory loggerFactory)
     {
+        _themeService = themeService;
         _logger = loggerFactory.CreateLogger<MainViewModel>();
         Dashboard = new DashboardViewModel(queryDispatcher);
         CountriesLeagues = new CountriesLeaguesViewModel(
@@ -28,6 +32,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Analytics = new AnalyticsViewModel(queryDispatcher);
 
         LoadInitialDataCommand = new AsyncRelayCommand(LoadInitialDataAsync, OnBackgroundCommandException);
+        ToggleThemeCommand = new RelayCommand(ToggleTheme);
     }
 
     public DashboardViewModel Dashboard { get; }
@@ -95,6 +100,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public AsyncRelayCommand LoadInitialDataCommand { get; }
 
+    public RelayCommand ToggleThemeCommand { get; }
+
+    public bool IsDarkTheme => _themeService.CurrentTheme == AppThemeMode.Dark;
+
+    public string ThemeToggleLabel => IsDarkTheme ? "Light" : "Dark";
+
+    public string ThemeToggleGlyph => IsDarkTheme ? "\uE706" : "\uE708";
+
     public async Task LoadInitialDataAsync()
     {
         await Dashboard.RefreshAsync();
@@ -130,6 +143,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void OnBackgroundCommandException(Exception exception)
     {
         _logger.LogError(exception, "Main view model command failed.");
+    }
+
+    private void ToggleTheme()
+    {
+        _themeService.ToggleTheme();
+        RaisePropertyChanged(nameof(IsDarkTheme));
+        RaisePropertyChanged(nameof(ThemeToggleLabel));
+        RaisePropertyChanged(nameof(ThemeToggleGlyph));
     }
 
     public void Dispose()

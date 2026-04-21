@@ -1,0 +1,41 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <!-- React card equivalent: rounded-xl, border, soft shadow -->
+    <Style x:Key="ReactCardStyle" TargetType="materialDesign:Card">
+        <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="24" />
+        <Setter Property="Margin" Value="0,0,0,12" />
+    </Style>
+
+    <Style x:Key="ReactCardInteractiveStyle"
+           TargetType="materialDesign:Card"
+           BasedOn="{StaticResource ReactCardStyle}">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Opacity" Value="0.97" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Opacity" Value="1" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="ReactCardBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="24" />
+        <Setter Property="Margin" Value="0,0,0,12" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="14"
+                                  ShadowDepth="1"
+                                  Opacity="0.18"
+                                  Color="#111827" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>
