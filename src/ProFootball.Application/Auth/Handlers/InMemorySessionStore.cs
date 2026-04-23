@@ -1,15 +1,31 @@
 using ProFootball.Application.Auth.Abstractions;
+using ProFootball.Application.Auth.Dtos;
 
 namespace ProFootball.Application.Auth.Handlers;
 
 public sealed class InMemorySessionStore : IUserSessionStore
 {
-    public bool IsAuthenticated => !string.IsNullOrWhiteSpace(CurrentUser);
+    private SessionStateDto _currentState = new(false, null, null, null);
 
-    public string? CurrentUser { get; private set; }
+    public bool IsAuthenticated => _currentState.IsAuthenticated;
 
-    public void SetCurrentUser(string? userName)
+    public SessionStateDto CurrentState => _currentState;
+
+    public void SetCurrentUser(string login, string displayName, string role)
     {
-        CurrentUser = userName;
+        ArgumentException.ThrowIfNullOrWhiteSpace(login);
+        ArgumentException.ThrowIfNullOrWhiteSpace(displayName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(role);
+
+        _currentState = new SessionStateDto(
+            true,
+            login.Trim(),
+            displayName.Trim(),
+            role.Trim());
+    }
+
+    public void Clear()
+    {
+        _currentState = new SessionStateDto(false, null, null, null);
     }
 }

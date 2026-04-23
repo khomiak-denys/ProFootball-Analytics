@@ -9,7 +9,7 @@ public sealed class SignOutCommandHandler(IUserSessionStore sessionStore) : ICom
     public Task HandleAsync(SignOutCommand _, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        sessionStore.SetCurrentUser(null);
+        sessionStore.Clear();
         return Task.CompletedTask;
     }
 }
