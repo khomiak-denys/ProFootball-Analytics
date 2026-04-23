@@ -1,0 +1,120 @@
+<Window x:Class="ProFootball.Presentation.Views.Auth.RegistrationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Registration"
+        Height="680"
+        Width="520"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource ShellMainBackgroundBrush}">
+    <Grid Margin="20">
+        <Border Style="{StaticResource ReactCardBorderStyle}" Margin="0" Padding="0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Background="{DynamicResource SuccessForegroundBrush}" Padding="20,18">
+                    <TextBlock FontSize="20"
+                               FontWeight="SemiBold"
+                               Foreground="White"
+                               Text="Реєстрація" />
+                </Border>
+
+                <StackPanel Grid.Row="1" Margin="24,20,24,24">
+                    <TextBlock Foreground="{DynamicResource MutedForegroundBrush}"
+                               Text="Створіть обліковий запис для доступу до ProFootball." />
+
+                    <TextBlock Margin="0,18,0,6" FontWeight="SemiBold" Text="Ім'я" />
+                    <TextBox Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Margin="0,14,0,6" FontWeight="SemiBold" Text="Прізвище" />
+                    <TextBox Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Margin="0,14,0,6" FontWeight="SemiBold" Text="Логін" />
+                    <TextBox Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <TextBlock Margin="0,14,0,6" FontWeight="SemiBold" Text="Пароль" />
+                    <PasswordBox x:Name="PasswordInput"
+                                 Height="40"
+                                 Padding="12,0"
+                                 FontSize="16"
+                                 BorderThickness="1"
+                                 BorderBrush="{DynamicResource CardBorderBrush}"
+                                 Background="{DynamicResource CardBackgroundBrush}"
+                                 Foreground="{DynamicResource TitleForegroundBrush}" />
+
+                    <TextBlock Margin="0,14,0,6" FontWeight="SemiBold" Text="Підтвердіть пароль" />
+                    <PasswordBox x:Name="ConfirmPasswordInput"
+                                 Height="40"
+                                 Padding="12,0"
+                                 FontSize="16"
+                                 BorderThickness="1"
+                                 BorderBrush="{DynamicResource CardBorderBrush}"
+                                 Background="{DynamicResource CardBackgroundBrush}"
+                                 Foreground="{DynamicResource TitleForegroundBrush}" />
+
+                    <TextBlock Margin="0,10,0,0"
+                               Foreground="{DynamicResource DangerForegroundBrush}"
+                               Text="{Binding ErrorMessage}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ErrorMessage}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding ErrorMessage}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <TextBlock Margin="0,10,0,0"
+                               Foreground="{DynamicResource SuccessForegroundBrush}"
+                               Text="{Binding SuccessMessage}">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SuccessMessage}" Value="">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SuccessMessage}" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+
+                    <Grid Margin="0,22,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Button Grid.Column="0"
+                                Content="Скасувати"
+                                Background="{DynamicResource SurfaceMutedBrush}"
+                                Foreground="{DynamicResource TitleForegroundBrush}"
+                                Click="OnCancelClick" />
+
+                        <Button Grid.Column="2"
+                                Content="Зареєструватися"
+                                Background="{DynamicResource SuccessForegroundBrush}"
+                                Foreground="White"
+                                Click="OnRegisterClick" />
+                    </Grid>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

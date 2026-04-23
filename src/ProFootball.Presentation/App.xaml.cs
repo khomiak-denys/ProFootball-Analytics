@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ProFootball.Infrastructure;
 using ProFootball.Presentation.Services;
+using ProFootball.Presentation.ViewModels.Auth;
+using ProFootball.Presentation.Views.Auth;
 using ProFootball.Presentation.ViewModels;
 using Serilog;
 using Serilog.Events;
@@ -57,6 +59,10 @@ public partial class App : System.Windows.Application
                 {
                     services.AddInfrastructure(context.Configuration);
                     services.AddSingleton<IThemeService, ThemeService>();
+                    services.AddScoped<LoginViewModel>();
+                    services.AddScoped<RegistrationViewModel>();
+                    services.AddScoped<LoginWindow>();
+                    services.AddScoped<RegistrationWindow>();
                     services.AddScoped<MainViewModel>();
                     services.AddScoped<MainWindow>();
                 })
@@ -67,6 +73,22 @@ public partial class App : System.Windows.Application
             _uiScope = _host.Services.CreateScope();
             var themeService = _uiScope.ServiceProvider.GetRequiredService<IThemeService>();
             themeService.Initialize();
+
+            LoginWindow? loginWindow;
+            using (var authScope = _host.Services.CreateScope())
+            {
+                loginWindow = authScope.ServiceProvider.GetRequiredService<LoginWindow>();
+                var signedIn = loginWindow.ShowDialog() == true;
+                if (!signedIn)
+                {
+                    Shutdown(0);
+                    base.OnStartup(e);
+                    return;
+                }
+            }
+
+            _uiScope.Dispose();
+            _uiScope = _host.Services.CreateScope();
             var mainWindow = _uiScope.ServiceProvider.GetRequiredService<MainWindow>();
             MainWindow = mainWindow;
             mainWindow.Show();

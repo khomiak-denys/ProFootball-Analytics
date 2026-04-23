@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Auth.Dtos;
+using ProFootball.Application.Auth.Queries;
 using ProFootball.Presentation.Commands;
 using ProFootball.Presentation.Services;
 
@@ -10,12 +12,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private AppTab _selectedTab = AppTab.Dashboard;
     private readonly ILogger<MainViewModel> _logger;
     private readonly IThemeService _themeService;
+    private readonly IQueryDispatcher _queryDispatcher;
+    private string _currentUserDisplayName = "Unknown";
+    private string _currentUserRole = "Analyst";
 
     public MainViewModel(
         IQueryDispatcher queryDispatcher,
         IThemeService themeService,
         ILoggerFactory loggerFactory)
     {
+        _queryDispatcher = queryDispatcher;
         _themeService = themeService;
         _logger = loggerFactory.CreateLogger<MainViewModel>();
         Dashboard = new DashboardViewModel(queryDispatcher);
@@ -108,8 +114,34 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public string ThemeToggleGlyph => IsDarkTheme ? "\uE706" : "\uE708";
 
+    public string CurrentUserDisplayName
+    {
+        get => _currentUserDisplayName;
+        private set => SetProperty(ref _currentUserDisplayName, value);
+    }
+
+    public string CurrentUserRole
+    {
+        get => _currentUserRole;
+        private set
+        {
+            if (SetProperty(ref _currentUserRole, value))
+            {
+                RaisePropertyChanged(nameof(CanManageData));
+                RaisePropertyChanged(nameof(IsReadOnlyUser));
+            }
+        }
+    }
+
+    public bool CanManageData =>
+        string.Equals(CurrentUserRole, "Admin", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(CurrentUserRole, "Manager", StringComparison.OrdinalIgnoreCase);
+
+    public bool IsReadOnlyUser => !CanManageData;
+
     public async Task LoadInitialDataAsync()
     {
+        await RefreshSessionStateAsync();
         await Dashboard.RefreshAsync();
         await CountriesLeagues.RefreshAsync();
         await Teams.SearchAsync();
@@ -152,6 +184,18 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RaisePropertyChanged(nameof(IsDarkTheme));
         RaisePropertyChanged(nameof(ThemeToggleLabel));
         RaisePropertyChanged(nameof(ThemeToggleGlyph));
+    }
+
+    private async Task RefreshSessionStateAsync()
+    {
+        SessionStateDto session = await _queryDispatcher.DispatchAsync<GetSessionStateQuery, SessionStateDto>(new GetSessionStateQuery());
+        if (!session.IsAuthenticated)
+        {
+            throw new InvalidOperationException("No authenticated session is available.");
+        }
+
+        CurrentUserDisplayName = string.IsNullOrWhiteSpace(session.DisplayName) ? "Unknown" : session.DisplayName;
+        CurrentUserRole = string.IsNullOrWhiteSpace(session.Role) ? "Analyst" : session.Role;
     }
 
     public void Dispose()
