@@ -5,6 +5,8 @@ namespace ProFootball.Infrastructure.Persistence;
 
 public sealed class ProFootballDbContext(DbContextOptions<ProFootballDbContext> options) : DbContext(options)
 {
+    public DbSet<AppUser> AppUsers => Set<AppUser>();
+
     public DbSet<FootballClub> FootballClubs => Set<FootballClub>();
     public DbSet<League> Leagues => Set<League>();
     public DbSet<Team> Teams => Set<Team>();
