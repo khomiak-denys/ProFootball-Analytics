@@ -360,7 +360,7 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         try
         {
             var topPlayersTask = _queryDispatcher.DispatchAsync<TopPlayersQuery, IReadOnlyList<TopPlayerDto>>(new TopPlayersQuery(
-                Limit: 80,
+                Limit: 20,
                 MinOverallRating: null,
                 MinPotential: null,
                 PreferredFoot: null,
@@ -371,7 +371,7 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
                 SortBy: null,
                 SortDescending: false,
                 Page: 1,
-                PageSize: 120), refreshToken);
+                PageSize: 20), refreshToken);
 
             await Task.WhenAll(topPlayersTask, teamsTask);
             _playersSnapshot = await topPlayersTask;

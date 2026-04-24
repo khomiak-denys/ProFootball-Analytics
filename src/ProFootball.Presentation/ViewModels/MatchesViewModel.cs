@@ -47,8 +47,6 @@ public sealed class MatchesViewModel : ObservableObject
         NextPageCommand = new AsyncRelayCommand(NextPageAsync, CommandExceptionHandler.Handle, () => HasNextPage);
         PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, CommandExceptionHandler.Handle, () => HasPreviousPage);
         OpenDetailsCommand = new RelayCommand(OpenDetails, () => SelectedMatch is not null);
-
-        _ = InitializeAsync();
     }
 
     public ObservableCollection<MatchListItemDto> Matches { get; }
@@ -261,20 +259,6 @@ public sealed class MatchesViewModel : ObservableObject
     {
         try
         {
-            await StartSearchAsync();
-        }
-        catch (Exception exception)
-        {
-            CommandExceptionHandler.Handle(exception);
-        }
-    }
-
-    private async Task InitializeAsync()
-    {
-        try
-        {
-            await LoadLeaguesAsync();
-            await LoadTeamOptionsAsync();
             await StartSearchAsync();
         }
         catch (Exception exception)
