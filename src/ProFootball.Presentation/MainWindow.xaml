@@ -7,6 +7,7 @@
         xmlns:views="clr-namespace:ProFootball.Presentation.Views"
         mc:Ignorable="d"
         Title="ProFootball"
+        Icon="Assets/app.ico"
         Height="1024"
         Width="1440"
         MinHeight="1024"
