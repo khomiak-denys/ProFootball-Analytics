@@ -21,6 +21,7 @@ using ProFootball.Application.Player.Dtos;
 using ProFootball.Application.Player.Queries;
 using ProFootball.Application.Team.Dtos;
 using ProFootball.Application.Team.Queries;
+using ProFootball.Domain.Entities;
 using ProFootball.Infrastructure.Auth;
 using ProFootball.Infrastructure.Importing;
 using ProFootball.Infrastructure.Persistence;

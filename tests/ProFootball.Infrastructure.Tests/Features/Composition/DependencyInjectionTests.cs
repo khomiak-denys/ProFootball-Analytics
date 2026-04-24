@@ -6,6 +6,7 @@ using ProFootball.Application.Auth.Abstractions;
 using ProFootball.Application.Auth.Commands;
 using ProFootball.Application.Match.Dtos;
 using ProFootball.Application.Match.Queries;
+using ProFootball.Domain.Entities;
 using ProFootball.Infrastructure;
 using Xunit;
 

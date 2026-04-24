@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using ProFootball.Application.Auth.Abstractions;
 using ProFootball.Domain.Entities;
 
 namespace ProFootball.Infrastructure.Persistence.Repositories;
