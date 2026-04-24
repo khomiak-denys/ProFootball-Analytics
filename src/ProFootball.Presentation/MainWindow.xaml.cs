@@ -39,14 +39,6 @@ public partial class MainWindow : Window
         }
     }
 
-    private void OnAuthHeaderMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (e.ButtonState == MouseButtonState.Pressed)
-        {
-            DragMove();
-        }
-    }
-
     private async void OnAuthSignInClick(object sender, RoutedEventArgs e)
     {
         if (FindName("LoginPasswordBox") is not PasswordBox passwordBox)
@@ -84,21 +76,6 @@ public partial class MainWindow : Window
         {
             authTabs.SelectedIndex = 0;
         }
-    }
-
-    private void OnMinimizeClick(object sender, RoutedEventArgs e)
-    {
-        WindowState = WindowState.Minimized;
-    }
-
-    private void OnToggleMaximizeClick(object sender, RoutedEventArgs e)
-    {
-        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
-    }
-
-    private void OnCloseClick(object sender, RoutedEventArgs e)
-    {
-        Close();
     }
 
     private void OnShowLoginModeClick(object sender, RoutedEventArgs e)

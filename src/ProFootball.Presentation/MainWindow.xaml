@@ -11,7 +11,6 @@
         Width="1440"
         MinHeight="1024"
         MinWidth="1440"
-        WindowStyle="None"
         ResizeMode="CanResize"
         Background="{DynamicResource ShellMainBackgroundBrush}">
     <Grid>
@@ -103,8 +102,7 @@
                 <Border Grid.Row="0"
                         Background="{DynamicResource HeaderBackgroundBrush}"
                         BorderBrush="{DynamicResource SubtleBorderBrush}"
-                        BorderThickness="0,0,0,1"
-                        MouseLeftButtonDown="OnAuthHeaderMouseLeftButtonDown">
+                        BorderThickness="0,0,0,1">
                     <Grid Margin="22,0,14,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
@@ -158,25 +156,6 @@
                                            FontSize="18"
                                            Text="{Binding ThemeToggleGlyph}" />
                             </Button>
-                            <Button Width="40"
-                                    Height="40"
-                                    Margin="12,0,0,0"
-                                    Padding="0"
-                                    Content="–"
-                                    Click="OnMinimizeClick" />
-                            <Button Width="40"
-                                    Height="40"
-                                    Margin="8,0,0,0"
-                                    Padding="0"
-                                    Content="▢"
-                                    Click="OnToggleMaximizeClick" />
-                            <Button Width="40"
-                                    Height="40"
-                                    Margin="8,0,0,0"
-                                    Padding="0"
-                                    Content="×"
-                                    Click="OnCloseClick"
-                                    ToolTip="Close" />
                             <Border Margin="12,0,0,0"
                                     Padding="12,0"
                                     Height="40"
@@ -284,7 +263,7 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <Border Background="{DynamicResource SuccessForegroundBrush}" Padding="24,20" MouseLeftButtonDown="OnAuthHeaderMouseLeftButtonDown">
+                    <Border Background="{DynamicResource SuccessForegroundBrush}" Padding="24,20">
                         <StackPanel Orientation="Horizontal">
                             <Border Width="44"
                                     Height="44"
@@ -515,5 +494,3 @@
         </Grid>
     </Grid>
 </Window>
-
-
