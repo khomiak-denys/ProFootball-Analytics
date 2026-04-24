@@ -8,8 +8,7 @@ public sealed class PlayerAttribute
 
     public PlayerAttribute(
         int id,
-        int playerApiId,
-        int? playerFifaApiId,
+        int playerId,
         DateTime date,
         int? overallRating,
         int? potential,
@@ -18,8 +17,7 @@ public sealed class PlayerAttribute
         string? defensiveWorkRate)
     {
         Id = id;
-        PlayerApiId = playerApiId;
-        PlayerFifaApiId = playerFifaApiId;
+        PlayerId = playerId;
         Date = date;
         OverallRating = overallRating;
         Potential = potential;
@@ -30,9 +28,7 @@ public sealed class PlayerAttribute
 
     public int Id { get; private set; }
 
-    public int PlayerApiId { get; private set; }
-
-    public int? PlayerFifaApiId { get; private set; }
+    public int PlayerId { get; private set; }
 
     public DateTime Date { get; private set; }
 

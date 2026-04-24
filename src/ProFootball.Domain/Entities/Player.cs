@@ -8,8 +8,6 @@ public sealed class Player
 
     public Player(
         int id,
-        int playerApiId,
-        int? playerFifaApiId,
         string name,
         DateTime? birthday,
         int? height,
@@ -18,8 +16,6 @@ public sealed class Player
         ArgumentException.ThrowIfNullOrWhiteSpace(name);
 
         Id = id;
-        PlayerApiId = playerApiId;
-        PlayerFifaApiId = playerFifaApiId;
         Name = name.Trim();
         Birthday = birthday;
         Height = height;
@@ -27,10 +23,6 @@ public sealed class Player
     }
 
     public int Id { get; private set; }
-
-    public int PlayerApiId { get; private set; }
-
-    public int? PlayerFifaApiId { get; private set; }
 
     public string Name { get; private set; } = string.Empty;
 
