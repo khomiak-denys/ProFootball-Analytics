@@ -7,7 +7,6 @@ using ProFootball.Application.Auth.Commands;
 using ProFootball.Application.Auth.Dtos;
 using ProFootball.Application.Auth.Handlers;
 using ProFootball.Application.Auth.Queries;
-using ProFootball.Application.Abstractions.Persistence;
 using ProFootball.Application.Country.Dtos;
 using ProFootball.Application.Country.Queries;
 using ProFootball.Application.Common;
@@ -49,7 +48,6 @@ public static class DependencyInjection
 
         services.AddDbContext<ProFootballDbContext>(options => options.UseNpgsql(connectionString));
         services.AddDbContextFactory<ProFootballDbContext>(options => options.UseNpgsql(connectionString));
-        services.AddScoped<IClubRepository, EfClubRepository>();
         services.AddScoped<IAppUserAuthRepository, EfAppUserAuthRepository>();
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
         services.AddScoped<IQueryDispatcher, QueryDispatcher>();

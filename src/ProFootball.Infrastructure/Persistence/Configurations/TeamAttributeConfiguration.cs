@@ -14,14 +14,14 @@ public sealed class TeamAttributeConfiguration : IEntityTypeConfiguration<TeamAt
 
         builder.Property(attribute => attribute.Id).ValueGeneratedNever();
 
-        builder.HasIndex(attribute => attribute.TeamApiId);
+        builder.HasIndex(attribute => attribute.TeamId);
         builder.HasIndex(attribute => attribute.Date);
-        builder.HasIndex(attribute => new { attribute.TeamApiId, attribute.Date });
+        builder.HasIndex(attribute => new { attribute.TeamId, attribute.Date });
 
         builder.HasOne(attribute => attribute.Team)
             .WithMany()
-            .HasForeignKey(attribute => attribute.TeamApiId)
-            .HasPrincipalKey(team => team.TeamApiId)
+            .HasForeignKey(attribute => attribute.TeamId)
+            .HasPrincipalKey(team => team.Id)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

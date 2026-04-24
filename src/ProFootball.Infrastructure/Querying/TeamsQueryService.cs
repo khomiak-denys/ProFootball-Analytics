@@ -34,10 +34,10 @@ public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> db
             .Skip(skip)
             .Take(pageSize)
             .Select(team => new TeamListItemDto(
-                team.TeamApiId,
+                team.Id,
                 team.LongName,
                 team.ShortName,
-                team.TeamFifaApiId))
+                null))
             .ToListAsync(cancellationToken);
 
         return new PagedResult<TeamListItemDto>(items, totalCount, page, pageSize);
@@ -47,12 +47,12 @@ public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> db
         GetTeamDetailsQuery query,
         CancellationToken cancellationToken = default)
     {
-        var teamApiId = query.TeamApiId;
+        var teamId = query.TeamApiId;
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var team = await dbContext.Teams
             .AsNoTracking()
-            .Where(item => item.TeamApiId == teamApiId)
-            .Select(item => new TeamListItemDto(item.TeamApiId, item.LongName, item.ShortName, item.TeamFifaApiId))
+            .Where(item => item.Id == teamId)
+            .Select(item => new TeamListItemDto(item.Id, item.LongName, item.ShortName, null))
             .SingleOrDefaultAsync(cancellationToken);
 
         if (team is null)
@@ -62,7 +62,7 @@ public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> db
 
         var attributes = await dbContext.TeamAttributes
             .AsNoTracking()
-            .Where(attribute => attribute.TeamApiId == teamApiId)
+            .Where(attribute => attribute.TeamId == teamId)
             .OrderByDescending(attribute => attribute.Date)
             .ThenByDescending(attribute => attribute.Id)
             .Take(200)
@@ -86,8 +86,8 @@ public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> db
         {
             ("shortname", true) => query.OrderByDescending(team => team.ShortName).ThenBy(team => team.LongName),
             ("shortname", false) => query.OrderBy(team => team.ShortName).ThenBy(team => team.LongName),
-            ("teamapiid", true) => query.OrderByDescending(team => team.TeamApiId),
-            ("teamapiid", false) => query.OrderBy(team => team.TeamApiId),
+            ("teamapiid", true) => query.OrderByDescending(team => team.Id),
+            ("teamapiid", false) => query.OrderBy(team => team.Id),
             (_, true) => query.OrderByDescending(team => team.LongName),
             _ => query.OrderBy(team => team.LongName),
         };

@@ -24,22 +24,22 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
 
         var projectedQuery = from match in dbContext.Matches.AsNoTracking()
                              join league in dbContext.Leagues.AsNoTracking() on match.LeagueId equals league.Id
-                             join homeTeam in dbContext.Teams.AsNoTracking() on match.HomeTeamApiId equals homeTeam.TeamApiId into homeTeamJoin
+                             join homeTeam in dbContext.Teams.AsNoTracking() on match.HomeTeamId equals homeTeam.Id into homeTeamJoin
                              from homeTeam in homeTeamJoin.DefaultIfEmpty()
-                             join awayTeam in dbContext.Teams.AsNoTracking() on match.AwayTeamApiId equals awayTeam.TeamApiId into awayTeamJoin
+                             join awayTeam in dbContext.Teams.AsNoTracking() on match.AwayTeamId equals awayTeam.Id into awayTeamJoin
                              from awayTeam in awayTeamJoin.DefaultIfEmpty()
                              select new
                              {
-                                 match.MatchApiId,
+                                 match.Id,
                                  match.Date,
                                  match.Season,
                                  LeagueId = league.Id,
                                  LeagueName = league.Name,
                                  match.CountryName,
-                                 match.HomeTeamApiId,
-                                 HomeTeamName = homeTeam == null ? match.HomeTeamApiId.ToString() : homeTeam.LongName,
-                                 match.AwayTeamApiId,
-                                 AwayTeamName = awayTeam == null ? match.AwayTeamApiId.ToString() : awayTeam.LongName,
+                                 match.HomeTeamId,
+                                 HomeTeamName = homeTeam == null ? match.HomeTeamId.ToString() : homeTeam.LongName,
+                                 match.AwayTeamId,
+                                 AwayTeamName = awayTeam == null ? match.AwayTeamId.ToString() : awayTeam.LongName,
                                  match.HomeTeamGoal,
                                  match.AwayTeamGoal,
                              };
@@ -58,7 +58,7 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
         if (query.TeamApiId.HasValue)
         {
             projectedQuery = projectedQuery.Where(match =>
-                match.HomeTeamApiId == query.TeamApiId.Value || match.AwayTeamApiId == query.TeamApiId.Value);
+                match.HomeTeamId == query.TeamApiId.Value || match.AwayTeamId == query.TeamApiId.Value);
         }
 
         if (query.DateFrom.HasValue)
@@ -86,14 +86,14 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
             .Skip(skip)
             .Take(pageSize)
             .Select(match => new MatchListItemDto(
-                match.MatchApiId,
+                match.Id,
                 match.Date,
                 match.Season,
                 match.LeagueName,
                 match.CountryName,
-                match.HomeTeamApiId,
+                match.HomeTeamId,
                 match.HomeTeamName,
-                match.AwayTeamApiId,
+                match.AwayTeamId,
                 match.AwayTeamName,
                 match.HomeTeamGoal,
                 match.AwayTeamGoal))
@@ -115,19 +115,19 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
         }
 
         var teamIds = matchesQuery
-            .Select(match => match.HomeTeamApiId)
-            .Concat(matchesQuery.Select(match => match.AwayTeamApiId))
+            .Select(match => match.HomeTeamId)
+            .Concat(matchesQuery.Select(match => match.AwayTeamId))
             .Distinct();
 
         var teams = await dbContext.Teams
             .AsNoTracking()
-            .Where(team => teamIds.Contains(team.TeamApiId))
+            .Where(team => teamIds.Contains(team.Id))
             .OrderBy(team => team.LongName)
             .Select(team => new TeamListItemDto(
-                team.TeamApiId,
+                team.Id,
                 team.LongName,
                 team.ShortName,
-                team.TeamFifaApiId))
+                null))
             .ToListAsync(cancellationToken);
 
         return teams;
@@ -137,25 +137,25 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
         GetMatchDetailsQuery query,
         CancellationToken cancellationToken = default)
     {
-        var matchApiId = query.MatchApiId;
+        var matchId = query.MatchApiId;
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var match = await (from item in dbContext.Matches.AsNoTracking()
-                           where item.MatchApiId == matchApiId
+                           where item.Id == matchId
                            join league in dbContext.Leagues.AsNoTracking() on item.LeagueId equals league.Id
-                           join homeTeam in dbContext.Teams.AsNoTracking() on item.HomeTeamApiId equals homeTeam.TeamApiId into homeTeamJoin
+                           join homeTeam in dbContext.Teams.AsNoTracking() on item.HomeTeamId equals homeTeam.Id into homeTeamJoin
                            from homeTeam in homeTeamJoin.DefaultIfEmpty()
-                           join awayTeam in dbContext.Teams.AsNoTracking() on item.AwayTeamApiId equals awayTeam.TeamApiId into awayTeamJoin
+                           join awayTeam in dbContext.Teams.AsNoTracking() on item.AwayTeamId equals awayTeam.Id into awayTeamJoin
                            from awayTeam in awayTeamJoin.DefaultIfEmpty()
                            select new MatchDetailsDto(
-                               item.MatchApiId,
+                               item.Id,
                                item.Date,
                                item.Season,
                                league.Name,
                                item.CountryName,
-                               item.HomeTeamApiId,
-                               homeTeam == null ? item.HomeTeamApiId.ToString() : homeTeam.LongName,
-                               item.AwayTeamApiId,
-                               awayTeam == null ? item.AwayTeamApiId.ToString() : awayTeam.LongName,
+                               item.HomeTeamId,
+                               homeTeam == null ? item.HomeTeamId.ToString() : homeTeam.LongName,
+                               item.AwayTeamId,
+                               awayTeam == null ? item.AwayTeamId.ToString() : awayTeam.LongName,
                                item.HomeTeamGoal,
                                item.AwayTeamGoal))
             .SingleOrDefaultAsync(cancellationToken);

@@ -14,11 +14,11 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
         GetPlayerTrendQuery query,
         CancellationToken cancellationToken = default)
     {
-        var playerApiId = query.PlayerApiId;
+        var playerId = query.PlayerApiId;
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         return await dbContext.PlayerAttributes
             .AsNoTracking()
-            .Where(attribute => attribute.PlayerApiId == playerApiId)
+            .Where(attribute => attribute.PlayerId == playerId)
             .OrderBy(attribute => attribute.Date)
             .Select(attribute => new PlayerTrendPointDto(
                 attribute.Date,
@@ -61,11 +61,11 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
         }
 
         var groupedQuery = from attribute in attributesQuery
-                           group attribute by attribute.PlayerApiId
+                           group attribute by attribute.PlayerId
             into grouped
                            select new
                            {
-                               PlayerApiId = grouped.Key,
+                               PlayerId = grouped.Key,
                                AverageOverallRating = grouped.Average(attribute => attribute.OverallRating) ?? 0,
                                AveragePotential = grouped.Average(attribute => attribute.Potential) ?? 0,
                                Samples = grouped.Count(),
@@ -84,9 +84,9 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
         var topGrouped = groupedQuery.Take(limit);
 
         var queryResult = from grouped in topGrouped
-                          join player in dbContext.Players.AsNoTracking() on grouped.PlayerApiId equals player.PlayerApiId
+                          join player in dbContext.Players.AsNoTracking() on grouped.PlayerId equals player.Id
                           select new TopPlayerDto(
-                              grouped.PlayerApiId,
+                              grouped.PlayerId,
                               player.Name,
                               Math.Round(grouped.AverageOverallRating, 2),
                               Math.Round(grouped.AveragePotential, 2),
