@@ -25,6 +25,7 @@ public sealed class FootballMatchConfiguration : IEntityTypeConfiguration<Footba
         builder.HasIndex(match => match.MatchApiId).IsUnique();
         builder.HasIndex(match => match.Date);
         builder.HasIndex(match => match.Season);
+        builder.HasIndex(match => new { match.Season, match.LeagueId });
         builder.HasIndex(match => match.CountryName);
         builder.HasIndex(match => match.LeagueId);
         builder.HasIndex(match => match.HomeTeamApiId);
