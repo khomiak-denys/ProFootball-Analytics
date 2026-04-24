@@ -174,6 +174,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private async Task LoadMatchesAsync()
     {
         await Matches.LoadLeaguesAsync();
+        await Matches.LoadSeasonOptionsAsync();
         await Matches.LoadTeamOptionsAsync();
         await Matches.SearchAsync();
     }

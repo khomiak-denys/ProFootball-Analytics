@@ -324,8 +324,6 @@ public sealed class MatchesViewModel : ObservableObject
             Matches.Add(item);
         }
 
-        UpdateSeasonOptions(result.Items);
-
         var selectedMatchId = SelectedMatch?.MatchApiId;
         SelectedMatch = selectedMatchId.HasValue
             ? Matches.FirstOrDefault(item => item.MatchApiId == selectedMatchId.Value)
@@ -339,12 +337,50 @@ public sealed class MatchesViewModel : ObservableObject
     {
         try
         {
+            await LoadSeasonOptionsAsync();
             await LoadTeamOptionsAsync();
             await StartSearchAsync();
         }
         catch (Exception exception)
         {
             CommandExceptionHandler.Handle(exception);
+        }
+    }
+
+    public async Task LoadSeasonOptionsAsync()
+    {
+        var selectedSeason = Season;
+        var bySeason = await _queryDispatcher.DispatchAsync<GetMatchesBySeasonQuery, IReadOnlyList<MatchesBySeasonDto>>(
+            new GetMatchesBySeasonQuery(SelectedLeague?.Id));
+        var seasons = bySeason
+            .Select(item => item.Season)
+            .Where(season => !string.IsNullOrWhiteSpace(season))
+            .Select(season => season.Trim())
+            .Distinct(StringComparer.Ordinal)
+            .OrderByDescending(season => season, StringComparer.Ordinal)
+            .ToList();
+
+        _isUpdatingSeasonOptions = true;
+        try
+        {
+            SeasonOptions.Clear();
+            SeasonOptions.Add(AllSeasonsOption);
+            foreach (var season in seasons)
+            {
+                SeasonOptions.Add(season);
+            }
+
+            if (!string.IsNullOrWhiteSpace(selectedSeason) && SeasonOptions.Contains(selectedSeason))
+            {
+                Season = selectedSeason;
+                return;
+            }
+
+            Season = AllSeasonsOption;
+        }
+        finally
+        {
+            _isUpdatingSeasonOptions = false;
         }
     }
 
@@ -431,47 +467,6 @@ public sealed class MatchesViewModel : ObservableObject
         }
 
         return DateTime.SpecifyKind(value.Value.Date, DateTimeKind.Utc);
-    }
-
-    private void UpdateSeasonOptions(IReadOnlyList<MatchListItemDto> items)
-    {
-        var selectedSeason = Season;
-        var discoveredSeasons = items
-            .Select(item => item.Season)
-            .Where(season => !string.IsNullOrWhiteSpace(season))
-            .Select(season => season!.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderByDescending(season => season, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        _isUpdatingSeasonOptions = true;
-        try
-        {
-            SeasonOptions.Clear();
-            SeasonOptions.Add(AllSeasonsOption);
-            foreach (var season in discoveredSeasons)
-            {
-                SeasonOptions.Add(season);
-            }
-
-            if (string.IsNullOrWhiteSpace(selectedSeason) ||
-                selectedSeason.Equals(AllSeasonsOption, StringComparison.OrdinalIgnoreCase))
-            {
-                Season = AllSeasonsOption;
-                return;
-            }
-
-            if (!SeasonOptions.Contains(selectedSeason))
-            {
-                SeasonOptions.Add(selectedSeason);
-            }
-
-            Season = selectedSeason;
-        }
-        finally
-        {
-            _isUpdatingSeasonOptions = false;
-        }
     }
 
     private IReadOnlyList<MatchStatisticViewModel> BuildMatchStatistics()
