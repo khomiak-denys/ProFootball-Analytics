@@ -39,6 +39,61 @@ public partial class MainWindow : Window
         }
     }
 
+    private async void OnAuthSignInClick(object sender, RoutedEventArgs e)
+    {
+        if (FindName("LoginPasswordBox") is not PasswordBox passwordBox)
+        {
+            return;
+        }
+
+        if (!await _viewModel.LoginForm.SignInAsync(passwordBox.Password))
+        {
+            return;
+        }
+
+        await _viewModel.LoadInitialDataAsync();
+    }
+
+    private async void OnAuthRegisterClick(object sender, RoutedEventArgs e)
+    {
+        if (FindName("RegisterPasswordBox") is not PasswordBox passwordBox ||
+            FindName("RegisterConfirmPasswordBox") is not PasswordBox confirmPasswordBox)
+        {
+            return;
+        }
+
+        var registerSucceeded = await _viewModel.RegistrationForm.RegisterAsync(
+            passwordBox.Password,
+            confirmPasswordBox.Password);
+
+        if (!registerSucceeded)
+        {
+            return;
+        }
+
+        _viewModel.LoginForm.Login = _viewModel.RegistrationForm.Login;
+        if (FindName("AuthTabs") is TabControl authTabs)
+        {
+            authTabs.SelectedIndex = 0;
+        }
+    }
+
+    private void OnShowLoginModeClick(object sender, RoutedEventArgs e)
+    {
+        if (FindName("AuthTabs") is TabControl authTabs)
+        {
+            authTabs.SelectedIndex = 0;
+        }
+    }
+
+    private void OnShowRegisterModeClick(object sender, RoutedEventArgs e)
+    {
+        if (FindName("AuthTabs") is TabControl authTabs)
+        {
+            authTabs.SelectedIndex = 1;
+        }
+    }
+
     private void OnSidebarItemMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
     {
         if (sender is not ListBox listBox || e.OriginalSource is not DependencyObject source)

@@ -6,20 +6,22 @@
         xmlns:viewModels="clr-namespace:ProFootball.Presentation.ViewModels"
         xmlns:views="clr-namespace:ProFootball.Presentation.Views"
         mc:Ignorable="d"
-        Title="ProFootball MVP"
+        Title="ProFootball"
+        Icon="pack://application:,,,/Assets/app.ico"
         Height="1024"
         Width="1440"
         MinHeight="1024"
         MinWidth="1440"
+        ResizeMode="CanResize"
         Background="{DynamicResource ShellMainBackgroundBrush}">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="256" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+        <Grid Visibility="{Binding IsAuthenticated, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="256" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0"
-                Background="{DynamicResource ShellSidebarBrush}">
+            <Border Grid.Column="0" Background="{DynamicResource ShellSidebarBrush}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -48,226 +50,448 @@
                              ItemContainerStyle="{StaticResource SidebarNavItemStyle}">
                         <ListBoxItem Tag="{x:Static viewModels:AppTab.Dashboard}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock FontFamily="Segoe MDL2 Assets"
-                                           FontSize="19"
-                                           Foreground="White"
-                                           Text="&#xE80F;" />
-                                <TextBlock Margin="14,0,0,0"
-                                           FontSize="16"
-                                           Foreground="White"
-                                           Text="Dashboard" />
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="19" Foreground="White" Text="&#xE80F;" />
+                                <TextBlock Margin="14,0,0,0" FontSize="16" Foreground="White" Text="Dashboard" />
                             </StackPanel>
                         </ListBoxItem>
                         <ListBoxItem Tag="{x:Static viewModels:AppTab.Players}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock FontFamily="Segoe MDL2 Assets"
-                                           FontSize="19"
-                                           Foreground="White"
-                                           Text="&#xE716;" />
-                                <TextBlock Margin="14,0,0,0"
-                                           FontSize="16"
-                                           Foreground="White"
-                                           Text="Players" />
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="19" Foreground="White" Text="&#xE716;" />
+                                <TextBlock Margin="14,0,0,0" FontSize="16" Foreground="White" Text="Players" />
                             </StackPanel>
                         </ListBoxItem>
                         <ListBoxItem Tag="{x:Static viewModels:AppTab.Teams}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock FontFamily="Segoe MDL2 Assets"
-                                           FontSize="19"
-                                           Foreground="White"
-                                           Text="&#xE72E;" />
-                                <TextBlock Margin="14,0,0,0"
-                                           FontSize="16"
-                                           Foreground="White"
-                                           Text="Teams" />
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="19" Foreground="White" Text="&#xE72E;" />
+                                <TextBlock Margin="14,0,0,0" FontSize="16" Foreground="White" Text="Teams" />
                             </StackPanel>
                         </ListBoxItem>
                         <ListBoxItem Tag="{x:Static viewModels:AppTab.Matches}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock FontFamily="Segoe MDL2 Assets"
-                                           FontSize="19"
-                                           Foreground="White"
-                                           Text="&#xE787;" />
-                                <TextBlock Margin="14,0,0,0"
-                                           FontSize="16"
-                                           Foreground="White"
-                                           Text="Matches" />
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="19" Foreground="White" Text="&#xE787;" />
+                                <TextBlock Margin="14,0,0,0" FontSize="16" Foreground="White" Text="Matches" />
                             </StackPanel>
                         </ListBoxItem>
                         <ListBoxItem Tag="{x:Static viewModels:AppTab.CountriesLeagues}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock FontFamily="Segoe MDL2 Assets"
-                                           FontSize="19"
-                                           Foreground="White"
-                                           Text="&#xE909;" />
-                                <TextBlock Margin="14,0,0,0"
-                                           FontSize="16"
-                                           Foreground="White"
-                                           Text="Leagues" />
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="19" Foreground="White" Text="&#xE909;" />
+                                <TextBlock Margin="14,0,0,0" FontSize="16" Foreground="White" Text="Leagues" />
                             </StackPanel>
                         </ListBoxItem>
                         <ListBoxItem Tag="{x:Static viewModels:AppTab.Analytics}">
                             <StackPanel Orientation="Horizontal">
-                                <TextBlock FontFamily="Segoe MDL2 Assets"
-                                           FontSize="19"
-                                           Foreground="White"
-                                           Text="&#xE9D2;" />
-                                <TextBlock Margin="14,0,0,0"
-                                           FontSize="16"
-                                           Foreground="White"
-                                           Text="Analytics" />
+                                <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="19" Foreground="White" Text="&#xE9D2;" />
+                                <TextBlock Margin="14,0,0,0" FontSize="16" Foreground="White" Text="Analytics" />
                             </StackPanel>
                         </ListBoxItem>
                     </ListBox>
 
-                    <Border Grid.Row="2"
-                            Padding="16,20"
-                            BorderBrush="{DynamicResource SidebarDividerBrush}"
-                            BorderThickness="0,1,0,0">
+                    <Border Grid.Row="2" Padding="16,20" BorderBrush="{DynamicResource SidebarDividerBrush}" BorderThickness="0,1,0,0">
                         <TextBlock FontSize="12"
                                    Foreground="{DynamicResource SidebarSecondaryForegroundBrush}"
                                    Text="{Binding Dashboard.CurrentYear, StringFormat={}© {0} ProFootball Analytics}" />
                     </Border>
                 </Grid>
-        </Border>
+            </Border>
 
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="64" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="64" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-            <Border Grid.Row="0"
-                    Background="{DynamicResource HeaderBackgroundBrush}"
-                    BorderBrush="{DynamicResource SubtleBorderBrush}"
-                    BorderThickness="0,0,0,1">
-                <Grid Margin="22,0,22,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock VerticalAlignment="Center"
-                               FontSize="24"
-                               FontWeight="Medium"
-                               Foreground="{DynamicResource TitleForegroundBrush}"
-                               Text="{Binding CurrentSectionTitle}" />
-                    <Border Grid.Column="1"
-                            Width="430"
-                            Height="40"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Background="{DynamicResource SurfaceMutedBrush}"
-                            BorderBrush="{DynamicResource SubtleBorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="8">
-                        <Grid Margin="14,0,14,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock VerticalAlignment="Center"
-                                       FontFamily="Segoe MDL2 Assets"
-                                       FontSize="14"
-                                       Foreground="{DynamicResource ChartAxisBrush}"
-                                       Text="&#xE721;" />
-                            <TextBlock Grid.Column="1"
-                                       Margin="10,0,0,0"
-                                       VerticalAlignment="Center"
+                <Border Grid.Row="0"
+                        Background="{DynamicResource HeaderBackgroundBrush}"
+                        BorderBrush="{DynamicResource SubtleBorderBrush}"
+                        BorderThickness="0,0,0,1">
+                    <Grid Margin="22,0,14,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock VerticalAlignment="Center"
+                                   FontSize="24"
+                                   FontWeight="Medium"
+                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                   Text="{Binding CurrentSectionTitle}" />
+                        <Border Grid.Column="1"
+                                Width="430"
+                                Height="40"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Background="{DynamicResource SurfaceMutedBrush}"
+                                BorderBrush="{DynamicResource SubtleBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="8">
+                            <Grid Margin="14,0,14,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock VerticalAlignment="Center"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="14"
+                                           Foreground="{DynamicResource ChartAxisBrush}"
+                                           Text="&#xE721;" />
+                                <TextBlock Grid.Column="1"
+                                           Margin="10,0,0,0"
+                                           VerticalAlignment="Center"
+                                           FontSize="16"
+                                           Foreground="{DynamicResource MutedForegroundBrush}"
+                                           Text="Search players, teams, matches..." />
+                            </Grid>
+                        </Border>
+                        <StackPanel Grid.Column="2"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center">
+                            <Button Width="40"
+                                    Height="40"
+                                    Padding="0"
+                                    Command="{Binding ToggleThemeCommand}"
+                                    ToolTip="Toggle theme">
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="18"
+                                           Text="{Binding ThemeToggleGlyph}" />
+                            </Button>
+                            <Border Margin="12,0,0,0"
+                                    Padding="12,0"
+                                    Height="40"
+                                    VerticalAlignment="Center"
+                                    Background="{DynamicResource CardBackgroundBrush}"
+                                    BorderBrush="{DynamicResource CardBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8">
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Border Width="24"
+                                            Height="24"
+                                            CornerRadius="12"
+                                            Background="{DynamicResource SuccessSoftBackgroundBrush}">
+                                        <TextBlock HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   FontFamily="Segoe MDL2 Assets"
+                                                   Foreground="{DynamicResource SuccessForegroundBrush}"
+                                                   Text="&#xE77B;" />
+                                    </Border>
+                                    <TextBlock Margin="8,0,0,0"
+                                               VerticalAlignment="Center"
+                                               FontSize="14"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TitleForegroundBrush}"
+                                               Text="{Binding CurrentUserDisplayName}" />
+                                    <Border Margin="10,0,0,0"
+                                            Padding="8,3"
+                                            Background="{DynamicResource BadgeSurfaceBrush}"
+                                            CornerRadius="999">
+                                        <TextBlock FontSize="12"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                                   Text="{Binding CurrentUserRole}" />
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <Grid Grid.Row="1" Margin="18,16,18,16">
+                    <TabControl Style="{StaticResource ContentOnlyTabControlStyle}"
+                                SelectedValuePath="Tag"
+                                SelectedValue="{Binding SelectedTab, Mode=TwoWay}">
+                        <TabItem Header="Dashboard" Tag="{x:Static viewModels:AppTab.Dashboard}">
+                            <views:DashboardView />
+                        </TabItem>
+
+                        <TabItem Header="Countries/Leagues" Tag="{x:Static viewModels:AppTab.CountriesLeagues}">
+                            <views:CountriesLeaguesView />
+                        </TabItem>
+
+                        <TabItem Header="Teams" Tag="{x:Static viewModels:AppTab.Teams}">
+                            <views:TeamsView />
+                        </TabItem>
+
+                        <TabItem Header="Team Details" Tag="{x:Static viewModels:AppTab.TeamDetails}">
+                            <views:TeamDetailsView />
+                        </TabItem>
+
+                        <TabItem Header="Players" Tag="{x:Static viewModels:AppTab.Players}">
+                            <views:PlayersView />
+                        </TabItem>
+
+                        <TabItem Header="Player Details" Tag="{x:Static viewModels:AppTab.PlayerDetails}">
+                            <views:PlayerDetailsView />
+                        </TabItem>
+
+                        <TabItem Header="Matches" Tag="{x:Static viewModels:AppTab.Matches}">
+                            <views:MatchesView />
+                        </TabItem>
+
+                        <TabItem Header="Match Details" Tag="{x:Static viewModels:AppTab.MatchDetails}">
+                            <views:MatchDetailsView />
+                        </TabItem>
+
+                        <TabItem Header="Analytics" Tag="{x:Static viewModels:AppTab.Analytics}">
+                            <views:AnalyticsView />
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </Grid>
+        </Grid>
+
+          <Grid Visibility="{Binding IsAuthenticated, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+            <Grid.Background>
+                <RadialGradientBrush GradientOrigin="0.25,0.2" Center="0.25,0.2" RadiusX="1" RadiusY="1">
+                    <GradientStop Color="#F1F6F2" Offset="0" />
+                    <GradientStop Color="#F7F8FA" Offset="0.55" />
+                    <GradientStop Color="#E9ECEF" Offset="1" />
+                </RadialGradientBrush>
+            </Grid.Background>
+
+            <Border Width="760"
+                    Padding="0"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    CornerRadius="20"
+                    Background="White"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Border Background="{DynamicResource SuccessForegroundBrush}" Padding="24,20">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Width="44"
+                                    Height="44"
+                                    CornerRadius="10"
+                                    Background="White">
+                                <TextBlock HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="20"
+                                           Foreground="{DynamicResource SuccessForegroundBrush}"
+                                           Text="&#xE77B;" />
+                            </Border>
+                            <StackPanel Margin="14,0,0,0">
+                                <TextBlock FontSize="22"
+                                           FontWeight="SemiBold"
+                                           Foreground="White"
+                                           Text="ProFootball Analytics" />
+                                <TextBlock FontSize="13"
+                                           Foreground="White"
+                                           Opacity="0.85"
+                                           Text="Data Analysis Platform" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Grid Grid.Row="1" Margin="24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.1*" />
+                            <ColumnDefinition Width="0.9*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Margin="0,8,20,8" VerticalAlignment="Center">
+                            <TextBlock FontSize="28"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                       Text="ProFootball access" />
+                            <TextBlock Margin="0,12,0,0"
                                        FontSize="16"
                                        Foreground="{DynamicResource MutedForegroundBrush}"
-                                       Text="Search players, teams, matches..." />
-                        </Grid>
-                    </Border>
-                    <StackPanel Grid.Column="2"
-                                Orientation="Horizontal"
-                                HorizontalAlignment="Right"
-                                VerticalAlignment="Center">
-                        <Button Width="40"
-                                Height="40"
-                                Padding="0"
-                                Command="{Binding ToggleThemeCommand}"
-                                ToolTip="Toggle theme">
-                            <TextBlock HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       FontFamily="Segoe MDL2 Assets"
-                                       FontSize="18"
-                                       Text="{Binding ThemeToggleGlyph}" />
-                        </Button>
-                        <Border Margin="12,0,0,0"
-                                Padding="12,0"
-                                Height="40"
-                                VerticalAlignment="Center"
+                                       TextWrapping="Wrap"
+                                       Text="Sign in to view analytics and browse football data, or register a new account to start with a clean profile." />
+
+                            <Border Margin="0,24,0,0"
+                                    Padding="18"
+                                    Background="#F7FBF8"
+                                    BorderBrush="{DynamicResource CardBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="14">
+                                <StackPanel>
+                                    <TextBlock FontSize="15" FontWeight="SemiBold" Text="What you can do" />
+                                    <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" Foreground="{DynamicResource MutedForegroundBrush}" Text="Login to continue with an analyst account. Registration will create the first user as Admin and subsequent accounts as Analyst." />
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+
+                        <Border Grid.Column="1"
                                 Background="{DynamicResource CardBackgroundBrush}"
                                 BorderBrush="{DynamicResource CardBorderBrush}"
                                 BorderThickness="1"
-                                CornerRadius="8">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <Border Width="24"
-                                        Height="24"
-                                        CornerRadius="12"
-                                        Background="{DynamicResource SuccessSoftBackgroundBrush}">
-                                    <TextBlock HorizontalAlignment="Center"
-                                               VerticalAlignment="Center"
-                                               FontFamily="Segoe MDL2 Assets"
-                                               Foreground="{DynamicResource SuccessForegroundBrush}"
-                                               Text="&#xE77B;" />
-                                </Border>
-                                <TextBlock Margin="8,0,0,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="14"
-                                           FontWeight="SemiBold"
-                                           Foreground="{DynamicResource TitleForegroundBrush}"
-                                           Text="Analyst" />
-                            </StackPanel>
+                                CornerRadius="16"
+                                Padding="20">
+                            <TabControl x:Name="AuthTabs"
+                                        Style="{StaticResource ContentOnlyTabControlStyle}"
+                                        SelectedIndex="0">
+                                <TabItem Header="Sign in">
+                                    <StackPanel Margin="0,8,0,0">
+                                        <TextBlock FontSize="22"
+                                                   FontWeight="SemiBold"
+                                                   Text="Вхід" />
+                                        <TextBlock Margin="0,8,0,0"
+                                                   Foreground="{DynamicResource MutedForegroundBrush}"
+                                                   Text="Увійдіть з логіном та паролем." />
+
+                                        <TextBlock Margin="0,18,0,6" FontWeight="SemiBold" Text="Логін" />
+                                        <TextBox Text="{Binding LoginForm.Login, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        <TextBlock Margin="0,14,0,6" FontWeight="SemiBold" Text="Пароль" />
+                                        <PasswordBox x:Name="LoginPasswordBox"
+                                                     Height="40"
+                                                     Padding="12,0"
+                                                     FontSize="16"
+                                                     BorderThickness="1"
+                                                     BorderBrush="{DynamicResource CardBorderBrush}"
+                                                     Background="{DynamicResource CardBackgroundBrush}"
+                                                     Foreground="{DynamicResource TitleForegroundBrush}" />
+
+                                        <Border Margin="0,14,0,0"
+                                                Padding="10,8"
+                                                Background="#11D4183D"
+                                                BorderBrush="{DynamicResource DangerForegroundBrush}"
+                                                BorderThickness="1"
+                                                CornerRadius="8">
+                                            <TextBlock Foreground="{DynamicResource DangerForegroundBrush}"
+                                                       Text="{Binding LoginForm.ErrorMessage}" />
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding LoginForm.ErrorMessage}" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding LoginForm.ErrorMessage}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                        </Border>
+
+                                        <Button Margin="0,18,0,0"
+                                                Content="Увійти"
+                                                Background="{DynamicResource SuccessForegroundBrush}"
+                                                Foreground="White"
+                                                Click="OnAuthSignInClick" />
+
+                                        <StackPanel Margin="0,12,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock Foreground="{DynamicResource MutedForegroundBrush}" Text="Немає облікового запису?" />
+                                            <Button Margin="6,0,0,0"
+                                                    Padding="6,0"
+                                                    Height="24"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Foreground="{DynamicResource SuccessForegroundBrush}"
+                                                    Content="Зареєструватися"
+                                                    Click="OnShowRegisterModeClick" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </TabItem>
+
+                                <TabItem Header="Register">
+                                    <StackPanel Margin="0,8,0,0">
+                                        <TextBlock FontSize="22"
+                                                   FontWeight="SemiBold"
+                                                   Text="Реєстрація" />
+                                        <TextBlock Margin="0,8,0,0"
+                                                   Foreground="{DynamicResource MutedForegroundBrush}"
+                                                   Text="Створіть обліковий запис для доступу до ProFootball." />
+
+                                        <TextBlock Margin="0,16,0,6" FontWeight="SemiBold" Text="Ім'я" />
+                                        <TextBox Text="{Binding RegistrationForm.FirstName, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        <TextBlock Margin="0,12,0,6" FontWeight="SemiBold" Text="Прізвище" />
+                                        <TextBox Text="{Binding RegistrationForm.LastName, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        <TextBlock Margin="0,12,0,6" FontWeight="SemiBold" Text="Логін" />
+                                        <TextBox Text="{Binding RegistrationForm.Login, UpdateSourceTrigger=PropertyChanged}" />
+
+                                        <TextBlock Margin="0,12,0,6" FontWeight="SemiBold" Text="Пароль" />
+                                        <PasswordBox x:Name="RegisterPasswordBox"
+                                                     Height="40"
+                                                     Padding="12,0"
+                                                     FontSize="16"
+                                                     BorderThickness="1"
+                                                     BorderBrush="{DynamicResource CardBorderBrush}"
+                                                     Background="{DynamicResource CardBackgroundBrush}"
+                                                     Foreground="{DynamicResource TitleForegroundBrush}" />
+
+                                        <TextBlock Margin="0,12,0,6" FontWeight="SemiBold" Text="Підтвердіть пароль" />
+                                        <PasswordBox x:Name="RegisterConfirmPasswordBox"
+                                                     Height="40"
+                                                     Padding="12,0"
+                                                     FontSize="16"
+                                                     BorderThickness="1"
+                                                     BorderBrush="{DynamicResource CardBorderBrush}"
+                                                     Background="{DynamicResource CardBackgroundBrush}"
+                                                     Foreground="{DynamicResource TitleForegroundBrush}" />
+
+                                        <TextBlock Margin="0,10,0,0"
+                                                   Foreground="{DynamicResource DangerForegroundBrush}"
+                                                   Text="{Binding RegistrationForm.ErrorMessage}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding RegistrationForm.ErrorMessage}" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding RegistrationForm.ErrorMessage}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <TextBlock Margin="0,10,0,0"
+                                                   Foreground="{DynamicResource SuccessForegroundBrush}"
+                                                   Text="{Binding RegistrationForm.SuccessMessage}">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Visibility" Value="Visible" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding RegistrationForm.SuccessMessage}" Value="">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding RegistrationForm.SuccessMessage}" Value="{x:Null}">
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+
+                                        <Button Margin="0,18,0,0"
+                                                Content="Зареєструватися"
+                                                Background="{DynamicResource SuccessForegroundBrush}"
+                                                Foreground="White"
+                                                Click="OnAuthRegisterClick" />
+
+                                        <StackPanel Margin="0,12,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <TextBlock Foreground="{DynamicResource MutedForegroundBrush}" Text="Вже маєте обліковий запис?" />
+                                            <Button Margin="6,0,0,0"
+                                                    Padding="6,0"
+                                                    Height="24"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Foreground="{DynamicResource SuccessForegroundBrush}"
+                                                    Content="Увійти"
+                                                    Click="OnShowLoginModeClick" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </TabItem>
+                            </TabControl>
                         </Border>
-                    </StackPanel>
+                    </Grid>
                 </Grid>
             </Border>
-
-            <Grid Grid.Row="1" Margin="18,16,18,16">
-                <TabControl Style="{StaticResource ContentOnlyTabControlStyle}"
-                            SelectedValuePath="Tag"
-                            SelectedValue="{Binding SelectedTab, Mode=TwoWay}">
-                    <TabItem Header="Dashboard" Tag="{x:Static viewModels:AppTab.Dashboard}">
-                        <views:DashboardView />
-                    </TabItem>
-
-                    <TabItem Header="Countries/Leagues" Tag="{x:Static viewModels:AppTab.CountriesLeagues}">
-                        <views:CountriesLeaguesView />
-                    </TabItem>
-
-                    <TabItem Header="Teams" Tag="{x:Static viewModels:AppTab.Teams}">
-                        <views:TeamsView />
-                    </TabItem>
-
-                    <TabItem Header="Team Details" Tag="{x:Static viewModels:AppTab.TeamDetails}">
-                        <views:TeamDetailsView />
-                    </TabItem>
-
-                    <TabItem Header="Players" Tag="{x:Static viewModels:AppTab.Players}">
-                        <views:PlayersView />
-                    </TabItem>
-
-                    <TabItem Header="Player Details" Tag="{x:Static viewModels:AppTab.PlayerDetails}">
-                        <views:PlayerDetailsView />
-                    </TabItem>
-
-                    <TabItem Header="Matches" Tag="{x:Static viewModels:AppTab.Matches}">
-                        <views:MatchesView />
-                    </TabItem>
-
-                    <TabItem Header="Match Details" Tag="{x:Static viewModels:AppTab.MatchDetails}">
-                        <views:MatchDetailsView />
-                    </TabItem>
-
-                    <TabItem Header="Analytics" Tag="{x:Static viewModels:AppTab.Analytics}">
-                        <views:AnalyticsView />
-                    </TabItem>
-                </TabControl>
-            </Grid>
         </Grid>
     </Grid>
 </Window>
-
-

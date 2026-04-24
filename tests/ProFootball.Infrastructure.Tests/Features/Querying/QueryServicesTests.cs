@@ -133,6 +133,31 @@ public class QueryServicesTests
     }
 
     [Fact]
+    public async Task Matches_GetMatchTeams_ShouldReturnDistinctTeamsForLeague_SortedByName()
+    {
+        await using var host = await QueryingTestHost.CreateAsync();
+        var service = new MatchesQueryService(host.DbContextFactory);
+
+        var teams = await service.HandleAsync(new GetMatchTeamsQuery(10));
+
+        Assert.Equal(2, teams.Count);
+        Assert.Equal(new[] { 100, 300 }, teams.Select(team => team.TeamApiId));
+        Assert.Equal(new[] { "Arsenal", "Chelsea" }, teams.Select(team => team.LongName));
+    }
+
+    [Fact]
+    public async Task Matches_GetMatchTeams_ShouldReturnDistinctTeamsAcrossAllLeagues_WhenLeagueIsNotSpecified()
+    {
+        await using var host = await QueryingTestHost.CreateAsync();
+        var service = new MatchesQueryService(host.DbContextFactory);
+
+        var teams = await service.HandleAsync(new GetMatchTeamsQuery());
+
+        Assert.Equal(4, teams.Count);
+        Assert.Equal(new[] { 100, 200, 300, 400 }, teams.Select(team => team.TeamApiId).OrderBy(id => id));
+    }
+
+    [Fact]
     public async Task Matches_GetDetails_ShouldReturnNull_WhenMatchDoesNotExist()
     {
         await using var host = await QueryingTestHost.CreateAsync();

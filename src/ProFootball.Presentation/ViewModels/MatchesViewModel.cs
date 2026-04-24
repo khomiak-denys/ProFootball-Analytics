@@ -5,21 +5,29 @@ using ProFootball.Application.League.Dtos;
 using ProFootball.Application.League.Queries;
 using ProFootball.Application.Match.Dtos;
 using ProFootball.Application.Match.Queries;
+using ProFootball.Application.Team.Dtos;
 using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
 
 public sealed class MatchesViewModel : ObservableObject
 {
+    private const string AllSeasonsOption = "All Seasons";
+    private static readonly TeamFilterOption AllTeamsOption = new(null, "All Teams");
+
     private readonly IQueryDispatcher _queryDispatcher;
     private readonly Action<int> _openDetails;
     private MatchListItemDto? _selectedMatch;
     private LeagueDto? _selectedLeague;
+    private TeamFilterOption? _selectedTeamOption = AllTeamsOption;
     private string? _season;
-    private int? _teamApiId;
+    private DateTime? _dateFrom;
+    private DateTime? _dateTo;
     private int _page = 1;
     private int _pageSize = 25;
     private int _totalCount;
+    private bool _isUpdatingSeasonOptions;
+    private bool _isUpdatingTeamOptions;
 
     public MatchesViewModel(
         IQueryDispatcher queryDispatcher,
@@ -30,16 +38,26 @@ public sealed class MatchesViewModel : ObservableObject
 
         Matches = new ObservableCollection<MatchListItemDto>();
         Leagues = new ObservableCollection<LeagueDto>();
+        TeamOptions = new ObservableCollection<TeamFilterOption> { AllTeamsOption };
+        SeasonOptions = new ObservableCollection<string> { AllSeasonsOption };
+        _season = AllSeasonsOption;
+
         SearchCommand = new AsyncRelayCommand(StartSearchAsync, CommandExceptionHandler.Handle);
         LoadLeaguesCommand = new AsyncRelayCommand(LoadLeaguesAsync, CommandExceptionHandler.Handle);
         NextPageCommand = new AsyncRelayCommand(NextPageAsync, CommandExceptionHandler.Handle, () => HasNextPage);
         PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, CommandExceptionHandler.Handle, () => HasPreviousPage);
         OpenDetailsCommand = new RelayCommand(OpenDetails, () => SelectedMatch is not null);
+
+        _ = InitializeAsync();
     }
 
     public ObservableCollection<MatchListItemDto> Matches { get; }
 
     public ObservableCollection<LeagueDto> Leagues { get; }
+
+    public ObservableCollection<TeamFilterOption> TeamOptions { get; }
+
+    public ObservableCollection<string> SeasonOptions { get; }
 
     public MatchListItemDto? SelectedMatch
     {
@@ -53,8 +71,11 @@ public sealed class MatchesViewModel : ObservableObject
 
             OpenDetailsCommand.RaiseCanExecuteChanged();
             RaiseSelectedMatchPropertiesChanged();
+            RaisePropertyChanged(nameof(HasSelectedMatch));
         }
     }
+
+    public bool HasSelectedMatch => SelectedMatch is not null;
 
     public string SelectedMatchCompetition => SelectedMatch?.LeagueName ?? "--";
 
@@ -76,6 +97,14 @@ public sealed class MatchesViewModel : ObservableObject
         ? "--"
         : $"{FormatScore(SelectedMatch.HomeTeamGoal)} - {FormatScore(SelectedMatch.AwayTeamGoal)}";
 
+    public string SelectedMatchHomeScore => SelectedMatch is null
+        ? "--"
+        : FormatScore(SelectedMatch.HomeTeamGoal);
+
+    public string SelectedMatchAwayScore => SelectedMatch is null
+        ? "--"
+        : FormatScore(SelectedMatch.AwayTeamGoal);
+
     public int SelectedMatchGoals => GetGoalTotal();
 
     public int SelectedMatchAssists => Math.Max(0, GetGoalTotal() - 1) + 1;
@@ -89,19 +118,83 @@ public sealed class MatchesViewModel : ObservableObject
     public LeagueDto? SelectedLeague
     {
         get => _selectedLeague;
-        set => SetProperty(ref _selectedLeague, value);
+        set
+        {
+            if (!SetProperty(ref _selectedLeague, value))
+            {
+                return;
+            }
+
+            _ = OnLeagueChangedSafeAsync();
+        }
     }
 
     public string? Season
     {
         get => _season;
-        set => SetProperty(ref _season, value);
+        set
+        {
+            if (!SetProperty(ref _season, value))
+            {
+                return;
+            }
+
+            if (_isUpdatingSeasonOptions)
+            {
+                return;
+            }
+
+            _ = StartSearchSafeAsync();
+        }
     }
 
-    public int? TeamApiId
+    public TeamFilterOption? SelectedTeamOption
     {
-        get => _teamApiId;
-        set => SetProperty(ref _teamApiId, value);
+        get => _selectedTeamOption;
+        set
+        {
+            if (!SetProperty(ref _selectedTeamOption, value))
+            {
+                return;
+            }
+
+            if (_isUpdatingTeamOptions)
+            {
+                return;
+            }
+
+            _ = StartSearchSafeAsync();
+        }
+    }
+
+    public DateTime? DateFrom
+    {
+        get => _dateFrom;
+        set
+        {
+            var normalized = NormalizeUtcDate(value);
+            if (!SetProperty(ref _dateFrom, normalized))
+            {
+                return;
+            }
+
+            _ = StartSearchSafeAsync();
+        }
+    }
+
+    public DateTime? DateTo
+    {
+        get => _dateTo;
+        set
+        {
+            var normalized = NormalizeUtcDate(value);
+            if (!SetProperty(ref _dateTo, normalized))
+            {
+                return;
+            }
+
+            _ = StartSearchSafeAsync();
+        }
     }
 
     public int Page
@@ -164,6 +257,32 @@ public sealed class MatchesViewModel : ObservableObject
         await SearchAsync();
     }
 
+    private async Task StartSearchSafeAsync()
+    {
+        try
+        {
+            await StartSearchAsync();
+        }
+        catch (Exception exception)
+        {
+            CommandExceptionHandler.Handle(exception);
+        }
+    }
+
+    private async Task InitializeAsync()
+    {
+        try
+        {
+            await LoadLeaguesAsync();
+            await LoadTeamOptionsAsync();
+            await StartSearchAsync();
+        }
+        catch (Exception exception)
+        {
+            CommandExceptionHandler.Handle(exception);
+        }
+    }
+
     public async Task LoadLeaguesAsync()
     {
         Leagues.Clear();
@@ -174,14 +293,41 @@ public sealed class MatchesViewModel : ObservableObject
         }
     }
 
+    public async Task LoadTeamOptionsAsync()
+    {
+        var selectedTeamApiId = SelectedTeamOption?.TeamApiId;
+        var teams = await _queryDispatcher.DispatchAsync<GetMatchTeamsQuery, IReadOnlyList<TeamListItemDto>>(
+            new GetMatchTeamsQuery(SelectedLeague?.Id));
+
+        _isUpdatingTeamOptions = true;
+        try
+        {
+            TeamOptions.Clear();
+            TeamOptions.Add(AllTeamsOption);
+
+            foreach (var team in teams)
+            {
+                TeamOptions.Add(new TeamFilterOption(team.TeamApiId, team.LongName));
+            }
+
+            SelectedTeamOption = selectedTeamApiId.HasValue
+                ? TeamOptions.FirstOrDefault(option => option.TeamApiId == selectedTeamApiId.Value) ?? AllTeamsOption
+                : AllTeamsOption;
+        }
+        finally
+        {
+            _isUpdatingTeamOptions = false;
+        }
+    }
+
     public async Task SearchAsync()
     {
         var result = await _queryDispatcher.DispatchAsync<MatchSearchQuery, PagedResult<MatchListItemDto>>(new MatchSearchQuery(
             SelectedLeague?.Id,
-            string.IsNullOrWhiteSpace(Season) ? null : Season.Trim(),
-            TeamApiId,
-            null,
-            null,
+            NormalizeSeasonFilter(Season),
+            SelectedTeamOption?.TeamApiId,
+            NormalizeUtcDate(DateFrom),
+            NormalizeUtcDate(DateTo),
             "date",
             true,
             Page,
@@ -194,8 +340,28 @@ public sealed class MatchesViewModel : ObservableObject
             Matches.Add(item);
         }
 
+        UpdateSeasonOptions(result.Items);
+
+        var selectedMatchId = SelectedMatch?.MatchApiId;
+        SelectedMatch = selectedMatchId.HasValue
+            ? Matches.FirstOrDefault(item => item.MatchApiId == selectedMatchId.Value)
+            : null;
+
         NextPageCommand.RaiseCanExecuteChanged();
         PreviousPageCommand.RaiseCanExecuteChanged();
+    }
+
+    private async Task OnLeagueChangedSafeAsync()
+    {
+        try
+        {
+            await LoadTeamOptionsAsync();
+            await StartSearchAsync();
+        }
+        catch (Exception exception)
+        {
+            CommandExceptionHandler.Handle(exception);
+        }
     }
 
     private async Task NextPageAsync()
@@ -240,6 +406,8 @@ public sealed class MatchesViewModel : ObservableObject
         RaisePropertyChanged(nameof(SelectedMatchHomeTeam));
         RaisePropertyChanged(nameof(SelectedMatchAwayTeam));
         RaisePropertyChanged(nameof(SelectedMatchScore));
+        RaisePropertyChanged(nameof(SelectedMatchHomeScore));
+        RaisePropertyChanged(nameof(SelectedMatchAwayScore));
         RaisePropertyChanged(nameof(SelectedMatchGoals));
         RaisePropertyChanged(nameof(SelectedMatchAssists));
         RaisePropertyChanged(nameof(SelectedMatchShots));
@@ -258,6 +426,69 @@ public sealed class MatchesViewModel : ObservableObject
     }
 
     private static string FormatScore(int? value) => value.HasValue ? value.Value.ToString() : "--";
+
+    private static string? NormalizeSeasonFilter(string? season)
+    {
+        if (string.IsNullOrWhiteSpace(season))
+        {
+            return null;
+        }
+
+        return season.Equals(AllSeasonsOption, StringComparison.OrdinalIgnoreCase)
+            ? null
+            : season.Trim();
+    }
+
+    private static DateTime? NormalizeUtcDate(DateTime? value)
+    {
+        if (!value.HasValue)
+        {
+            return null;
+        }
+
+        return DateTime.SpecifyKind(value.Value.Date, DateTimeKind.Utc);
+    }
+
+    private void UpdateSeasonOptions(IReadOnlyList<MatchListItemDto> items)
+    {
+        var selectedSeason = Season;
+        var discoveredSeasons = items
+            .Select(item => item.Season)
+            .Where(season => !string.IsNullOrWhiteSpace(season))
+            .Select(season => season!.Trim())
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(season => season, StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        _isUpdatingSeasonOptions = true;
+        try
+        {
+            SeasonOptions.Clear();
+            SeasonOptions.Add(AllSeasonsOption);
+            foreach (var season in discoveredSeasons)
+            {
+                SeasonOptions.Add(season);
+            }
+
+            if (string.IsNullOrWhiteSpace(selectedSeason) ||
+                selectedSeason.Equals(AllSeasonsOption, StringComparison.OrdinalIgnoreCase))
+            {
+                Season = AllSeasonsOption;
+                return;
+            }
+
+            if (!SeasonOptions.Contains(selectedSeason))
+            {
+                SeasonOptions.Add(selectedSeason);
+            }
+
+            Season = selectedSeason;
+        }
+        finally
+        {
+            _isUpdatingSeasonOptions = false;
+        }
+    }
 
     private IReadOnlyList<MatchStatisticViewModel> BuildMatchStatistics()
     {
@@ -286,6 +517,8 @@ public sealed class MatchesViewModel : ObservableObject
         var ratio = Math.Clamp(value / (double)maxValue, 0.0, 1.0);
         return Math.Max(4, Math.Round(ratio * 100, 1));
     }
+
+    public sealed record TeamFilterOption(int? TeamApiId, string Name);
 
     public sealed record MatchStatisticViewModel(string Label, int Value, double BarWidth, string ColorHex);
 }

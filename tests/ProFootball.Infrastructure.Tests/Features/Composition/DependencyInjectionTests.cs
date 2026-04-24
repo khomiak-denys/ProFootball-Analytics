@@ -2,6 +2,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Auth.Abstractions;
+using ProFootball.Application.Auth.Commands;
 using ProFootball.Application.Abstractions.Persistence;
 using ProFootball.Application.Match.Dtos;
 using ProFootball.Application.Match.Queries;
@@ -18,7 +20,16 @@ public class DependencyInjectionTests
         var services = new ServiceCollection();
         var configuration = new TestConfiguration(new Dictionary<string, string?>());
 
-        var exception = Record.Exception(() => services.AddInfrastructure(configuration));
+        Exception? exception = null;
+        try
+        {
+            services.AddInfrastructure(configuration);
+        }
+        catch (Exception ex)
+        {
+            exception = ex;
+        }
+
         var invalidOperation = Assert.IsType<InvalidOperationException>(exception);
 
         Assert.Contains(DependencyInjection.ConnectionStringName, invalidOperation.Message);
@@ -38,7 +49,10 @@ public class DependencyInjectionTests
         using var provider = services.BuildServiceProvider();
 
         Assert.NotNull(provider.GetService<IClubRepository>());
+        Assert.NotNull(provider.GetService<IAppUserAuthRepository>());
+        Assert.NotNull(provider.GetService<IPasswordHasher>());
         Assert.NotNull(provider.GetService<IQueryDispatcher>());
+        Assert.NotNull(provider.GetService<ICommandHandler<RegisterUserCommand>>());
         Assert.NotNull(provider.GetService<IQueryHandler<GetDashboardKpiQuery, DashboardKpiDto>>());
     }
 
@@ -52,16 +66,16 @@ public class DependencyInjectionTests
 
         public IEnumerable<IConfigurationSection> GetChildren() => Enumerable.Empty<IConfigurationSection>();
 
-        public IChangeToken GetReloadToken() => NullChangeToken.Singleton;
+        public IChangeToken GetReloadToken() => EmptyChangeToken.Instance;
 
         public IConfigurationSection GetSection(string key) => new TestConfigurationSection(this, key);
     }
 
     private sealed class TestConfigurationSection(TestConfiguration root, string path) : IConfigurationSection
     {
-        public string this[string key]
+        public string? this[string key]
         {
-            get => root[$"{path}:{key}"] ?? string.Empty;
+            get => root[$"{path}:{key}"];
             set => root[$"{path}:{key}"] = value;
         }
 
@@ -79,8 +93,28 @@ public class DependencyInjectionTests
 
         public IEnumerable<IConfigurationSection> GetChildren() => Enumerable.Empty<IConfigurationSection>();
 
-        public IChangeToken GetReloadToken() => NullChangeToken.Singleton;
+        public IChangeToken GetReloadToken() => EmptyChangeToken.Instance;
 
         public IConfigurationSection GetSection(string key) => new TestConfigurationSection(root, $"{path}:{key}");
+    }
+
+    private sealed class EmptyChangeToken : IChangeToken
+    {
+        public static EmptyChangeToken Instance { get; } = new();
+
+        public bool HasChanged => false;
+
+        public bool ActiveChangeCallbacks => false;
+
+        public IDisposable RegisterChangeCallback(Action<object?> callback, object? state) => NoopDisposable.Instance;
+    }
+
+    private sealed class NoopDisposable : IDisposable
+    {
+        public static NoopDisposable Instance { get; } = new();
+
+        public void Dispose()
+        {
+        }
     }
 }

@@ -22,6 +22,7 @@ using ProFootball.Application.Player.Dtos;
 using ProFootball.Application.Player.Queries;
 using ProFootball.Application.Team.Dtos;
 using ProFootball.Application.Team.Queries;
+using ProFootball.Infrastructure.Auth;
 using ProFootball.Infrastructure.Importing;
 using ProFootball.Infrastructure.Persistence;
 using ProFootball.Infrastructure.Persistence.Repositories;
@@ -49,11 +50,14 @@ public static class DependencyInjection
         services.AddDbContext<ProFootballDbContext>(options => options.UseNpgsql(connectionString));
         services.AddDbContextFactory<ProFootballDbContext>(options => options.UseNpgsql(connectionString));
         services.AddScoped<IClubRepository, EfClubRepository>();
+        services.AddScoped<IAppUserAuthRepository, EfAppUserAuthRepository>();
+        services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
         services.AddScoped<IQueryDispatcher, QueryDispatcher>();
         services.AddScoped<ICommandDispatcher, CommandDispatcher>();
 
         services.AddSingleton<IUserSessionStore, InMemorySessionStore>();
         services.AddScoped<ICommandHandler<SignInCommand>, SignInCommandHandler>();
+        services.AddScoped<ICommandHandler<RegisterUserCommand>, RegisterUserCommandHandler>();
         services.AddScoped<ICommandHandler<SignOutCommand>, SignOutCommandHandler>();
         services.AddScoped<IQueryHandler<GetSessionStateQuery, SessionStateDto>, GetSessionStateQueryHandler>();
 
@@ -72,6 +76,7 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<TopPlayersQuery, IReadOnlyList<TopPlayerDto>>, AnalyticsQueryService>();
 
         services.AddScoped<IQueryHandler<MatchSearchQuery, PagedResult<MatchListItemDto>>, MatchesQueryService>();
+        services.AddScoped<IQueryHandler<GetMatchTeamsQuery, IReadOnlyList<TeamListItemDto>>, MatchesQueryService>();
         services.AddScoped<IQueryHandler<GetMatchDetailsQuery, MatchDetailsDto?>, MatchesQueryService>();
         services.AddScoped<IQueryHandler<GetMatchesBySeasonQuery, IReadOnlyList<MatchesBySeasonDto>>, MatchesQueryService>();
         services.AddScoped<IQueryHandler<GetDashboardKpiQuery, DashboardKpiDto>, MatchesQueryService>();

@@ -67,6 +67,24 @@ Create local `.env` from `.env.example` and set values as needed.
   - Dark: `Background #0f1214`, `Card #1a1d1f`, `Border #2d3236`, `Text #f8f9fa`, `Muted #9ca3af`
   - Primary accent: `#22c55e`
 
+## App Icon (Title Bar + Taskbar)
+
+To use your own icon in both the window frame and Windows taskbar:
+
+1. Add an `.ico` file to `src/ProFootball.Presentation/Assets/` (for example `app.ico`).
+2. Set executable icon in `src/ProFootball.Presentation/ProFootball.Presentation.csproj`:
+```xml
+<PropertyGroup>
+  <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+</PropertyGroup>
+```
+3. Set window icon in `src/ProFootball.Presentation/MainWindow.xaml`:
+```xml
+<Window ... Icon="Assets/app.ico">
+```
+
+`ApplicationIcon` controls the executable/taskbar icon, and `Icon` ensures the same icon is shown in the window frame.
+
 ## Commands Cheat Sheet
 
 ```powershell

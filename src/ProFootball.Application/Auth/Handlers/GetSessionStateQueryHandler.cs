@@ -10,6 +10,6 @@ public sealed class GetSessionStateQueryHandler(IUserSessionStore sessionStore) 
     public Task<SessionStateDto> HandleAsync(GetSessionStateQuery _, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(new SessionStateDto(sessionStore.IsAuthenticated, sessionStore.CurrentUser));
+        return Task.FromResult(sessionStore.CurrentState);
     }
 }

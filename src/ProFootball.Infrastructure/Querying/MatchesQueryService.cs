@@ -3,12 +3,14 @@ using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Common;
 using ProFootball.Application.Match.Dtos;
 using ProFootball.Application.Match.Queries;
+using ProFootball.Application.Team.Dtos;
 using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
 public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) :
     IQueryHandler<MatchSearchQuery, PagedResult<MatchListItemDto>>,
+    IQueryHandler<GetMatchTeamsQuery, IReadOnlyList<TeamListItemDto>>,
     IQueryHandler<GetMatchDetailsQuery, MatchDetailsDto?>,
     IQueryHandler<GetMatchesBySeasonQuery, IReadOnlyList<MatchesBySeasonDto>>,
     IQueryHandler<GetDashboardKpiQuery, DashboardKpiDto>
@@ -98,6 +100,37 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
             .ToListAsync(cancellationToken);
 
         return new PagedResult<MatchListItemDto>(items, totalCount, page, pageSize);
+    }
+
+    public async Task<IReadOnlyList<TeamListItemDto>> HandleAsync(
+        GetMatchTeamsQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var matchesQuery = dbContext.Matches.AsNoTracking();
+        if (query.LeagueId.HasValue)
+        {
+            matchesQuery = matchesQuery.Where(match => match.LeagueId == query.LeagueId.Value);
+        }
+
+        var teamIds = matchesQuery
+            .Select(match => match.HomeTeamApiId)
+            .Concat(matchesQuery.Select(match => match.AwayTeamApiId))
+            .Distinct();
+
+        var teams = await dbContext.Teams
+            .AsNoTracking()
+            .Where(team => teamIds.Contains(team.TeamApiId))
+            .OrderBy(team => team.LongName)
+            .Select(team => new TeamListItemDto(
+                team.TeamApiId,
+                team.LongName,
+                team.ShortName,
+                team.TeamFifaApiId))
+            .ToListAsync(cancellationToken);
+
+        return teams;
     }
 
     public async Task<MatchDetailsDto?> HandleAsync(

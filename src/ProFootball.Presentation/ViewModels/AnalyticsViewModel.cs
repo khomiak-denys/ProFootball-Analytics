@@ -3,10 +3,13 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Media;
 using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Common;
 using ProFootball.Application.Match.Dtos;
 using ProFootball.Application.Match.Queries;
 using ProFootball.Application.Player.Dtos;
 using ProFootball.Application.Player.Queries;
+using ProFootball.Application.Team.Dtos;
+using ProFootball.Application.Team.Queries;
 using ProFootball.Presentation.Commands;
 
 namespace ProFootball.Presentation.ViewModels;
@@ -15,12 +18,17 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 {
     private readonly IQueryDispatcher _queryDispatcher;
     private readonly IReadOnlyList<string> _metricOptions;
+    private readonly IReadOnlyList<string> _teamMetricOptions;
     private IReadOnlyList<TopPlayerDto> _playersSnapshot = Array.Empty<TopPlayerDto>();
+    private IReadOnlyList<TeamListItemDto> _teamsSnapshot = Array.Empty<TeamListItemDto>();
 
     private AnalyticsCompareMode _compareMode = AnalyticsCompareMode.Players;
     private AnalyticsPlayerOptionViewModel? _selectedPlayer1;
     private AnalyticsPlayerOptionViewModel? _selectedPlayer2;
+    private AnalyticsTeamOptionViewModel? _selectedTeam1;
+    private AnalyticsTeamOptionViewModel? _selectedTeam2;
     private string _selectedMetric;
+    private string _selectedTeamMetric;
     private bool _isLoading;
     private string? _errorMessage;
     private double _averageOverallRating;
@@ -40,14 +48,22 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
     private CancellationTokenSource? _visualRefreshCts;
     private long _visualStateVersion;
     private bool _isUpdatingSelection;
+    private string _selectedTeamOneName = "Team 1";
+    private string _selectedTeamTwoName = "Team 2";
+    private double _selectedTeamOneMetricValue;
+    private double _selectedTeamTwoMetricValue;
+    private string _teamsModeSummary = "--";
 
     public AnalyticsViewModel(IQueryDispatcher queryDispatcher)
     {
         _queryDispatcher = queryDispatcher;
         _metricOptions = ["Overall Rating", "Potential"];
+        _teamMetricOptions = ["Build Up Speed", "Build Up Passing", "Chance Creation", "Defence Pressure"];
         _selectedMetric = _metricOptions[0];
+        _selectedTeamMetric = _teamMetricOptions[0];
 
         AvailablePlayers = new ObservableCollection<AnalyticsPlayerOptionViewModel>();
+        AvailableTeams = new ObservableCollection<AnalyticsTeamOptionViewModel>();
         TrendPoints = new ObservableCollection<AnalyticsTrendPointViewModel>();
         TopPerformerBars = new ObservableCollection<AnalyticsTopPerformerBarViewModel>();
         GoalsAssistsBars = new ObservableCollection<AnalyticsGoalsAssistsBarViewModel>();
@@ -60,6 +76,8 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
     public ObservableCollection<AnalyticsPlayerOptionViewModel> AvailablePlayers { get; }
 
+    public ObservableCollection<AnalyticsTeamOptionViewModel> AvailableTeams { get; }
+
     public ObservableCollection<AnalyticsTrendPointViewModel> TrendPoints { get; }
 
     public ObservableCollection<AnalyticsTopPerformerBarViewModel> TopPerformerBars { get; }
@@ -70,6 +88,8 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
     public IReadOnlyList<string> MetricOptions => _metricOptions;
 
+    public IReadOnlyList<string> TeamMetricOptions => _teamMetricOptions;
+
     public AnalyticsCompareMode CompareMode
     {
         get => _compareMode;
@@ -79,6 +99,7 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
             {
                 RaisePropertyChanged(nameof(IsComparePlayersMode));
                 RaisePropertyChanged(nameof(IsCompareTeamsMode));
+                _ = RefreshVisualStateSafeAsync();
             }
         }
     }
@@ -129,12 +150,73 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         }
     }
 
+    public AnalyticsTeamOptionViewModel? SelectedTeam1
+    {
+        get => _selectedTeam1;
+        set
+        {
+            if (!SetProperty(ref _selectedTeam1, value))
+            {
+                return;
+            }
+
+            RaisePropertyChanged(nameof(SelectedTeamOneName));
+
+            if (_isUpdatingSelection || !IsCompareTeamsMode)
+            {
+                return;
+            }
+
+            _ = RefreshVisualStateSafeAsync();
+        }
+    }
+
+    public AnalyticsTeamOptionViewModel? SelectedTeam2
+    {
+        get => _selectedTeam2;
+        set
+        {
+            if (!SetProperty(ref _selectedTeam2, value))
+            {
+                return;
+            }
+
+            RaisePropertyChanged(nameof(SelectedTeamTwoName));
+
+            if (_isUpdatingSelection || !IsCompareTeamsMode)
+            {
+                return;
+            }
+
+            _ = RefreshVisualStateSafeAsync();
+        }
+    }
+
     public string SelectedMetric
     {
         get => _selectedMetric;
         set
         {
             if (!SetProperty(ref _selectedMetric, value))
+            {
+                return;
+            }
+
+            _ = RefreshVisualStateSafeAsync();
+        }
+    }
+
+    public string SelectedTeamMetric
+    {
+        get => _selectedTeamMetric;
+        set
+        {
+            if (!SetProperty(ref _selectedTeamMetric, value))
+            {
+                return;
+            }
+
+            if (!IsCompareTeamsMode)
             {
                 return;
             }
@@ -237,7 +319,27 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
     public string PlayerTwoLegendLabel => SelectedPlayer2?.PlayerName ?? "Player 2";
 
-    public string TeamsModePlaceholder => "Compare Teams: coming in the next phase.";
+    public string SelectedTeamOneName => _selectedTeamOneName;
+
+    public string SelectedTeamTwoName => _selectedTeamTwoName;
+
+    public double SelectedTeamOneMetricValue
+    {
+        get => _selectedTeamOneMetricValue;
+        private set => SetProperty(ref _selectedTeamOneMetricValue, value);
+    }
+
+    public double SelectedTeamTwoMetricValue
+    {
+        get => _selectedTeamTwoMetricValue;
+        private set => SetProperty(ref _selectedTeamTwoMetricValue, value);
+    }
+
+    public string TeamsModeSummary
+    {
+        get => _teamsModeSummary;
+        private set => SetProperty(ref _teamsModeSummary, value);
+    }
 
     public AsyncRelayCommand RefreshAllCommand { get; }
 
@@ -257,16 +359,28 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
         try
         {
-            _playersSnapshot = await _queryDispatcher.DispatchAsync<TopPlayersQuery, IReadOnlyList<TopPlayerDto>>(new TopPlayersQuery(
+            var topPlayersTask = _queryDispatcher.DispatchAsync<TopPlayersQuery, IReadOnlyList<TopPlayerDto>>(new TopPlayersQuery(
                 Limit: 80,
                 MinOverallRating: null,
                 MinPotential: null,
                 PreferredFoot: null,
                 SortBy: "overall",
                 SortDescending: true), refreshToken);
+            var teamsTask = _queryDispatcher.DispatchAsync<TeamSearchQuery, PagedResult<TeamListItemDto>>(new TeamSearchQuery(
+                Name: null,
+                SortBy: null,
+                SortDescending: false,
+                Page: 1,
+                PageSize: 120), refreshToken);
+
+            await Task.WhenAll(topPlayersTask, teamsTask);
+            _playersSnapshot = await topPlayersTask;
+            _teamsSnapshot = (await teamsTask).Items;
 
             UpdatePlayerOptions();
             EnsureSelectedPlayers();
+            UpdateTeamOptions();
+            EnsureSelectedTeams();
 
             refreshToken.ThrowIfCancellationRequested();
             await RefreshVisualStateAsync(version, visualToken);
@@ -347,6 +461,12 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
     private async Task RefreshVisualStateAsync(long version, CancellationToken cancellationToken)
     {
+        if (IsCompareTeamsMode)
+        {
+            await RefreshTeamsVisualStateAsync(version, cancellationToken);
+            return;
+        }
+
         var orderedPlayers = OrderByMetric(_playersSnapshot, SelectedMetric)
             .Take(5)
             .ToList();
@@ -380,6 +500,73 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         BuildRadar(ResolvePlayerById(SelectedPlayer1?.PlayerApiId), ResolvePlayerById(SelectedPlayer2?.PlayerApiId));
         BuildTrend(playerOneTrend, playerTwoTrend);
 
+    }
+
+    private async Task RefreshTeamsVisualStateAsync(long version, CancellationToken cancellationToken)
+    {
+        var selectedTeamOne = SelectedTeam1;
+        var selectedTeamTwo = SelectedTeam2;
+        if (selectedTeamOne is null && selectedTeamTwo is null)
+        {
+            TopPerformerBars.Clear();
+            GoalsAssistsBars.Clear();
+            TopPerformerCards.Clear();
+            TrendPoints.Clear();
+            PerformanceTrendPoints = new PointCollection();
+            RadarPlayerOnePoints = new PointCollection();
+            RadarPlayerTwoPoints = new PointCollection();
+            TeamsModeSummary = "No teams available for comparison.";
+            return;
+        }
+
+        selectedTeamOne ??= selectedTeamTwo;
+        selectedTeamTwo ??= selectedTeamOne;
+
+        var teamOneTask = selectedTeamOne is null
+            ? Task.FromResult<TeamDetailsDto?>(null)
+            : _queryDispatcher.DispatchAsync<GetTeamDetailsQuery, TeamDetailsDto?>(
+                new GetTeamDetailsQuery(selectedTeamOne.TeamApiId),
+                cancellationToken);
+        var teamTwoTask = selectedTeamTwo is null
+            ? Task.FromResult<TeamDetailsDto?>(null)
+            : _queryDispatcher.DispatchAsync<GetTeamDetailsQuery, TeamDetailsDto?>(
+                new GetTeamDetailsQuery(selectedTeamTwo.TeamApiId),
+                cancellationToken);
+
+        await Task.WhenAll(teamOneTask, teamTwoTask);
+
+        var teamOneDetails = await teamOneTask;
+        var teamTwoDetails = await teamTwoTask;
+        cancellationToken.ThrowIfCancellationRequested();
+        if (version != Volatile.Read(ref _visualStateVersion))
+        {
+            return;
+        }
+
+        var teamOneMetric = ResolveTeamMetricValue(teamOneDetails?.Attributes.FirstOrDefault(), SelectedTeamMetric);
+        var teamTwoMetric = ResolveTeamMetricValue(teamTwoDetails?.Attributes.FirstOrDefault(), SelectedTeamMetric);
+
+        _selectedTeamOneName = teamOneDetails?.Team.LongName ?? selectedTeamOne?.TeamName ?? "Team 1";
+        _selectedTeamTwoName = teamTwoDetails?.Team.LongName ?? selectedTeamTwo?.TeamName ?? "Team 2";
+        RaisePropertyChanged(nameof(SelectedTeamOneName));
+        RaisePropertyChanged(nameof(SelectedTeamTwoName));
+        SelectedTeamOneMetricValue = Math.Round(teamOneMetric, 1);
+        SelectedTeamTwoMetricValue = Math.Round(teamTwoMetric, 1);
+        TeamsModeSummary = BuildTeamsSummary(SelectedTeamMetric, SelectedTeamOneName, SelectedTeamTwoName, teamOneMetric, teamTwoMetric);
+
+        TopPerformersCount = teamOneDetails?.Attributes.Count ?? 0;
+        RisingStarsCount = teamTwoDetails?.Attributes.Count ?? 0;
+        AverageOverallRating = Math.Round((teamOneMetric + teamTwoMetric) / 2.0, 1);
+        AveragePotential = Math.Round(Math.Abs(teamOneMetric - teamTwoMetric), 1);
+        AverageOverallDelta = "based on latest attributes";
+        AveragePotentialDelta = "team-to-team gap";
+
+        BuildTeamsBars(SelectedTeamOneName, teamOneMetric, SelectedTeamTwoName, teamTwoMetric);
+        GoalsAssistsBars.Clear();
+        TopPerformerCards.Clear();
+        RadarPlayerOnePoints = BuildTeamRadarPolygonPoints(teamOneDetails);
+        RadarPlayerTwoPoints = BuildTeamRadarPolygonPoints(teamTwoDetails);
+        BuildTeamTrend(teamOneDetails, teamTwoDetails, SelectedTeamMetric);
     }
 
     private (CancellationTokenSource Current, CancellationTokenSource? Previous) ReplaceRefreshAllSource()
@@ -482,6 +669,60 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         {
             SelectedPlayer1 = resolvedPlayerOne;
             SelectedPlayer2 = resolvedPlayerTwo;
+        }
+        finally
+        {
+            _isUpdatingSelection = false;
+        }
+    }
+
+    private void UpdateTeamOptions()
+    {
+        var selectedTeamOneId = SelectedTeam1?.TeamApiId;
+        var selectedTeamTwoId = SelectedTeam2?.TeamApiId;
+
+        AvailableTeams.Clear();
+        foreach (var team in _teamsSnapshot.Take(80))
+        {
+            AvailableTeams.Add(new AnalyticsTeamOptionViewModel(team.TeamApiId, team.LongName));
+        }
+
+        _isUpdatingSelection = true;
+        try
+        {
+            SelectedTeam1 = selectedTeamOneId.HasValue
+                ? AvailableTeams.FirstOrDefault(team => team.TeamApiId == selectedTeamOneId.Value)
+                : AvailableTeams.FirstOrDefault();
+            SelectedTeam2 = selectedTeamTwoId.HasValue
+                ? AvailableTeams.FirstOrDefault(team => team.TeamApiId == selectedTeamTwoId.Value)
+                : AvailableTeams.Skip(1).FirstOrDefault();
+
+            if (SelectedTeam2 is null)
+            {
+                SelectedTeam2 = SelectedTeam1;
+            }
+        }
+        finally
+        {
+            _isUpdatingSelection = false;
+        }
+    }
+
+    private void EnsureSelectedTeams()
+    {
+        var resolvedTeamOne = SelectedTeam1 ?? AvailableTeams.FirstOrDefault();
+        var resolvedTeamTwo = SelectedTeam2;
+        if (resolvedTeamTwo is null || resolvedTeamTwo.TeamApiId == resolvedTeamOne?.TeamApiId)
+        {
+            resolvedTeamTwo = AvailableTeams.FirstOrDefault(team =>
+                team.TeamApiId != resolvedTeamOne?.TeamApiId) ?? resolvedTeamOne;
+        }
+
+        _isUpdatingSelection = true;
+        try
+        {
+            SelectedTeam1 = resolvedTeamOne;
+            SelectedTeam2 = resolvedTeamTwo;
         }
         finally
         {
@@ -681,6 +922,203 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
             "Potential" => player.AveragePotential,
             _ => player.AverageOverallRating,
         };
+
+    private static double ResolveTeamMetricValue(TeamAttributeDto? attribute, string metric)
+    {
+        if (attribute is null)
+        {
+            return 0;
+        }
+
+        var value = metric switch
+        {
+            "Build Up Passing" => attribute.BuildUpPlayPassing,
+            "Chance Creation" => attribute.ChanceCreationPassing,
+            "Defence Pressure" => attribute.DefencePressure,
+            _ => attribute.BuildUpPlaySpeed,
+        };
+
+        return value ?? 0;
+    }
+
+    private void BuildTeamsBars(string teamOneLabel, double teamOneValue, string teamTwoLabel, double teamTwoValue)
+    {
+        TopPerformerBars.Clear();
+        var maxValue = Math.Max(1, Math.Max(teamOneValue, teamTwoValue));
+
+        TopPerformerBars.Add(new AnalyticsTopPerformerBarViewModel(
+            ToCompactName(teamOneLabel),
+            Math.Round(teamOneValue, 1),
+            220 + Math.Clamp(teamOneValue / maxValue, 0.0, 1.0) * 340));
+        TopPerformerBars.Add(new AnalyticsTopPerformerBarViewModel(
+            ToCompactName(teamTwoLabel),
+            Math.Round(teamTwoValue, 1),
+            220 + Math.Clamp(teamTwoValue / maxValue, 0.0, 1.0) * 340));
+    }
+
+    private static string BuildTeamsSummary(string metric, string teamOneName, string teamTwoName, double teamOneValue, double teamTwoValue)
+    {
+        var delta = Math.Round(Math.Abs(teamOneValue - teamTwoValue), 1);
+        if (Math.Abs(teamOneValue - teamTwoValue) < 0.001)
+        {
+            return $"{metric}: {teamOneName} and {teamTwoName} are level.";
+        }
+
+        var leader = teamOneValue > teamTwoValue ? teamOneName : teamTwoName;
+        return $"{metric}: {leader} leads by {delta:0.0} points.";
+    }
+
+    private static PointCollection BuildTeamRadarPolygonPoints(TeamDetailsDto? teamDetails)
+    {
+        if (teamDetails is null)
+        {
+            return new PointCollection();
+        }
+
+        var latest = teamDetails.Attributes.FirstOrDefault();
+        if (latest is null)
+        {
+            return new PointCollection();
+        }
+
+        var metrics = new[]
+        {
+            ResolveTeamMetricValue(latest, "Build Up Speed"),
+            ResolveTeamMetricValue(latest, "Build Up Passing"),
+            ResolveTeamMetricValue(latest, "Chance Creation"),
+            ResolveTeamMetricValue(latest, "Defence Pressure"),
+            Math.Round((ResolveTeamMetricValue(latest, "Build Up Passing") + ResolveTeamMetricValue(latest, "Chance Creation")) / 2.0, 1),
+            Math.Round((ResolveTeamMetricValue(latest, "Build Up Speed") + ResolveTeamMetricValue(latest, "Defence Pressure")) / 2.0, 1),
+        };
+
+        const double centerX = 165;
+        const double centerY = 150;
+        const double maxRadius = 112;
+
+        var coordinates = metrics.Select((value, index) =>
+        {
+            var angle = (-90 + index * 60) * Math.PI / 180.0;
+            var radius = maxRadius * Math.Clamp(value / 100.0, 0, 1);
+            var x = centerX + Math.Cos(angle) * radius;
+            var y = centerY + Math.Sin(angle) * radius;
+            return new Point(x, y);
+        });
+
+        return new PointCollection(coordinates);
+    }
+
+    private void BuildTeamTrend(TeamDetailsDto? teamOneDetails, TeamDetailsDto? teamTwoDetails, string metric)
+    {
+        var one = teamOneDetails?.Attributes
+            .OrderBy(attribute => attribute.Date)
+            .TakeLast(6)
+            .Select(attribute => new AnalyticsTrendPointViewModel(
+                attribute.Date.ToString("MMM", CultureInfo.InvariantCulture),
+                ResolveTeamMetricValue(attribute, metric)))
+            .ToList() ?? [];
+        var two = teamTwoDetails?.Attributes
+            .OrderBy(attribute => attribute.Date)
+            .TakeLast(6)
+            .Select(attribute => new AnalyticsTrendPointViewModel(
+                attribute.Date.ToString("MMM", CultureInfo.InvariantCulture),
+                ResolveTeamMetricValue(attribute, metric)))
+            .ToList() ?? [];
+
+        var maxCount = Math.Max(Math.Max(one.Count, two.Count), 6);
+        var labels = BuildFallbackMonthLabels();
+        var merged = Enumerable.Range(0, maxCount)
+            .Select(index =>
+            {
+                var oneValue = GetAlignedTrendValue(one, maxCount, index);
+                var twoValue = GetAlignedTrendValue(two, maxCount, index);
+                var value = Math.Round((oneValue + twoValue) / 2.0, 1);
+                var label = GetAlignedTrendLabel(one, maxCount, index)
+                    ?? GetAlignedTrendLabel(two, maxCount, index)
+                    ?? labels[index % labels.Count];
+                return new AnalyticsTrendPointViewModel(label, value);
+            })
+            .ToList();
+
+        TrendPoints.Clear();
+        foreach (var point in merged)
+        {
+            TrendPoints.Add(point);
+        }
+
+        if (merged.Count == 0)
+        {
+            PerformanceTrendPoints = new PointCollection();
+            TrendAxisMin = 40;
+            TrendAxisMidLow = 55;
+            TrendAxisMidHigh = 70;
+            TrendAxisMax = 85;
+            return;
+        }
+
+        var values = merged.Select(item => item.Value).ToList();
+        var min = values.Min();
+        var max = values.Max();
+        if (Math.Abs(max - min) < 0.001)
+        {
+            min -= 2;
+            max += 2;
+        }
+
+        var padding = Math.Max(1.0, (max - min) * 0.2);
+        var axisMin = Math.Floor(min - padding);
+        var axisMax = Math.Ceiling(max + padding);
+        TrendAxisMin = axisMin;
+        TrendAxisMidLow = axisMin + (axisMax - axisMin) / 3.0;
+        TrendAxisMidHigh = axisMin + (axisMax - axisMin) * 2.0 / 3.0;
+        TrendAxisMax = axisMax;
+
+        var polyline = merged.Select((item, index) =>
+        {
+            var xRatio = merged.Count == 1 ? 0.5 : index / (double)(merged.Count - 1);
+            var x = AnalyticsTrendChartLayout.PlotLeft +
+                    (AnalyticsTrendChartLayout.PlotRight - AnalyticsTrendChartLayout.PlotLeft) * xRatio;
+            var yRatio = (item.Value - axisMin) / Math.Max(0.0001, axisMax - axisMin);
+            var y = AnalyticsTrendChartLayout.PlotBottom -
+                    yRatio * (AnalyticsTrendChartLayout.PlotBottom - AnalyticsTrendChartLayout.PlotTop);
+            return new Point(x, y);
+        });
+
+        PerformanceTrendPoints = new PointCollection(polyline);
+    }
+
+    private static double GetAlignedTrendValue(IReadOnlyList<AnalyticsTrendPointViewModel> points, int totalCount, int index)
+    {
+        if (points.Count == 0)
+        {
+            return 0;
+        }
+
+        var skip = totalCount - points.Count;
+        var sourceIndex = index - skip;
+        if (sourceIndex < 0 || sourceIndex >= points.Count)
+        {
+            return points[0].Value;
+        }
+
+        return points[sourceIndex].Value;
+    }
+
+    private static string? GetAlignedTrendLabel(IReadOnlyList<AnalyticsTrendPointViewModel> points, int totalCount, int index)
+    {
+        if (points.Count == 0)
+        {
+            return null;
+        }
+
+        var skip = totalCount - points.Count;
+        var sourceIndex = index - skip;
+        if (sourceIndex < 0 || sourceIndex >= points.Count)
+        {
+            return null;
+        }
+
+        return points[sourceIndex].Label;
+    }
 
     private TopPlayerDto? ResolvePlayerById(int? playerApiId)
     {

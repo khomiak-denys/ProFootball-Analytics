@@ -5,210 +5,379 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:ProFootball.Presentation.ViewModels"
              mc:Ignorable="d">
-                        <Grid Margin="6,2,6,2">
+    <Grid Margin="8,4,8,4">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300" />
+            <ColumnDefinition Width="16" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="16" />
+            <ColumnDefinition Width="380" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0"
+                Padding="16"
+                Background="{DynamicResource CardBackgroundBrush}"
+                BorderBrush="{DynamicResource CardBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="12">
+            <StackPanel>
+                <TextBlock FontSize="24"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TitleForegroundBrush}"
+                           Text="Filters" />
+
+                <TextBlock Margin="0,16,0,0"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TitleForegroundBrush}"
+                           Text="League" />
+                <ComboBox Margin="0,8,0,0"
+                          Style="{StaticResource PlayersFilterComboBoxStyle}"
+                          TextSearch.TextPath="Name"
+                          ItemsSource="{Binding Matches.Leagues}"
+                          SelectedItem="{Binding Matches.SelectedLeague, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBlock Margin="0,14,0,0"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TitleForegroundBrush}"
+                           Text="Season" />
+                <ComboBox Margin="0,8,0,0"
+                          Style="{StaticResource PlayersFilterComboBoxStyle}"
+                          ItemsSource="{Binding Matches.SeasonOptions}"
+                          SelectedItem="{Binding Matches.Season, Mode=TwoWay}" />
+
+                <TextBlock Margin="0,14,0,0"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TitleForegroundBrush}"
+                           Text="Team" />
+                <ComboBox Margin="0,8,0,0"
+                          Style="{StaticResource PlayersFilterComboBoxStyle}"
+                          TextSearch.TextPath="Name"
+                          ItemsSource="{Binding Matches.TeamOptions}"
+                          SelectedItem="{Binding Matches.SelectedTeamOption, Mode=TwoWay}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <TextBlock Margin="0,14,0,0"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TitleForegroundBrush}"
+                           Text="Date From" />
+                <DatePicker Margin="0,8,0,0"
+                            Style="{StaticResource PlayersFilterDatePickerStyle}"
+                            SelectedDate="{Binding Matches.DateFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <TextBlock Margin="0,14,0,0"
+                           FontSize="13"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TitleForegroundBrush}"
+                           Text="Date To" />
+                <DatePicker Margin="0,8,0,0"
+                            Style="{StaticResource PlayersFilterDatePickerStyle}"
+                            SelectedDate="{Binding Matches.DateTo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                <Border Margin="0,16,0,0"
+                        Padding="0,12,0,0"
+                        BorderBrush="{DynamicResource SubtleBorderBrush}"
+                        BorderThickness="0,1,0,0">
+                    <StackPanel>
+                        <TextBlock FontSize="13"
+                                   Foreground="{DynamicResource MutedForegroundBrush}"
+                                   Text="{Binding Matches.TotalCount, StringFormat=Total: {0} matches}" />
+                        <TextBlock Margin="0,6,0,0"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource MutedForegroundBrush}"
+                                   Text="{Binding Matches.HasNextPage, StringFormat=Has next page: {0}}" />
+                        <TextBlock Margin="0,6,0,0"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource DangerForegroundBrush}"
+                                   Text="{Binding Matches.SelectedMatchDate, StringFormat=Selected date: {0}}" />
+                    </StackPanel>
+                </Border>
+
+                <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
+                    <Button Width="96" Margin="0,0,8,0" Content="Prev" Command="{Binding Matches.PreviousPageCommand}" />
+                    <Button Width="96" Content="Next" Command="{Binding Matches.NextPageCommand}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Column="2"
+                Padding="16"
+                Background="{DynamicResource CardBackgroundBrush}"
+                BorderBrush="{DynamicResource CardBorderBrush}"
+                BorderThickness="1"
+                CornerRadius="12">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <StackPanel>
+                    <TextBlock FontSize="24"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource TitleForegroundBrush}"
+                               Text="Matches" />
+                    <TextBlock Margin="0,6,0,0"
+                               FontSize="13"
+                               Foreground="{DynamicResource MutedForegroundBrush}"
+                               Text="Click a row to inspect its details on the right." />
+                </StackPanel>
+
+                <Border Grid.Row="1"
+                        Margin="0,14,0,0"
+                        Background="{DynamicResource SurfaceMutedBrush}"
+                        BorderBrush="{DynamicResource SubtleBorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="10">
+                    <Grid>
+                        <DataGrid ItemsSource="{Binding Matches.Matches}"
+                                  SelectedItem="{Binding Matches.SelectedMatch, Mode=TwoWay}"
+                                  AutoGenerateColumns="False"
+                                  RowHeaderWidth="0"
+                                  HeadersVisibility="Column"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  GridLinesVisibility="Horizontal"
+                                  IsReadOnly="True"
+                                  BorderThickness="0"
+                                  Background="Transparent"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                  RowStyle="{StaticResource MatchesTableRowStyle}">
+                            <DataGrid.Style>
+                                <Style TargetType="DataGrid">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Matches.HasSelectedMatch}" Value="True">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.Style>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=\{0:yyyy-MM-dd\}}" Width="120" />
+                                <DataGridTextColumn Header="League" Binding="{Binding LeagueName}" Width="220" />
+                                <DataGridTextColumn Header="Home Team" Binding="{Binding HomeTeamName}" Width="220" />
+                                <DataGridTextColumn Header="Away Team" Binding="{Binding AwayTeamName}" Width="220" />
+                                <DataGridTextColumn Header="Stage" Binding="{Binding MatchApiId}" Width="100" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <DataGrid ItemsSource="{Binding Matches.Matches}"
+                                  SelectedItem="{Binding Matches.SelectedMatch, Mode=TwoWay}"
+                                  AutoGenerateColumns="False"
+                                  RowHeaderWidth="0"
+                                  HeadersVisibility="Column"
+                                  CanUserAddRows="False"
+                                  CanUserDeleteRows="False"
+                                  GridLinesVisibility="Horizontal"
+                                  IsReadOnly="True"
+                                  BorderThickness="0"
+                                  Background="Transparent"
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                  RowStyle="{StaticResource MatchesTableRowStyle}">
+                            <DataGrid.Style>
+                                <Style TargetType="DataGrid">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Matches.HasSelectedMatch}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.Style>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=\{0:yyyy-MM-dd\}}" Width="120" />
+                                <DataGridTextColumn Header="Home Team" Binding="{Binding HomeTeamName}" Width="260" />
+                                <DataGridTextColumn Header="Away Team" Binding="{Binding AwayTeamName}" Width="260" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Column="4">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Matches.HasSelectedMatch}" Value="False">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="16" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="16" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Border Padding="16"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                <StackPanel>
+                    <TextBlock FontSize="20"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource TitleForegroundBrush}"
+                               Text="Match Details" />
+
+                    <StackPanel Margin="0,14,0,0">
+                        <TextBlock FontSize="12" Foreground="{DynamicResource MutedForegroundBrush}" Text="Competition" />
+                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchCompetition}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,10,0,0">
+                        <TextBlock FontSize="12" Foreground="{DynamicResource MutedForegroundBrush}" Text="Country" />
+                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchCountry}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,10,0,0">
+                        <TextBlock FontSize="12" Foreground="{DynamicResource MutedForegroundBrush}" Text="Season" />
+                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchSeason}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,10,0,0">
+                        <TextBlock FontSize="12" Foreground="{DynamicResource MutedForegroundBrush}" Text="Stage" />
+                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchStage}" />
+                    </StackPanel>
+
+                    <StackPanel Margin="0,10,0,0">
+                        <TextBlock FontSize="12" Foreground="{DynamicResource MutedForegroundBrush}" Text="Date" />
+                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchDate}" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <Border Grid.Row="2"
+                    Padding="16"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                <StackPanel>
+                    <TextBlock FontSize="20"
+                               FontWeight="SemiBold"
+                               HorizontalAlignment="Center"
+                               Foreground="{DynamicResource TitleForegroundBrush}"
+                               Text="Final Score" />
+
+                    <Border Margin="0,14,0,0"
+                            Padding="12"
+                            Background="{DynamicResource SurfaceMutedBrush}"
+                            CornerRadius="8">
+                        <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="260" />
-                                <ColumnDefinition Width="16" />
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="16" />
-                                <ColumnDefinition Width="340" />
+                                <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock FontSize="12" Foreground="{DynamicResource MutedForegroundBrush}" Text="Home" />
+                                <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchHomeTeam}" />
+                            </StackPanel>
+                            <TextBlock Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       FontSize="30"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource SuccessForegroundBrush}"
+                                       Text="{Binding Matches.SelectedMatchHomeScore}" />
+                        </Grid>
+                    </Border>
 
-                            <Border Grid.Column="0" Style="{StaticResource SectionPanelStyle}">
-                                <StackPanel>
-                                    <TextBlock FontSize="36"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource TitleForegroundBrush}"
-                                               Text="Filters" />
+                    <Border Margin="0,10,0,0"
+                            Padding="12"
+                            Background="{DynamicResource SurfaceMutedBrush}"
+                            CornerRadius="8">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock FontSize="12" Foreground="{DynamicResource MutedForegroundBrush}" Text="Away" />
+                                <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchAwayTeam}" />
+                            </StackPanel>
+                            <TextBlock Grid.Column="1"
+                                       VerticalAlignment="Center"
+                                       FontSize="30"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource SuccessForegroundBrush}"
+                                       Text="{Binding Matches.SelectedMatchAwayScore}" />
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
 
-                                    <TextBlock Margin="0,22,0,0" FontSize="26" Foreground="{DynamicResource TitleForegroundBrush}" Text="League" />
-                                    <ComboBox Margin="0,8,0,0"
-                                              Style="{StaticResource PlayersFilterComboBoxStyle}"
-                                              ItemsSource="{Binding Matches.Leagues}"
-                                              SelectedItem="{Binding Matches.SelectedLeague, Mode=TwoWay}"
-                                              DisplayMemberPath="Name" />
+            <Border Grid.Row="4"
+                    Padding="16"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                <StackPanel>
+                    <TextBlock FontSize="20"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource TitleForegroundBrush}"
+                               Text="Match Statistics" />
 
-                                    <TextBlock Margin="0,18,0,0" FontSize="26" Foreground="{DynamicResource TitleForegroundBrush}" Text="Season" />
-                                    <TextBox Margin="0,8,0,0"
-                                             Style="{StaticResource PlayersFilterTextBoxStyle}"
-                                             Text="{Binding Matches.Season, UpdateSourceTrigger=PropertyChanged}" />
-
-                                    <TextBlock Margin="0,18,0,0" FontSize="26" Foreground="{DynamicResource TitleForegroundBrush}" Text="Team API" />
-                                    <TextBox Margin="0,8,0,0"
-                                             Style="{StaticResource PlayersFilterTextBoxStyle}"
-                                             Text="{Binding Matches.TeamApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
-
-                                    <StackPanel Margin="0,20,0,0" Orientation="Horizontal">
-                                        <Button Width="104" Margin="0,0,10,0" Content="Load" Command="{Binding Matches.LoadLeaguesCommand}" />
-                                        <Button Width="104" Margin="0,0,10,0" Content="Search" Command="{Binding Matches.SearchCommand}" />
-                                    </StackPanel>
-                                    <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
-                                        <Button Width="104" Margin="0,0,10,0" Content="Prev" Command="{Binding Matches.PreviousPageCommand}" />
-                                        <Button Width="104" Content="Next" Command="{Binding Matches.NextPageCommand}" />
-                                    </StackPanel>
-
-                                    <Button Margin="0,16,0,0"
-                                            Content="Open Details"
-                                            Command="{Binding Matches.OpenDetailsCommand}" />
-
-                                    <TextBlock Margin="0,16,0,0"
-                                               FontSize="16"
-                                               Foreground="{DynamicResource MutedForegroundBrush}"
-                                               Text="{Binding Matches.TotalCount, StringFormat=Total: {0} matches}" />
-                                </StackPanel>
-                            </Border>
-
-                            <Border Grid.Column="2" Style="{StaticResource SectionPanelStyle}">
-                                <Grid>
+                    <ItemsControl Margin="0,14,0,0" ItemsSource="{Binding Matches.MatchStatistics}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="0,0,0,10">
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
                                     </Grid.RowDefinitions>
-                                    <TextBlock FontSize="36"
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock FontSize="13"
+                                               Foreground="{DynamicResource TitleForegroundBrush}"
+                                               Text="{Binding Label}" />
+                                    <TextBlock Grid.Column="1"
+                                               FontSize="13"
                                                FontWeight="SemiBold"
                                                Foreground="{DynamicResource TitleForegroundBrush}"
-                                               Text="Matches List" />
-                                    <DataGrid Grid.Row="1"
-                                              Margin="0,16,0,0"
-                                              ItemsSource="{Binding Matches.Matches}"
-                                              SelectedItem="{Binding Matches.SelectedMatch, Mode=TwoWay}"
-                                              AutoGenerateColumns="False"
-                                              RowHeaderWidth="0"
-                                              HeadersVisibility="Column"
-                                              CanUserAddRows="False"
-                                              CanUserDeleteRows="False"
-                                              GridLinesVisibility="Horizontal"
-                                              IsReadOnly="True"
-                                              RowStyle="{StaticResource MatchesTableRowStyle}">
-                                        <DataGrid.Columns>
-                                            <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=\{0:yyyy-MM-dd\}}" Width="120" />
-                                            <DataGridTextColumn Header="League" Binding="{Binding LeagueName}" Width="*" />
-                                            <DataGridTextColumn Header="Home" Binding="{Binding HomeTeamName}" Width="170" />
-                                            <DataGridTextColumn Header="Score" Width="76">
-                                                <DataGridTextColumn.Binding>
-                                                    <MultiBinding StringFormat="{}{0} - {1}">
-                                                        <Binding Path="HomeTeamGoal" />
-                                                        <Binding Path="AwayTeamGoal" />
-                                                    </MultiBinding>
-                                                </DataGridTextColumn.Binding>
-                                            </DataGridTextColumn>
-                                            <DataGridTextColumn Header="Away" Binding="{Binding AwayTeamName}" Width="170" />
-                                            <DataGridTextColumn Header="Stage" Binding="{Binding MatchApiId}" Width="72" />
-                                        </DataGrid.Columns>
-                                    </DataGrid>
+                                               Text="{Binding Value}" />
+
+                                    <Grid Grid.Row="1"
+                                          Grid.ColumnSpan="2"
+                                          Margin="0,7,0,0">
+                                        <Border Height="8"
+                                                Background="{DynamicResource SurfaceMutedBrush}"
+                                                CornerRadius="4" />
+                                        <Border Width="{Binding BarWidth}"
+                                                HorizontalAlignment="Left"
+                                                Height="8"
+                                                Background="#22c55e"
+                                                CornerRadius="4" />
+                                    </Grid>
                                 </Grid>
-                            </Border>
-
-                            <Grid Grid.Column="4">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="16" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="16" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
-
-                                <Border Style="{StaticResource SectionPanelStyle}">
-                                    <StackPanel>
-                                        <TextBlock FontSize="30"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource TitleForegroundBrush}"
-                                                   Text="Match Details" />
-                                        <StackPanel Margin="0,16,0,0">
-                                            <TextBlock FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="Competition" />
-                                            <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchCompetition}" />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,12,0,0">
-                                            <TextBlock FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="Country" />
-                                            <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchCountry}" />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,12,0,0">
-                                            <TextBlock FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="Season" />
-                                            <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchSeason}" />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,12,0,0">
-                                            <TextBlock FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="Stage" />
-                                            <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchStage}" />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,12,0,0">
-                                            <TextBlock FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="Date" />
-                                            <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchDate}" />
-                                        </StackPanel>
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Grid.Row="2" Style="{StaticResource SectionPanelStyle}">
-                                    <StackPanel>
-                                        <TextBlock FontSize="30"
-                                                   FontWeight="SemiBold"
-                                                   HorizontalAlignment="Center"
-                                                   Foreground="{DynamicResource TitleForegroundBrush}"
-                                                   Text="Final Score" />
-                                        <Border Margin="0,16,0,0" Padding="12" Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="8">
-                                            <Grid>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="Auto" />
-                                                </Grid.ColumnDefinitions>
-                                                <StackPanel>
-                                                    <TextBlock FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="Home" />
-                                                    <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchHomeTeam}" />
-                                                </StackPanel>
-                                                <TextBlock Grid.Column="1" FontSize="36" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Matches.SelectedMatchScore}" />
-                                            </Grid>
-                                        </Border>
-                                        <Border Margin="0,12,0,0" Padding="12" Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="8">
-                                            <StackPanel>
-                                                <TextBlock FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="Away" />
-                                                <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchAwayTeam}" />
-                                            </StackPanel>
-                                        </Border>
-                                    </StackPanel>
-                                </Border>
-
-                                <Border Grid.Row="4" Style="{StaticResource SectionPanelStyle}">
-                                    <StackPanel>
-                                        <TextBlock FontSize="30"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource TitleForegroundBrush}"
-                                                   Text="Match Statistics" />
-                                        <ItemsControl Margin="0,16,0,0" ItemsSource="{Binding Matches.MatchStatistics}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Grid Margin="0,0,0,12">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="72" />
-                                                            <ColumnDefinition Width="*" />
-                                                            <ColumnDefinition Width="50" />
-                                                        </Grid.ColumnDefinitions>
-                                                        <TextBlock VerticalAlignment="Center"
-                                                                   FontSize="14"
-                                                                   Foreground="{DynamicResource MutedForegroundBrush}"
-                                                                   Text="{Binding Label}" />
-                                                        <Border Grid.Column="1"
-                                                                Height="14"
-                                                                Margin="10,0,10,0"
-                                                                Background="{DynamicResource SurfaceMutedBrush}"
-                                                                CornerRadius="7">
-                                                            <Border Width="{Binding BarWidth}"
-                                                                    HorizontalAlignment="Left"
-                                                                    Background="{DynamicResource SuccessForegroundBrush}"
-                                                                    CornerRadius="7" />
-                                                        </Border>
-                                                        <TextBlock Grid.Column="2"
-                                                                   VerticalAlignment="Center"
-                                                                   HorizontalAlignment="Right"
-                                                                   FontSize="14"
-                                                                   FontWeight="SemiBold"
-                                                                   Foreground="{DynamicResource TitleForegroundBrush}"
-                                                                   Text="{Binding Value}" />
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </StackPanel>
-                                </Border>
-                            </Grid>
-                        </Grid>
-                    
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
 </UserControl>

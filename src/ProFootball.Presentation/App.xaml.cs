@@ -4,6 +4,7 @@ using System.IO;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Infrastructure;
 using ProFootball.Presentation.Services;
 using ProFootball.Presentation.ViewModels;
