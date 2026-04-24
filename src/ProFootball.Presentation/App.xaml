@@ -6,6 +6,7 @@
         <ResourceDictionary>
             <converters:TrendToPointCollectionConverter x:Key="TrendToPointsConverter" />
             <converters:NullableIntTextConverter x:Key="NullableIntTextConverter" />
+            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Light.xaml" />
