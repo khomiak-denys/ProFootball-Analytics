@@ -24,7 +24,7 @@ public sealed class MatchesViewModel : ObservableObject
     private DateTime? _dateFrom;
     private DateTime? _dateTo;
     private int _page = 1;
-    private int _pageSize = 25;
+    private int _pageSize = 20;
     private int _totalCount;
     private bool _isUpdatingSeasonOptions;
     private bool _isUpdatingTeamOptions;

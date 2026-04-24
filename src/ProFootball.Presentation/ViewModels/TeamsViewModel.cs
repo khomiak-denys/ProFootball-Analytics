@@ -21,7 +21,7 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
     private bool _isLoadingDetails;
     private string? _errorMessage;
     private int _page = 1;
-    private int _pageSize = 30;
+    private int _pageSize = 20;
     private int _totalCount;
     private int _buildUpPlayScore;
     private int _chanceCreationScore;
@@ -169,7 +169,7 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
                 SortBy: null,
                 SortDescending: false,
                 Page: Page,
-                PageSize: Math.Max(10, PageSize)));
+                PageSize: Math.Max(20, PageSize)));
 
             if (searchVersion != Volatile.Read(ref _searchVersion))
             {
