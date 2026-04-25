@@ -2,6 +2,8 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using ProFootball.Domain.Entities;
 using ProFootball.Infrastructure.Persistence;
+using ProFootball.Infrastructure.Persistence.Repositories;
+using ProFootball.Infrastructure.Querying;
 
 namespace ProFootball.Infrastructure.Tests.Features.Querying;
 
@@ -9,11 +11,13 @@ internal sealed class QueryingTestHost : IAsyncDisposable
 {
     private readonly SqliteConnection _connection;
     private readonly DbContextOptions<ProFootballDbContext> _options;
+    private readonly ProFootballDbContext _queryDbContext;
 
-    private QueryingTestHost(SqliteConnection connection, DbContextOptions<ProFootballDbContext> options)
+    private QueryingTestHost(SqliteConnection connection, DbContextOptions<ProFootballDbContext> options, ProFootballDbContext queryDbContext)
     {
         _connection = connection;
         _options = options;
+        _queryDbContext = queryDbContext;
         DbContextFactory = new TestDbContextFactory(_options);
     }
 
@@ -37,7 +41,8 @@ internal sealed class QueryingTestHost : IAsyncDisposable
                 await SeedAsync(dbContext);
             }
 
-            return new QueryingTestHost(connection, options);
+            var queryDbContext = new ProFootballDbContext(options);
+            return new QueryingTestHost(connection, options, queryDbContext);
         }
         catch
         {
@@ -52,8 +57,28 @@ internal sealed class QueryingTestHost : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        await _queryDbContext.DisposeAsync();
         await _connection.DisposeAsync();
     }
+
+    public TeamsQueryService CreateTeamsService()
+        => new(new EfTeamRepository(_queryDbContext), new EfTeamAttributeRepository(_queryDbContext));
+
+    public PlayersQueryService CreatePlayersService()
+        => new(new EfPlayerRepository(_queryDbContext), new EfPlayerAttributeRepository(_queryDbContext));
+
+    public MatchesQueryService CreateMatchesService()
+        => new(
+            new EfFootballMatchRepository(_queryDbContext),
+            new EfLeagueRepository(_queryDbContext),
+            new EfTeamRepository(_queryDbContext),
+            new EfPlayerRepository(_queryDbContext));
+
+    public CountriesLeaguesQueryService CreateCountriesLeaguesService()
+        => new(new EfLeagueRepository(_queryDbContext), new EfFootballMatchRepository(_queryDbContext));
+
+    public AnalyticsQueryService CreateAnalyticsService()
+        => new(new EfPlayerAttributeRepository(_queryDbContext), new EfPlayerRepository(_queryDbContext));
 
     private static async Task SeedAsync(ProFootballDbContext dbContext)
     {

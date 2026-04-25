@@ -14,7 +14,7 @@ public class QueryServicesTests
     public async Task Teams_Search_ShouldApplySortingAndPaging()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new TeamsQueryService(host.DbContextFactory);
+        var service = host.CreateTeamsService();
 
         var firstPage = await service.HandleAsync(new TeamSearchQuery(
             Name: null,
@@ -39,7 +39,7 @@ public class QueryServicesTests
     public async Task Teams_GetDetails_ShouldReturnNull_WhenTeamDoesNotExist()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new TeamsQueryService(host.DbContextFactory);
+        var service = host.CreateTeamsService();
 
         var details = await service.HandleAsync(new GetTeamDetailsQuery(999999));
 
@@ -50,7 +50,7 @@ public class QueryServicesTests
     public async Task Players_Search_ShouldSortByOverallRating_AndKeepUnratedPlayersLast()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new PlayersQueryService(host.DbContextFactory);
+        var service = host.CreatePlayersService();
 
         var result = await service.HandleAsync(new PlayerSearchQuery(
             Name: null,
@@ -76,7 +76,7 @@ public class QueryServicesTests
     public async Task Players_Search_ShouldApplyCaseInsensitiveNameFilter_InSqliteFallback()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new PlayersQueryService(host.DbContextFactory);
+        var service = host.CreatePlayersService();
 
         var result = await service.HandleAsync(new PlayerSearchQuery(
             Name: "kEvIn",
@@ -100,7 +100,7 @@ public class QueryServicesTests
     public async Task Players_GetDetails_ShouldReturnAttributesOrderedByDateThenIdDesc()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new PlayersQueryService(host.DbContextFactory);
+        var service = host.CreatePlayersService();
 
         var details = await service.HandleAsync(new GetPlayerDetailsQuery(2));
 
@@ -115,7 +115,7 @@ public class QueryServicesTests
     public async Task Matches_Search_ShouldApplyLeagueSeasonTeamAndDateFilters()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new MatchesQueryService(host.DbContextFactory);
+        var service = host.CreateMatchesService();
 
         var result = await service.HandleAsync(new MatchSearchQuery(
             LeagueId: 10,
@@ -136,7 +136,7 @@ public class QueryServicesTests
     public async Task Matches_GetMatchTeams_ShouldReturnDistinctTeamsForLeague_SortedByName()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new MatchesQueryService(host.DbContextFactory);
+        var service = host.CreateMatchesService();
 
         var teams = await service.HandleAsync(new GetMatchTeamsQuery(10));
 
@@ -149,7 +149,7 @@ public class QueryServicesTests
     public async Task Matches_GetMatchTeams_ShouldReturnDistinctTeamsAcrossAllLeagues_WhenLeagueIsNotSpecified()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new MatchesQueryService(host.DbContextFactory);
+        var service = host.CreateMatchesService();
 
         var teams = await service.HandleAsync(new GetMatchTeamsQuery());
 
@@ -161,7 +161,7 @@ public class QueryServicesTests
     public async Task Matches_GetDetails_ShouldReturnNull_WhenMatchDoesNotExist()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new MatchesQueryService(host.DbContextFactory);
+        var service = host.CreateMatchesService();
 
         var details = await service.HandleAsync(new GetMatchDetailsQuery(77777));
 
@@ -172,7 +172,7 @@ public class QueryServicesTests
     public async Task CountriesLeagues_GetLeagues_ShouldFilterByCountry()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new CountriesLeaguesQueryService(host.DbContextFactory);
+        var service = host.CreateCountriesLeaguesService();
 
         var leagues = await service.HandleAsync(new GetLeaguesQuery("England"));
 
@@ -184,7 +184,7 @@ public class QueryServicesTests
     public async Task CountriesLeagues_GetCountriesWithLeagueCount_ShouldReturnDistinctCountries()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new CountriesLeaguesQueryService(host.DbContextFactory);
+        var service = host.CreateCountriesLeaguesService();
 
         var countries = await service.HandleAsync(new GetCountriesWithLeagueCountQuery());
         var england = Assert.Single(countries.Where(country => country.Name == "England"));
@@ -198,7 +198,7 @@ public class QueryServicesTests
     public async Task CountriesLeagues_GetCountrySnapshot_ShouldReturnZeroSummary_WhenCountryHasNoLeagues()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new CountriesLeaguesQueryService(host.DbContextFactory);
+        var service = host.CreateCountriesLeaguesService();
 
         var snapshot = await service.HandleAsync(new GetCountrySnapshotQuery("Emptyland"));
 
@@ -212,7 +212,7 @@ public class QueryServicesTests
     public async Task CountriesLeagues_GetCountrySnapshot_ShouldCalculateSummaryAndDivisions()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new CountriesLeaguesQueryService(host.DbContextFactory);
+        var service = host.CreateCountriesLeaguesService();
 
         var snapshot = await service.HandleAsync(new GetCountrySnapshotQuery("England"));
 
@@ -226,7 +226,7 @@ public class QueryServicesTests
     public async Task Analytics_GetTopPlayers_ShouldClampLimitAndSortBySamples()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new AnalyticsQueryService(host.DbContextFactory);
+        var service = host.CreateAnalyticsService();
 
         var topPlayers = await service.HandleAsync(new TopPlayersQuery(
             Limit: 500,
@@ -245,7 +245,7 @@ public class QueryServicesTests
     public async Task Analytics_GetMatchesBySeason_ShouldRespectOptionalLeagueFilter()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var matchService = new MatchesQueryService(host.DbContextFactory);
+        var matchService = host.CreateMatchesService();
         var allLeagues = await matchService.HandleAsync(new GetMatchesBySeasonQuery());
         var filtered = await matchService.HandleAsync(new GetMatchesBySeasonQuery(10));
 
@@ -260,7 +260,7 @@ public class QueryServicesTests
     public async Task Dashboard_GetKpis_ShouldReturnSeededCounts()
     {
         await using var host = await QueryingTestHost.CreateAsync();
-        var service = new MatchesQueryService(host.DbContextFactory);
+        var service = host.CreateMatchesService();
         var kpis = await service.HandleAsync(new GetDashboardKpiQuery());
 
         Assert.Equal(2, kpis.Countries);
@@ -270,3 +270,4 @@ public class QueryServicesTests
         Assert.Equal(3, kpis.Matches);
     }
 }
+
