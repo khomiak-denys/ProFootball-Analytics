@@ -4,11 +4,12 @@ using ProFootball.Application.Common;
 using ProFootball.Application.Team.Dtos;
 using ProFootball.Application.Team.Queries;
 using ProFootball.Domain.Entities;
-using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
-public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) :
+public sealed class TeamsQueryService(
+    ITeamRepository teamRepository,
+    ITeamAttributeRepository teamAttributeRepository) :
     IQueryHandler<TeamSearchQuery, PagedResult<TeamListItemDto>>,
     IQueryHandler<GetTeamDetailsQuery, TeamDetailsDto?>
 {
@@ -16,15 +17,14 @@ public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> db
         TeamSearchQuery query,
         CancellationToken cancellationToken = default)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var (page, pageSize, skip) = Paging.Normalize(query.Page, query.PageSize);
 
-        var teamsQuery = dbContext.Teams.AsNoTracking();
+        var teamsQuery = teamRepository.Query();
 
         if (!string.IsNullOrWhiteSpace(query.Name))
         {
-            var pattern = LikePattern.Contains(query.Name.Trim());
-            teamsQuery = teamsQuery.Where(team => EF.Functions.ILike(team.LongName, pattern, "\\"));
+            var name = query.Name.Trim().ToLowerInvariant();
+            teamsQuery = teamsQuery.Where(team => team.LongName.ToLower().Contains(name));
         }
 
         teamsQuery = ApplySorting(teamsQuery, query.SortBy, query.SortDescending);
@@ -48,9 +48,7 @@ public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> db
         CancellationToken cancellationToken = default)
     {
         var teamId = query.TeamApiId;
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        var team = await dbContext.Teams
-            .AsNoTracking()
+        var team = await teamRepository.Query()
             .Where(item => item.Id == teamId)
             .Select(item => new TeamListItemDto(item.Id, item.LongName, item.ShortName, null))
             .SingleOrDefaultAsync(cancellationToken);
@@ -60,8 +58,7 @@ public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> db
             return null;
         }
 
-        var attributes = await dbContext.TeamAttributes
-            .AsNoTracking()
+        var attributes = await teamAttributeRepository.Query()
             .Where(attribute => attribute.TeamId == teamId)
             .OrderByDescending(attribute => attribute.Date)
             .ThenByDescending(attribute => attribute.Id)

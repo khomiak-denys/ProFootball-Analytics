@@ -4,11 +4,13 @@ using ProFootball.Application.Country.Dtos;
 using ProFootball.Application.Country.Queries;
 using ProFootball.Application.League.Dtos;
 using ProFootball.Application.League.Queries;
-using ProFootball.Infrastructure.Persistence;
+using ProFootball.Domain.Entities;
 
 namespace ProFootball.Infrastructure.Querying;
 
-public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) :
+public sealed class CountriesLeaguesQueryService(
+    ILeagueRepository leagueRepository,
+    IFootballMatchRepository matchRepository) :
     IQueryHandler<GetCountriesQuery, IReadOnlyList<CountryDto>>,
     IQueryHandler<GetLeaguesQuery, IReadOnlyList<LeagueDto>>,
     IQueryHandler<GetCountriesWithLeagueCountQuery, IReadOnlyList<CountryLeagueListItemDto>>,
@@ -18,9 +20,7 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
         GetCountriesQuery _,
         CancellationToken cancellationToken = default)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        return await dbContext.Leagues
-            .AsNoTracking()
+        return await leagueRepository.Query()
             .Where(league => !string.IsNullOrWhiteSpace(league.CountryName))
             .Select(league => league.CountryName)
             .Distinct()
@@ -34,8 +34,7 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
         CancellationToken cancellationToken = default)
     {
         var countryName = query.CountryName?.Trim();
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        var leaguesQuery = dbContext.Leagues.AsNoTracking();
+        var leaguesQuery = leagueRepository.Query();
 
         if (!string.IsNullOrWhiteSpace(countryName))
         {
@@ -55,9 +54,7 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
         GetCountriesWithLeagueCountQuery _,
         CancellationToken cancellationToken = default)
     {
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        return await dbContext.Leagues
-            .AsNoTracking()
+        return await leagueRepository.Query()
             .Where(league => !string.IsNullOrWhiteSpace(league.CountryName))
             .GroupBy(league => league.CountryName)
             .OrderBy(grouped => grouped.Key)
@@ -77,8 +74,7 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
         }
 
         var countryName = query.CountryName.Trim();
-        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        var cards = await GetLeagueCardsCoreAsync(dbContext, countryName, cancellationToken);
+        var cards = await GetLeagueCardsCoreAsync(countryName, cancellationToken);
         var activeLeagues = cards.Count;
         var summary = new CountryLeagueSummaryDto(
             TotalClubs: cards.Sum(card => card.TeamsCount),
@@ -146,13 +142,11 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
         return 1;
     }
 
-    private static async Task<IReadOnlyList<LeagueCountryCardDto>> GetLeagueCardsCoreAsync(
-        ProFootballDbContext dbContext,
+    private async Task<IReadOnlyList<LeagueCountryCardDto>> GetLeagueCardsCoreAsync(
         string countryName,
         CancellationToken cancellationToken)
     {
-        var leagues = await dbContext.Leagues
-            .AsNoTracking()
+        var leagues = await leagueRepository.Query()
             .Where(league => league.CountryName == countryName)
             .OrderBy(league => league.Name)
             .Select(league => new
@@ -167,8 +161,7 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             return Array.Empty<LeagueCountryCardDto>();
         }
 
-        var seasonalAggregates = await dbContext.Matches
-            .AsNoTracking()
+        var seasonalAggregates = await matchRepository.Query()
             .Where(match => match.CountryName == countryName)
             .GroupBy(match => new
             {
