@@ -5,6 +5,7 @@ using ProFootball.Application.Importing.Commands;
 using ProFootball.Domain.Entities;
 using ProFootball.Infrastructure.Importing;
 using ProFootball.Infrastructure.Persistence;
+using ProFootball.Infrastructure.Persistence.Repositories;
 using Xunit;
 
 namespace ProFootball.Infrastructure.Tests.Features.Importing;
@@ -21,7 +22,7 @@ public class DataImportServiceTests
             .UseSqlite(destinationConnection)
             .Options;
 
-        var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
+        var service = CreateService(options);
 
         await Assert.ThrowsAnyAsync<ArgumentException>(() =>
             service.HandleAsync(new ImportDataCommand("   ", BatchSize: 100)));
@@ -37,7 +38,7 @@ public class DataImportServiceTests
             .UseSqlite(destinationConnection)
             .Options;
 
-        var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
+        var service = CreateService(options);
         var missingFilePath = Path.Combine(Path.GetTempPath(), $"missing-{Guid.NewGuid():N}.sqlite");
 
         await Assert.ThrowsAsync<FileNotFoundException>(() =>
@@ -61,7 +62,7 @@ public class DataImportServiceTests
                 .Options;
 
             await using var destinationContext = new ProFootballDbContext(options);
-            var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
+            var service = CreateService(options);
 
             var result = await service.HandleAsync(new ImportDataCommand(sourcePath, BatchSize: 2));
 
@@ -103,7 +104,7 @@ public class DataImportServiceTests
                 .UseSqlite(destinationConnection)
                 .Options;
 
-            var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
+            var service = CreateService(options);
 
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
                 service.HandleAsync(new ImportDataCommand(sourcePath, BatchSize: 0)));
@@ -130,7 +131,7 @@ public class DataImportServiceTests
                 .UseSqlite(destinationConnection)
                 .Options;
 
-            var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
+            var service = CreateService(options);
             var result = await service.HandleAsync(new ImportDataCommand(sourcePath, BatchSize: 2));
 
             Assert.Equal(1, result.CountriesResolved);
@@ -168,7 +169,7 @@ public class DataImportServiceTests
             destinationContext.Leagues.Add(new League(77, "Baseline Country", "Baseline League"));
             await destinationContext.SaveChangesAsync();
 
-            var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
+            var service = CreateService(options);
 
             await Assert.ThrowsAnyAsync<DbUpdateException>(() =>
                 service.HandleAsync(new ImportDataCommand(sourcePath, BatchSize: 1)));
@@ -306,8 +307,18 @@ public class DataImportServiceTests
             lastException);
     }
 
-    private sealed class TestDbContextFactory(DbContextOptions<ProFootballDbContext> options) : IDbContextFactory<ProFootballDbContext>
+    private static DataImportService CreateService(DbContextOptions<ProFootballDbContext> options)
     {
-        public ProFootballDbContext CreateDbContext() => new(options);
+        var dbContext = new ProFootballDbContext(options);
+        return new DataImportService(
+            dbContext,
+            new EfLeagueRepository(dbContext),
+            new EfTeamRepository(dbContext),
+            new EfPlayerRepository(dbContext),
+            new EfFootballMatchRepository(dbContext),
+            new EfTeamAttributeRepository(dbContext),
+            new EfPlayerAttributeRepository(dbContext),
+            NullLogger<DataImportService>.Instance);
     }
 }
+
