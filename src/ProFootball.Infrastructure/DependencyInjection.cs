@@ -49,6 +49,12 @@ public static class DependencyInjection
 
         services.AddDbContext<ProFootballDbContext>(options => options.UseNpgsql(connectionString));
         services.AddDbContextFactory<ProFootballDbContext>(options => options.UseNpgsql(connectionString));
+        services.AddScoped<ILeagueRepository, EfLeagueRepository>();
+        services.AddScoped<ITeamRepository, EfTeamRepository>();
+        services.AddScoped<ITeamAttributeRepository, EfTeamAttributeRepository>();
+        services.AddScoped<IPlayerRepository, EfPlayerRepository>();
+        services.AddScoped<IPlayerAttributeRepository, EfPlayerAttributeRepository>();
+        services.AddScoped<IFootballMatchRepository, EfFootballMatchRepository>();
         services.AddScoped<IAppUserAuthRepository, EfAppUserAuthRepository>();
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
         services.AddScoped<IQueryDispatcher, QueryDispatcher>();
