@@ -360,7 +360,7 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         try
         {
             var topPlayersTask = _queryDispatcher.DispatchAsync<TopPlayersQuery, IReadOnlyList<TopPlayerDto>>(new TopPlayersQuery(
-                Limit: 80,
+                Limit: 20,
                 MinOverallRating: null,
                 MinPotential: null,
                 PreferredFoot: null,
@@ -371,7 +371,7 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
                 SortBy: null,
                 SortDescending: false,
                 Page: 1,
-                PageSize: 120), refreshToken);
+                PageSize: 20), refreshToken);
 
             await Task.WhenAll(topPlayersTask, teamsTask);
             _playersSnapshot = await topPlayersTask;
@@ -805,14 +805,14 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         var rawValues = topPlayers
             .Select(player =>
             {
-                var goals = ResolveGoals(player.PlayerApiId, player.AverageOverallRating);
-                var assists = ResolveAssists(player.PlayerApiId, player.AveragePotential);
-                return (player, goals, assists);
+                var overall = Math.Round(player.AverageOverallRating, 1);
+                var potential = Math.Round(player.AveragePotential, 1);
+                return (player, overall, potential);
             })
             .ToList();
 
-        var maxValue = rawValues.Max(item => Math.Max(item.goals, item.assists));
-        if (maxValue < 1)
+        var maxValue = rawValues.Max(item => Math.Max(item.overall, item.potential));
+        if (maxValue < 0.1)
         {
             maxValue = 1;
         }
@@ -822,15 +822,15 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
         foreach (var item in rawValues)
         {
-            var goalsHeight = minBarHeight + item.goals / (double)maxValue * (chartHeight - minBarHeight);
-            var assistsHeight = minBarHeight + item.assists / (double)maxValue * (chartHeight - minBarHeight);
+            var overallHeight = minBarHeight + item.overall / maxValue * (chartHeight - minBarHeight);
+            var potentialHeight = minBarHeight + item.potential / maxValue * (chartHeight - minBarHeight);
 
             GoalsAssistsBars.Add(new AnalyticsGoalsAssistsBarViewModel(
                 ToCompactName(item.player.PlayerName),
-                item.goals,
-                item.assists,
-                Math.Clamp(goalsHeight, minBarHeight, chartHeight),
-                Math.Clamp(assistsHeight, minBarHeight, chartHeight)));
+                item.overall,
+                item.potential,
+                Math.Clamp(overallHeight, minBarHeight, chartHeight),
+                Math.Clamp(potentialHeight, minBarHeight, chartHeight)));
         }
     }
 
@@ -844,8 +844,8 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
                 index + 1,
                 player.PlayerName,
                 Math.Round(player.AverageOverallRating, 0),
-                ResolveGoals(player.PlayerApiId, player.AverageOverallRating),
-                ResolveAssists(player.PlayerApiId, player.AveragePotential)));
+                Math.Round(player.AveragePotential, 1),
+                player.Samples));
         }
     }
 
@@ -1156,18 +1156,25 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
     private static IReadOnlyList<int> BuildRadarMetrics(TopPlayerDto player)
     {
-        var seed = SafeAbs(player.PlayerApiId);
         var overall = (int)Math.Round(player.AverageOverallRating);
         var potential = (int)Math.Round(player.AveragePotential);
 
-        var pace = Math.Clamp((overall + potential) / 2 + Offset(seed, 1), 35, 99);
-        var shooting = Math.Clamp(overall + Offset(seed, 2), 30, 99);
-        var passing = Math.Clamp((2 * overall + potential) / 3 + Offset(seed, 3), 35, 99);
-        var dribbling = Math.Clamp((overall + potential + 6) / 2 + Offset(seed, 4), 35, 99);
-        var defending = Math.Clamp((overall + 70) / 2 + Offset(seed, 5), 25, 95);
-        var physical = Math.Clamp((overall + player.Samples / 3) + Offset(seed, 6), 30, 97);
+        var pace = Math.Clamp((overall + potential) / 2, 35, 99);
+        var shooting = Math.Clamp(overall, 30, 99);
+        var passing = Math.Clamp((overall + potential) / 2, 35, 99);
+        var dribbling = Math.Clamp(potential, 35, 99);
+        var defending = Math.Clamp((overall + potential) / 2, 25, 95);
+        var physical = Math.Clamp((overall + potential + Math.Min(player.Samples, 50) / 5.0) / 2.0, 30, 97);
 
-        return [pace, shooting, passing, dribbling, defending, physical];
+        return
+        [
+            pace,
+            shooting,
+            passing,
+            dribbling,
+            defending,
+            (int)Math.Round(physical),
+        ];
     }
 
     private IReadOnlyList<AnalyticsTrendPointViewModel> MergeTrend(
@@ -1175,52 +1182,29 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         IReadOnlyList<PlayerTrendPointDto> trendTwo,
         string metric)
     {
-        var fallbackMonths = BuildFallbackMonthLabels();
         var orderedOne = trendOne.OrderBy(point => point.Date).TakeLast(6).ToList();
         var orderedTwo = trendTwo.OrderBy(point => point.Date).TakeLast(6).ToList();
 
         if (orderedOne.Count == 0 && orderedTwo.Count == 0)
         {
-            return BuildFallbackTrend(metric);
+            return Array.Empty<AnalyticsTrendPointViewModel>();
         }
 
-        var count = Math.Max(orderedOne.Count, orderedTwo.Count);
-        if (count < 6)
-        {
-            count = 6;
-        }
+        var firstByDate = orderedOne.ToDictionary(point => point.Date.Date, point => point);
+        var secondByDate = orderedTwo.ToDictionary(point => point.Date.Date, point => point);
+        var mergedDates = firstByDate.Keys
+            .Concat(secondByDate.Keys)
+            .Distinct()
+            .OrderBy(date => date)
+            .ToList();
 
-        var values = new List<AnalyticsTrendPointViewModel>(count);
-        for (var index = 0; index < count; index++)
-        {
-            var entryOne = GetAlignedEntry(orderedOne, count, index);
-            var entryTwo = GetAlignedEntry(orderedTwo, count, index);
-            var resolvedValue = ResolveTrendValue(entryOne, entryTwo, metric);
-            var label = entryOne?.Date.ToString("MMM", CultureInfo.InvariantCulture)
-                ?? entryTwo?.Date.ToString("MMM", CultureInfo.InvariantCulture)
-                ?? fallbackMonths[index % fallbackMonths.Count];
-
-            values.Add(new AnalyticsTrendPointViewModel(label, resolvedValue));
-        }
-
-        return values;
-    }
-
-    private IReadOnlyList<AnalyticsTrendPointViewModel> BuildFallbackTrend(string metric)
-    {
-        var fallbackMonths = BuildFallbackMonthLabels();
-        var baseline = metric switch
-        {
-            "Potential" => ResolveMetricValue(ResolvePlayerById(SelectedPlayer1?.PlayerApiId) ?? CreateFallbackPlayer(), "Potential"),
-            _ => ResolveMetricValue(ResolvePlayerById(SelectedPlayer1?.PlayerApiId) ?? CreateFallbackPlayer(), "Overall Rating"),
-        };
-
-        return fallbackMonths
-            .Select((label, index) =>
+        return mergedDates
+            .Select(date =>
             {
-                var offset = ((SelectedPlayer1?.PlayerApiId ?? 0) + index * 7) % 5;
-                var value = Math.Clamp(baseline - 3 + index + offset * 0.2, 70, 95);
-                return new AnalyticsTrendPointViewModel(label, Math.Round(value, 1));
+                firstByDate.TryGetValue(date, out var firstPoint);
+                secondByDate.TryGetValue(date, out var secondPoint);
+                var resolvedValue = ResolveTrendValue(firstPoint, secondPoint, metric);
+                return new AnalyticsTrendPointViewModel(date.ToString("MMM", CultureInfo.InvariantCulture), resolvedValue);
             })
             .ToList();
     }
@@ -1333,27 +1317,6 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         };
     }
 
-    private static TopPlayerDto CreateFallbackPlayer() => new(
-        PlayerApiId: 0,
-        PlayerName: "Fallback",
-        AverageOverallRating: 78,
-        AveragePotential: 82,
-        Samples: 20);
-
-    private static int ResolveGoals(int playerApiId, double overallRating)
-    {
-        var normalizedRating = (int)Math.Round(overallRating, MidpointRounding.AwayFromZero);
-        var baseGoals = Math.Abs(playerApiId % 19) + normalizedRating / 4;
-        return Math.Clamp(baseGoals, 2, 35);
-    }
-
-    private static int ResolveAssists(int playerApiId, double potential)
-    {
-        var normalizedPotential = (int)Math.Round(potential, MidpointRounding.AwayFromZero);
-        var baseAssists = Math.Abs((playerApiId * 3) % 13) + normalizedPotential / 9;
-        return Math.Clamp(baseAssists, 1, 18);
-    }
-
     private static string ToCompactName(string playerName)
     {
         var parts = playerName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
@@ -1364,10 +1327,6 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
         return $"{parts[0][0]}. {parts[^1]}";
     }
-
-    private static int Offset(int seed, int salt) => ((seed * (11 + salt * 5)) % 13) - 6;
-
-    private static int SafeAbs(int value) => value == int.MinValue ? int.MaxValue : Math.Abs(value);
 
     public void Dispose()
     {

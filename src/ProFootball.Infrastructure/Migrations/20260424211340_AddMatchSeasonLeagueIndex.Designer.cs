@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProFootball.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using ProFootball.Infrastructure.Persistence;
 namespace ProFootball.Infrastructure.Migrations
 {
     [DbContext(typeof(ProFootballDbContext))]
-    partial class ProFootballDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260424211340_AddMatchSeasonLeagueIndex")]
+    partial class AddMatchSeasonLeagueIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -74,15 +77,34 @@ namespace ProFootball.Infrastructure.Migrations
                     b.ToTable("app_users", (string)null);
                 });
 
+            modelBuilder.Entity("ProFootball.Domain.Entities.FootballClub", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("FoundedYear")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("football_clubs", (string)null);
+                });
+
             modelBuilder.Entity("ProFootball.Domain.Entities.FootballMatch", b =>
                 {
                     b.Property<int>("Id")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("AwayTeamGoal")
+                    b.Property<int>("AwayTeamApiId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("AwayTeamId")
+                    b.Property<int?>("AwayTeamGoal")
                         .HasColumnType("integer");
 
                     b.Property<string>("CountryName")
@@ -93,13 +115,16 @@ namespace ProFootball.Infrastructure.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("HomeTeamApiId")
+                        .HasColumnType("integer");
+
                     b.Property<int?>("HomeTeamGoal")
                         .HasColumnType("integer");
 
-                    b.Property<int>("HomeTeamId")
+                    b.Property<int>("LeagueId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("LeagueId")
+                    b.Property<int>("MatchApiId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Season")
@@ -109,15 +134,18 @@ namespace ProFootball.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AwayTeamId");
+                    b.HasIndex("AwayTeamApiId");
 
                     b.HasIndex("CountryName");
 
                     b.HasIndex("Date");
 
-                    b.HasIndex("HomeTeamId");
+                    b.HasIndex("HomeTeamApiId");
 
                     b.HasIndex("LeagueId");
+
+                    b.HasIndex("MatchApiId")
+                        .IsUnique();
 
                     b.HasIndex("Season");
 
@@ -166,12 +194,20 @@ namespace ProFootball.Infrastructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<int>("PlayerApiId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("PlayerFifaApiId")
+                        .HasColumnType("integer");
+
                     b.Property<int?>("Weight")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Name");
+
+                    b.HasIndex("PlayerFifaApiId");
 
                     b.ToTable("players", (string)null);
                 });
@@ -195,7 +231,10 @@ namespace ProFootball.Infrastructure.Migrations
                     b.Property<int?>("OverallRating")
                         .HasColumnType("integer");
 
-                    b.Property<int>("PlayerId")
+                    b.Property<int>("PlayerApiId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("PlayerFifaApiId")
                         .HasColumnType("integer");
 
                     b.Property<int?>("Potential")
@@ -211,11 +250,11 @@ namespace ProFootball.Infrastructure.Migrations
 
                     b.HasIndex("OverallRating");
 
-                    b.HasIndex("PlayerId");
+                    b.HasIndex("PlayerApiId");
 
                     b.HasIndex("Potential");
 
-                    b.HasIndex("PlayerId", "Date");
+                    b.HasIndex("PlayerApiId", "Date");
 
                     b.ToTable("player_attributes", (string)null);
                 });
@@ -234,9 +273,17 @@ namespace ProFootball.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
+                    b.Property<int>("TeamApiId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("TeamFifaApiId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("LongName");
+
+                    b.HasIndex("TeamFifaApiId");
 
                     b.ToTable("teams", (string)null);
                 });
@@ -261,16 +308,19 @@ namespace ProFootball.Infrastructure.Migrations
                     b.Property<int?>("DefencePressure")
                         .HasColumnType("integer");
 
-                    b.Property<int>("TeamId")
+                    b.Property<int>("TeamApiId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("TeamFifaApiId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Date");
 
-                    b.HasIndex("TeamId");
+                    b.HasIndex("TeamApiId");
 
-                    b.HasIndex("TeamId", "Date");
+                    b.HasIndex("TeamApiId", "Date");
 
                     b.ToTable("team_attributes", (string)null);
                 });
@@ -290,7 +340,8 @@ namespace ProFootball.Infrastructure.Migrations
                 {
                     b.HasOne("ProFootball.Domain.Entities.Player", "Player")
                         .WithMany()
-                        .HasForeignKey("PlayerId")
+                        .HasForeignKey("PlayerApiId")
+                        .HasPrincipalKey("PlayerApiId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -301,7 +352,8 @@ namespace ProFootball.Infrastructure.Migrations
                 {
                     b.HasOne("ProFootball.Domain.Entities.Team", "Team")
                         .WithMany()
-                        .HasForeignKey("TeamId")
+                        .HasForeignKey("TeamApiId")
+                        .HasPrincipalKey("TeamApiId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 

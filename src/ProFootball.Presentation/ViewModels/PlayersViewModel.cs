@@ -263,7 +263,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
                 SortBy: "overallrating",
                 SortDescending: true,
                 Page: Page,
-                PageSize: Math.Max(5, PageSize));
+                PageSize: Math.Max(20, PageSize));
 
             var result = await _queryDispatcher.DispatchAsync<PlayerSearchQuery, PagedResult<PlayerListItemDto>>(query);
             if (searchVersion != Volatile.Read(ref _searchVersion))

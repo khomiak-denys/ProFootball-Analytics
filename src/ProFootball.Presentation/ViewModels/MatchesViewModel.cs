@@ -24,7 +24,7 @@ public sealed class MatchesViewModel : ObservableObject
     private DateTime? _dateFrom;
     private DateTime? _dateTo;
     private int _page = 1;
-    private int _pageSize = 25;
+    private int _pageSize = 20;
     private int _totalCount;
     private bool _isUpdatingSeasonOptions;
     private bool _isUpdatingTeamOptions;
@@ -47,8 +47,6 @@ public sealed class MatchesViewModel : ObservableObject
         NextPageCommand = new AsyncRelayCommand(NextPageAsync, CommandExceptionHandler.Handle, () => HasNextPage);
         PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, CommandExceptionHandler.Handle, () => HasPreviousPage);
         OpenDetailsCommand = new RelayCommand(OpenDetails, () => SelectedMatch is not null);
-
-        _ = InitializeAsync();
     }
 
     public ObservableCollection<MatchListItemDto> Matches { get; }
@@ -269,20 +267,6 @@ public sealed class MatchesViewModel : ObservableObject
         }
     }
 
-    private async Task InitializeAsync()
-    {
-        try
-        {
-            await LoadLeaguesAsync();
-            await LoadTeamOptionsAsync();
-            await StartSearchAsync();
-        }
-        catch (Exception exception)
-        {
-            CommandExceptionHandler.Handle(exception);
-        }
-    }
-
     public async Task LoadLeaguesAsync()
     {
         Leagues.Clear();
@@ -340,8 +324,6 @@ public sealed class MatchesViewModel : ObservableObject
             Matches.Add(item);
         }
 
-        UpdateSeasonOptions(result.Items);
-
         var selectedMatchId = SelectedMatch?.MatchApiId;
         SelectedMatch = selectedMatchId.HasValue
             ? Matches.FirstOrDefault(item => item.MatchApiId == selectedMatchId.Value)
@@ -355,12 +337,50 @@ public sealed class MatchesViewModel : ObservableObject
     {
         try
         {
+            await LoadSeasonOptionsAsync();
             await LoadTeamOptionsAsync();
             await StartSearchAsync();
         }
         catch (Exception exception)
         {
             CommandExceptionHandler.Handle(exception);
+        }
+    }
+
+    public async Task LoadSeasonOptionsAsync()
+    {
+        var selectedSeason = Season;
+        var bySeason = await _queryDispatcher.DispatchAsync<GetMatchesBySeasonQuery, IReadOnlyList<MatchesBySeasonDto>>(
+            new GetMatchesBySeasonQuery(SelectedLeague?.Id));
+        var seasons = bySeason
+            .Select(item => item.Season)
+            .Where(season => !string.IsNullOrWhiteSpace(season))
+            .Select(season => season.Trim())
+            .Distinct(StringComparer.Ordinal)
+            .OrderByDescending(season => season, StringComparer.Ordinal)
+            .ToList();
+
+        _isUpdatingSeasonOptions = true;
+        try
+        {
+            SeasonOptions.Clear();
+            SeasonOptions.Add(AllSeasonsOption);
+            foreach (var season in seasons)
+            {
+                SeasonOptions.Add(season);
+            }
+
+            if (!string.IsNullOrWhiteSpace(selectedSeason) && SeasonOptions.Contains(selectedSeason))
+            {
+                Season = selectedSeason;
+                return;
+            }
+
+            Season = AllSeasonsOption;
+        }
+        finally
+        {
+            _isUpdatingSeasonOptions = false;
         }
     }
 
@@ -447,47 +467,6 @@ public sealed class MatchesViewModel : ObservableObject
         }
 
         return DateTime.SpecifyKind(value.Value.Date, DateTimeKind.Utc);
-    }
-
-    private void UpdateSeasonOptions(IReadOnlyList<MatchListItemDto> items)
-    {
-        var selectedSeason = Season;
-        var discoveredSeasons = items
-            .Select(item => item.Season)
-            .Where(season => !string.IsNullOrWhiteSpace(season))
-            .Select(season => season!.Trim())
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderByDescending(season => season, StringComparer.OrdinalIgnoreCase)
-            .ToList();
-
-        _isUpdatingSeasonOptions = true;
-        try
-        {
-            SeasonOptions.Clear();
-            SeasonOptions.Add(AllSeasonsOption);
-            foreach (var season in discoveredSeasons)
-            {
-                SeasonOptions.Add(season);
-            }
-
-            if (string.IsNullOrWhiteSpace(selectedSeason) ||
-                selectedSeason.Equals(AllSeasonsOption, StringComparison.OrdinalIgnoreCase))
-            {
-                Season = AllSeasonsOption;
-                return;
-            }
-
-            if (!SeasonOptions.Contains(selectedSeason))
-            {
-                SeasonOptions.Add(selectedSeason);
-            }
-
-            Season = selectedSeason;
-        }
-        finally
-        {
-            _isUpdatingSeasonOptions = false;
-        }
     }
 
     private IReadOnlyList<MatchStatisticViewModel> BuildMatchStatistics()

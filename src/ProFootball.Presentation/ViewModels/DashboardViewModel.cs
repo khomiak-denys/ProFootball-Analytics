@@ -13,6 +13,7 @@ public sealed class DashboardViewModel : ObservableObject
     private readonly IQueryDispatcher _queryDispatcher;
     private string? _selectedSeason;
     private LeagueDto? _selectedLeague;
+    private bool _isUpdatingFilters;
     private DateTime _lastUpdatedAt = DateTime.Now;
 
     private int _countries;
@@ -28,8 +29,6 @@ public sealed class DashboardViewModel : ObservableObject
         LeagueOptions = new ObservableCollection<LeagueDto>();
         RecentMatches = new ObservableCollection<MatchListItemDto>();
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, CommandExceptionHandler.Handle);
-
-        InitializeSeasonOptions();
     }
 
     public ObservableCollection<string> SeasonOptions { get; }
@@ -45,13 +44,29 @@ public sealed class DashboardViewModel : ObservableObject
     public string? SelectedSeason
     {
         get => _selectedSeason;
-        set => SetProperty(ref _selectedSeason, value);
+        set
+        {
+            if (!SetProperty(ref _selectedSeason, value) || _isUpdatingFilters)
+            {
+                return;
+            }
+
+            _ = ReloadRecentMatchesSafeAsync();
+        }
     }
 
     public LeagueDto? SelectedLeague
     {
         get => _selectedLeague;
-        set => SetProperty(ref _selectedLeague, value);
+        set
+        {
+            if (!SetProperty(ref _selectedLeague, value) || _isUpdatingFilters)
+            {
+                return;
+            }
+
+            _ = ReloadByLeagueSafeAsync();
+        }
     }
 
     public int Countries
@@ -93,6 +108,7 @@ public sealed class DashboardViewModel : ObservableObject
             await LoadLeaguesAsync();
         }
 
+        await LoadSeasonOptionsAsync();
         await LoadRecentMatchesAsync();
 
         var kpis = await _queryDispatcher.DispatchAsync<GetDashboardKpiQuery, DashboardKpiDto>(new GetDashboardKpiQuery());
@@ -108,19 +124,42 @@ public sealed class DashboardViewModel : ObservableObject
         RaisePropertyChanged(nameof(CurrentYear));
     }
 
-    private void InitializeSeasonOptions()
+    private async Task LoadSeasonOptionsAsync()
     {
-        var today = DateTime.Today;
-        var currentSeasonStartYear = today.Month >= 7 ? today.Year : today.Year - 1;
+        int? selectedLeagueId = SelectedLeague is { Id: > 0 } league ? league.Id : null;
+        var groupedBySeason = await _queryDispatcher.DispatchAsync<GetMatchesBySeasonQuery, IReadOnlyList<MatchesBySeasonDto>>(
+            new GetMatchesBySeasonQuery(selectedLeagueId));
+        var seasons = groupedBySeason
+            .Select(item => item.Season)
+            .Where(season => !string.IsNullOrWhiteSpace(season))
+            .Select(season => season.Trim())
+            .Distinct(StringComparer.Ordinal)
+            .OrderByDescending(season => season, StringComparer.Ordinal)
+            .ToList();
 
-        for (var offset = 0; offset < 4; offset++)
+        _isUpdatingFilters = true;
+        try
         {
-            var startYear = currentSeasonStartYear - offset;
-            var endYear = startYear + 1;
-            SeasonOptions.Add($"{startYear}/{endYear}");
-        }
+            var previousSelection = SelectedSeason;
+            SeasonOptions.Clear();
+            foreach (var season in seasons)
+            {
+                SeasonOptions.Add(season);
+            }
 
-        SelectedSeason = SeasonOptions[0];
+            if (!string.IsNullOrWhiteSpace(previousSelection) && SeasonOptions.Contains(previousSelection))
+            {
+                SelectedSeason = previousSelection;
+            }
+            else
+            {
+                SelectedSeason = SeasonOptions.FirstOrDefault();
+            }
+        }
+        finally
+        {
+            _isUpdatingFilters = false;
+        }
     }
 
     private async Task LoadLeaguesAsync()
@@ -135,6 +174,31 @@ public sealed class DashboardViewModel : ObservableObject
         }
 
         SelectedLeague ??= LeagueOptions[0];
+    }
+
+    private async Task ReloadByLeagueSafeAsync()
+    {
+        try
+        {
+            await LoadSeasonOptionsAsync();
+            await LoadRecentMatchesAsync();
+        }
+        catch (Exception exception)
+        {
+            CommandExceptionHandler.Handle(exception);
+        }
+    }
+
+    private async Task ReloadRecentMatchesSafeAsync()
+    {
+        try
+        {
+            await LoadRecentMatchesAsync();
+        }
+        catch (Exception exception)
+        {
+            CommandExceptionHandler.Handle(exception);
+        }
     }
 
     private async Task LoadRecentMatchesAsync()

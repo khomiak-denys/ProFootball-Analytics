@@ -35,34 +35,34 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
     {
         var playerAttributes = dbContext.PlayerAttributes.AsNoTracking();
         var latestDatesQuery = playerAttributes
-            .GroupBy(attribute => attribute.PlayerApiId)
+            .GroupBy(attribute => attribute.PlayerId)
             .Select(group => new
             {
-                PlayerApiId = group.Key,
+                PlayerId = group.Key,
                 Date = group.Max(attribute => attribute.Date),
             });
 
         var latestDateRowsQuery =
             from attribute in playerAttributes
             join latestDate in latestDatesQuery
-                on new { attribute.PlayerApiId, attribute.Date } equals new { latestDate.PlayerApiId, latestDate.Date }
+                on new { attribute.PlayerId, attribute.Date } equals new { latestDate.PlayerId, latestDate.Date }
             select attribute;
 
         var latestIdsQuery = latestDateRowsQuery
-            .GroupBy(attribute => attribute.PlayerApiId)
+            .GroupBy(attribute => attribute.PlayerId)
             .Select(group => new
             {
-                PlayerApiId = group.Key,
+                PlayerId = group.Key,
                 Id = group.Max(attribute => attribute.Id),
             });
 
         var latestAttributesQuery =
             from attribute in playerAttributes
             join latestId in latestIdsQuery
-                on new { attribute.PlayerApiId, attribute.Id } equals new { latestId.PlayerApiId, latestId.Id }
+                on new { attribute.PlayerId, attribute.Id } equals new { latestId.PlayerId, latestId.Id }
             select new
             {
-                attribute.PlayerApiId,
+                attribute.PlayerId,
                 attribute.OverallRating,
                 attribute.Potential,
                 attribute.PreferredFoot,
@@ -71,11 +71,11 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
         var projectedQuery =
             from player in dbContext.Players.AsNoTracking()
             join latest in latestAttributesQuery
-                on player.PlayerApiId equals latest.PlayerApiId into latestJoin
+                on player.Id equals latest.PlayerId into latestJoin
             from latest in latestJoin.DefaultIfEmpty()
             select new
             {
-                player.PlayerApiId,
+                player.Id,
                 player.Name,
                 player.Birthday,
                 player.Height,
@@ -172,7 +172,7 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
             .Skip(skip)
             .Take(pageSize)
             .Select(player => new PlayerListItemDto(
-                player.PlayerApiId,
+                player.Id,
                 player.Name,
                 player.Birthday,
                 player.Height,
@@ -195,34 +195,34 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
     {
         var playerAttributes = dbContext.PlayerAttributes.AsNoTracking();
         var latestDatesQuery = playerAttributes
-            .GroupBy(attribute => attribute.PlayerApiId)
+            .GroupBy(attribute => attribute.PlayerId)
             .Select(group => new
             {
-                PlayerApiId = group.Key,
+                PlayerId = group.Key,
                 Date = group.Max(attribute => attribute.Date),
             });
 
         var latestDateRowsQuery =
             from attribute in playerAttributes
             join latestDate in latestDatesQuery
-                on new { attribute.PlayerApiId, attribute.Date } equals new { latestDate.PlayerApiId, latestDate.Date }
+                on new { attribute.PlayerId, attribute.Date } equals new { latestDate.PlayerId, latestDate.Date }
             select attribute;
 
         var latestIdsQuery = latestDateRowsQuery
-            .GroupBy(attribute => attribute.PlayerApiId)
+            .GroupBy(attribute => attribute.PlayerId)
             .Select(group => new
             {
-                PlayerApiId = group.Key,
+                PlayerId = group.Key,
                 Id = group.Max(attribute => attribute.Id),
             });
 
         var latestAttributesQuery =
             from attribute in playerAttributes
             join latestId in latestIdsQuery
-                on new { attribute.PlayerApiId, attribute.Id } equals new { latestId.PlayerApiId, latestId.Id }
+                on new { attribute.PlayerId, attribute.Id } equals new { latestId.PlayerId, latestId.Id }
             select new
             {
-                attribute.PlayerApiId,
+                attribute.PlayerId,
                 attribute.OverallRating,
                 attribute.Potential,
                 attribute.PreferredFoot,
@@ -231,11 +231,11 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
         var projectedQuery =
             from player in dbContext.Players.AsNoTracking()
             join latest in latestAttributesQuery
-                on player.PlayerApiId equals latest.PlayerApiId into latestJoin
+                on player.Id equals latest.PlayerId into latestJoin
             from latest in latestJoin.DefaultIfEmpty()
             select new
             {
-                player.PlayerApiId,
+                player.Id,
                 player.Name,
                 player.Birthday,
                 player.Height,
@@ -333,7 +333,7 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
             .Skip(skip)
             .Take(pageSize)
             .Select(player => new PlayerListItemDto(
-                player.PlayerApiId,
+                player.Id,
                 player.Name,
                 player.Birthday,
                 player.Height,
@@ -350,15 +350,14 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
         GetPlayerDetailsQuery query,
         CancellationToken cancellationToken = default)
     {
-        var playerApiId = query.PlayerApiId;
+        var playerId = query.PlayerApiId;
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var player = await dbContext.Players
             .AsNoTracking()
-            .Where(item => item.PlayerApiId == playerApiId)
+            .Where(item => item.Id == playerId)
             .Select(item => new
             {
-                item.PlayerApiId,
-                item.PlayerFifaApiId,
+                item.Id,
                 item.Name,
                 item.Birthday,
                 item.Height,
@@ -373,7 +372,7 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
 
         var attributes = await dbContext.PlayerAttributes
             .AsNoTracking()
-            .Where(attribute => attribute.PlayerApiId == playerApiId)
+            .Where(attribute => attribute.PlayerId == playerId)
             .OrderByDescending(attribute => attribute.Date)
             .ThenByDescending(attribute => attribute.Id)
             .Take(300)
@@ -387,8 +386,8 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
             .ToListAsync(cancellationToken);
 
         return new PlayerDetailsDto(
-            player.PlayerApiId,
-            player.PlayerFifaApiId,
+            player.Id,
+            null,
             player.Name,
             player.Birthday,
             player.Height,

@@ -31,8 +31,8 @@ public class QueryServicesTests
             PageSize: 2));
 
         Assert.Equal(4, firstPage.TotalCount);
-        Assert.Equal(new[] { 400, 300 }, firstPage.Items.Select(item => item.TeamApiId));
-        Assert.Equal(new[] { 200, 100 }, secondPage.Items.Select(item => item.TeamApiId));
+        Assert.Equal(new[] { 4, 3 }, firstPage.Items.Select(item => item.TeamApiId));
+        Assert.Equal(new[] { 2, 1 }, secondPage.Items.Select(item => item.TeamApiId));
     }
 
     [Fact]
@@ -67,8 +67,8 @@ public class QueryServicesTests
             PageSize: 10));
 
         Assert.Equal(3, result.TotalCount);
-        Assert.Equal(9001, result.Items[0].PlayerApiId);
-        Assert.Equal(9003, result.Items[^1].PlayerApiId);
+        Assert.Equal(1, result.Items[0].PlayerApiId);
+        Assert.Equal(3, result.Items[^1].PlayerApiId);
         Assert.Null(result.Items[^1].OverallRating);
     }
 
@@ -93,7 +93,7 @@ public class QueryServicesTests
             PageSize: 10));
 
         var player = Assert.Single(result.Items);
-        Assert.Equal(9001, player.PlayerApiId);
+        Assert.Equal(1, player.PlayerApiId);
     }
 
     [Fact]
@@ -102,7 +102,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new PlayersQueryService(host.DbContextFactory);
 
-        var details = await service.HandleAsync(new GetPlayerDetailsQuery(9002));
+        var details = await service.HandleAsync(new GetPlayerDetailsQuery(2));
 
         Assert.NotNull(details);
         Assert.Equal(3, details!.Attributes.Count);
@@ -120,7 +120,7 @@ public class QueryServicesTests
         var result = await service.HandleAsync(new MatchSearchQuery(
             LeagueId: 10,
             Season: "2024/2025",
-            TeamApiId: 100,
+            TeamApiId: 1,
             DateFrom: new DateTime(2024, 8, 1, 0, 0, 0, DateTimeKind.Utc),
             DateTo: new DateTime(2024, 8, 31, 0, 0, 0, DateTimeKind.Utc),
             SortBy: "date",
@@ -129,7 +129,7 @@ public class QueryServicesTests
             PageSize: 10));
 
         Assert.Single(result.Items);
-        Assert.Equal(5001, result.Items[0].MatchApiId);
+        Assert.Equal(1, result.Items[0].MatchApiId);
     }
 
     [Fact]
@@ -141,7 +141,7 @@ public class QueryServicesTests
         var teams = await service.HandleAsync(new GetMatchTeamsQuery(10));
 
         Assert.Equal(2, teams.Count);
-        Assert.Equal(new[] { 100, 300 }, teams.Select(team => team.TeamApiId));
+        Assert.Equal(new[] { 1, 3 }, teams.Select(team => team.TeamApiId));
         Assert.Equal(new[] { "Arsenal", "Chelsea" }, teams.Select(team => team.LongName));
     }
 
@@ -154,7 +154,7 @@ public class QueryServicesTests
         var teams = await service.HandleAsync(new GetMatchTeamsQuery());
 
         Assert.Equal(4, teams.Count);
-        Assert.Equal(new[] { 100, 200, 300, 400 }, teams.Select(team => team.TeamApiId).OrderBy(id => id));
+        Assert.Equal(new[] { 1, 2, 3, 4 }, teams.Select(team => team.TeamApiId).OrderBy(id => id));
     }
 
     [Fact]
@@ -237,7 +237,7 @@ public class QueryServicesTests
             SortDescending: true));
 
         Assert.Equal(2, topPlayers.Count);
-        Assert.Equal(9002, topPlayers[0].PlayerApiId);
+        Assert.Equal(2, topPlayers[0].PlayerApiId);
         Assert.True(topPlayers[0].Samples >= topPlayers[1].Samples);
     }
 

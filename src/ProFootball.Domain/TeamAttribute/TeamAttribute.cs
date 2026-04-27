@@ -8,8 +8,7 @@ public sealed class TeamAttribute
 
     public TeamAttribute(
         int id,
-        int teamApiId,
-        int? teamFifaApiId,
+        int teamId,
         DateTime date,
         int? buildUpPlaySpeed,
         int? buildUpPlayPassing,
@@ -17,8 +16,7 @@ public sealed class TeamAttribute
         int? defencePressure)
     {
         Id = id;
-        TeamApiId = teamApiId;
-        TeamFifaApiId = teamFifaApiId;
+        TeamId = teamId;
         Date = date;
         BuildUpPlaySpeed = buildUpPlaySpeed;
         BuildUpPlayPassing = buildUpPlayPassing;
@@ -28,9 +26,7 @@ public sealed class TeamAttribute
 
     public int Id { get; private set; }
 
-    public int TeamApiId { get; private set; }
-
-    public int? TeamFifaApiId { get; private set; }
+    public int TeamId { get; private set; }
 
     public DateTime Date { get; private set; }
 

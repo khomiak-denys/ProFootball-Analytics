@@ -19,6 +19,5 @@ public sealed class PlayerConfiguration : IEntityTypeConfiguration<Player>
             .IsRequired();
 
         builder.HasIndex(player => player.Name);
-        builder.HasIndex(player => player.PlayerFifaApiId);
     }
 }

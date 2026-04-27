@@ -4,9 +4,9 @@ using Microsoft.Extensions.Primitives;
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Auth.Abstractions;
 using ProFootball.Application.Auth.Commands;
-using ProFootball.Application.Abstractions.Persistence;
 using ProFootball.Application.Match.Dtos;
 using ProFootball.Application.Match.Queries;
+using ProFootball.Domain.Entities;
 using ProFootball.Infrastructure;
 using Xunit;
 
@@ -48,7 +48,6 @@ public class DependencyInjectionTests
         services.AddInfrastructure(configuration);
         using var provider = services.BuildServiceProvider();
 
-        Assert.NotNull(provider.GetService<IClubRepository>());
         Assert.NotNull(provider.GetService<IAppUserAuthRepository>());
         Assert.NotNull(provider.GetService<IPasswordHasher>());
         Assert.NotNull(provider.GetService<IQueryDispatcher>());

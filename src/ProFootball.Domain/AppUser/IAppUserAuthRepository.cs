@@ -1,6 +1,4 @@
-using ProFootball.Domain.Entities;
-
-namespace ProFootball.Application.Auth.Abstractions;
+namespace ProFootball.Domain.Entities;
 
 public interface IAppUserAuthRepository
 {

@@ -1,6 +1,7 @@
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Auth.Abstractions;
 using ProFootball.Application.Auth.Commands;
+using ProFootball.Domain.Entities;
 
 namespace ProFootball.Application.Auth.Handlers;
 

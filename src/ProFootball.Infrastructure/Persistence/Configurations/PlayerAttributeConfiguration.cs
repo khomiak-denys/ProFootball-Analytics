@@ -18,16 +18,16 @@ public sealed class PlayerAttributeConfiguration : IEntityTypeConfiguration<Play
         builder.Property(attribute => attribute.AttackingWorkRate).HasMaxLength(32);
         builder.Property(attribute => attribute.DefensiveWorkRate).HasMaxLength(32);
 
-        builder.HasIndex(attribute => attribute.PlayerApiId);
+        builder.HasIndex(attribute => attribute.PlayerId);
         builder.HasIndex(attribute => attribute.Date);
-        builder.HasIndex(attribute => new { attribute.PlayerApiId, attribute.Date });
+        builder.HasIndex(attribute => new { attribute.PlayerId, attribute.Date });
         builder.HasIndex(attribute => attribute.OverallRating);
         builder.HasIndex(attribute => attribute.Potential);
 
         builder.HasOne(attribute => attribute.Player)
             .WithMany()
-            .HasForeignKey(attribute => attribute.PlayerApiId)
-            .HasPrincipalKey(player => player.PlayerApiId)
+            .HasForeignKey(attribute => attribute.PlayerId)
+            .HasPrincipalKey(player => player.Id)
             .OnDelete(DeleteBehavior.Restrict);
     }
 }

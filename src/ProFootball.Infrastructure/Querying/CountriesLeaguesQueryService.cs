@@ -182,8 +182,8 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
                 LatestDate = grouped.Max(match => match.Date),
                 MatchCount = grouped.Count(),
                 TeamsCount = grouped
-                    .Select(match => match.HomeTeamApiId)
-                    .Concat(grouped.Select(match => match.AwayTeamApiId))
+                    .Select(match => match.HomeTeamId)
+                    .Concat(grouped.Select(match => match.AwayTeamId))
                     .Distinct()
                     .Count(),
             })

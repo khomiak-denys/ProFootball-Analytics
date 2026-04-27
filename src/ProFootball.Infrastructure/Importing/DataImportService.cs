@@ -52,11 +52,11 @@ public sealed class DataImportService(
             var skipped = 0;
             var countryLookup = await ReadCountryLookupAsync(sqliteConnection, value => skipped += value, cancellationToken);
             var leagues = await ImportLeaguesAsync(dbContext, sqliteConnection, countryLookup, batchSize, value => skipped += value, cancellationToken);
-            var teams = await ImportTeamsAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-            var players = await ImportPlayersAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-            var matches = await ImportMatchesAsync(dbContext, sqliteConnection, countryLookup, batchSize, value => skipped += value, cancellationToken);
-            var teamAttributes = await ImportTeamAttributesAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-            var playerAttributes = await ImportPlayerAttributesAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+            var (teams, teamIdMap) = await ImportTeamsAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+            var (players, playerIdMap) = await ImportPlayersAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+            var matches = await ImportMatchesAsync(dbContext, sqliteConnection, countryLookup, teamIdMap, batchSize, value => skipped += value, cancellationToken);
+            var teamAttributes = await ImportTeamAttributesAsync(dbContext, sqliteConnection, teamIdMap, batchSize, value => skipped += value, cancellationToken);
+            var playerAttributes = await ImportPlayerAttributesAsync(dbContext, sqliteConnection, playerIdMap, batchSize, value => skipped += value, cancellationToken);
 
             await importTransaction.CommitAsync(cancellationToken);
 
@@ -190,7 +190,7 @@ public sealed class DataImportService(
         return imported;
     }
 
-    private async Task<int> ImportTeamsAsync(
+    private async Task<(int Imported, IReadOnlyDictionary<int, int> TeamIdMap)> ImportTeamsAsync(
         ProFootballDbContext dbContext,
         SqliteConnection sqliteConnection,
         int batchSize,
@@ -204,6 +204,7 @@ public sealed class DataImportService(
         var imported = 0;
         var skipped = 0;
         var batch = new List<Team>(batchSize);
+        var teamIdMap = new Dictionary<int, int>();
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
@@ -219,7 +220,9 @@ public sealed class DataImportService(
                 continue;
             }
 
-            batch.Add(new Team(id.Value, teamApiId.Value, teamFifaApiId, longName, shortName));
+            _ = teamFifaApiId; // source field intentionally ignored in normalized model
+            teamIdMap[teamApiId.Value] = id.Value;
+            batch.Add(new Team(id.Value, longName, shortName));
             if (batch.Count >= batchSize)
             {
                 imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
@@ -230,10 +233,10 @@ public sealed class DataImportService(
         addSkipped(skipped);
 
         logger.LogInformation("Imported teams: {Imported}, skipped: {Skipped}", imported, skipped);
-        return imported;
+        return (imported, teamIdMap);
     }
 
-    private async Task<int> ImportPlayersAsync(
+    private async Task<(int Imported, IReadOnlyDictionary<int, int> PlayerIdMap)> ImportPlayersAsync(
         ProFootballDbContext dbContext,
         SqliteConnection sqliteConnection,
         int batchSize,
@@ -247,6 +250,7 @@ public sealed class DataImportService(
         var imported = 0;
         var skipped = 0;
         var batch = new List<Player>(batchSize);
+        var playerIdMap = new Dictionary<int, int>();
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
@@ -264,7 +268,9 @@ public sealed class DataImportService(
                 continue;
             }
 
-            batch.Add(new Player(id.Value, playerApiId.Value, playerFifaApiId, name, birthday, height, weight));
+            _ = playerFifaApiId; // source field intentionally ignored in normalized model
+            playerIdMap[playerApiId.Value] = id.Value;
+            batch.Add(new Player(id.Value, name, birthday, height, weight));
             if (batch.Count >= batchSize)
             {
                 imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
@@ -275,13 +281,14 @@ public sealed class DataImportService(
         addSkipped(skipped);
 
         logger.LogInformation("Imported players: {Imported}, skipped: {Skipped}", imported, skipped);
-        return imported;
+        return (imported, playerIdMap);
     }
 
     private async Task<int> ImportMatchesAsync(
         ProFootballDbContext dbContext,
         SqliteConnection sqliteConnection,
         IReadOnlyDictionary<int, string> countryLookup,
+        IReadOnlyDictionary<int, int> teamIdMap,
         int batchSize,
         Action<int> addSkipped,
         CancellationToken cancellationToken)
@@ -314,25 +321,26 @@ public sealed class DataImportService(
                 || !countryId.HasValue
                 || !leagueId.HasValue
                 || !date.HasValue
-                || !matchApiId.HasValue
                 || !homeTeamApiId.HasValue
                 || !awayTeamApiId.HasValue
                 || string.IsNullOrWhiteSpace(season)
-                || !countryLookup.TryGetValue(countryId.Value, out var countryName))
+                || !countryLookup.TryGetValue(countryId.Value, out var countryName)
+                || !teamIdMap.TryGetValue(homeTeamApiId.Value, out var homeTeamId)
+                || !teamIdMap.TryGetValue(awayTeamApiId.Value, out var awayTeamId))
             {
                 skipped++;
                 continue;
             }
 
+            _ = matchApiId; // source field intentionally ignored in normalized model
             batch.Add(new FootballMatch(
                 id.Value,
                 countryName,
                 leagueId.Value,
                 season,
                 date.Value,
-                matchApiId.Value,
-                homeTeamApiId.Value,
-                awayTeamApiId.Value,
+                homeTeamId,
+                awayTeamId,
                 homeTeamGoal,
                 awayTeamGoal));
 
@@ -352,6 +360,7 @@ public sealed class DataImportService(
     private async Task<int> ImportTeamAttributesAsync(
         ProFootballDbContext dbContext,
         SqliteConnection sqliteConnection,
+        IReadOnlyDictionary<int, int> teamIdMap,
         int batchSize,
         Action<int> addSkipped,
         CancellationToken cancellationToken)
@@ -378,16 +387,16 @@ public sealed class DataImportService(
             var chanceCreationPassing = SqliteValueParser.ReadInt32(reader, 6);
             var defencePressure = SqliteValueParser.ReadInt32(reader, 7);
 
-            if (!id.HasValue || !teamApiId.HasValue || !date.HasValue)
+            if (!id.HasValue || !teamApiId.HasValue || !date.HasValue || !teamIdMap.TryGetValue(teamApiId.Value, out var teamId))
             {
                 skipped++;
                 continue;
             }
 
+            _ = teamFifaApiId; // source field intentionally ignored in normalized model
             batch.Add(new TeamAttribute(
                 id.Value,
-                teamApiId.Value,
-                teamFifaApiId,
+                teamId,
                 date.Value,
                 buildUpPlaySpeed,
                 buildUpPlayPassing,
@@ -410,6 +419,7 @@ public sealed class DataImportService(
     private async Task<int> ImportPlayerAttributesAsync(
         ProFootballDbContext dbContext,
         SqliteConnection sqliteConnection,
+        IReadOnlyDictionary<int, int> playerIdMap,
         int batchSize,
         Action<int> addSkipped,
         CancellationToken cancellationToken)
@@ -437,16 +447,16 @@ public sealed class DataImportService(
             var attackingWorkRate = SqliteValueParser.ReadString(reader, 7);
             var defensiveWorkRate = SqliteValueParser.ReadString(reader, 8);
 
-            if (!id.HasValue || !playerApiId.HasValue || !date.HasValue)
+            if (!id.HasValue || !playerApiId.HasValue || !date.HasValue || !playerIdMap.TryGetValue(playerApiId.Value, out var playerId))
             {
                 skipped++;
                 continue;
             }
 
+            _ = playerFifaApiId; // source field intentionally ignored in normalized model
             batch.Add(new PlayerAttribute(
                 id.Value,
-                playerApiId.Value,
-                playerFifaApiId,
+                playerId,
                 date.Value,
                 overallRating,
                 potential,

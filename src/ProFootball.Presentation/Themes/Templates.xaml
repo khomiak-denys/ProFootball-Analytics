@@ -46,18 +46,26 @@
                            Width="24"
                            VerticalAlignment="Bottom"
                            Fill="{DynamicResource SuccessForegroundBrush}"
-                           Height="{Binding GoalsBarHeight}" />
+                           Height="{Binding OverallBarHeight}" />
                 <Rectangle Grid.Column="1"
                            Width="24"
                            VerticalAlignment="Bottom"
                            Fill="{DynamicResource BlueAccentBrush}"
-                           Height="{Binding AssistsBarHeight}" />
+                           Height="{Binding PotentialBarHeight}" />
             </Grid>
             <TextBlock Margin="0,8,0,0"
                        HorizontalAlignment="Center"
                        FontSize="14"
                        Foreground="{DynamicResource MutedForegroundBrush}"
                        Text="{Binding PlayerLabel}" />
+            <TextBlock HorizontalAlignment="Center"
+                       FontSize="12"
+                       Foreground="{DynamicResource MutedForegroundBrush}"
+                       Text="{Binding Overall, StringFormat=Ovr: {0:0.#}}" />
+            <TextBlock HorizontalAlignment="Center"
+                       FontSize="12"
+                       Foreground="{DynamicResource MutedForegroundBrush}"
+                       Text="{Binding Potential, StringFormat=Pot: {0:0.#}}" />
         </StackPanel>
     </DataTemplate>
 
@@ -81,10 +89,10 @@
                            Text="{Binding Rating, StringFormat=Rating: {0}}" />
                 <TextBlock Margin="0,4,0,0"
                            FontSize="15"
-                           Text="{Binding Goals, StringFormat=Est. Goals: {0}}" />
+                           Text="{Binding Potential, StringFormat=Potential: {0:0.#}}" />
                 <TextBlock Margin="0,4,0,0"
                            FontSize="15"
-                           Text="{Binding Assists, StringFormat=Est. Assists: {0}}" />
+                           Text="{Binding Samples, StringFormat=Samples: {0}}" />
             </StackPanel>
         </Border>
     </DataTemplate>

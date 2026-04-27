@@ -162,14 +162,21 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return;
         }
 
-        await Dashboard.RefreshAsync();
-        await CountriesLeagues.RefreshAsync();
-        await Teams.SearchAsync();
-        await Players.SearchAsync();
+        await Task.WhenAll(
+            Dashboard.RefreshAsync(),
+            CountriesLeagues.RefreshAsync(),
+            Teams.SearchAsync(),
+            Players.SearchAsync(),
+            LoadMatchesAsync(),
+            Analytics.RefreshAllAsync());
+    }
+
+    private async Task LoadMatchesAsync()
+    {
         await Matches.LoadLeaguesAsync();
+        await Matches.LoadSeasonOptionsAsync();
         await Matches.LoadTeamOptionsAsync();
         await Matches.SearchAsync();
-        await Analytics.RefreshAllAsync();
     }
 
     private void OpenTeamDetails(int teamApiId)

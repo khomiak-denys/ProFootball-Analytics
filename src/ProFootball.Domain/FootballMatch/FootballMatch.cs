@@ -12,9 +12,8 @@ public sealed class FootballMatch
         int leagueId,
         string season,
         DateTime date,
-        int matchApiId,
-        int homeTeamApiId,
-        int awayTeamApiId,
+        int homeTeamId,
+        int awayTeamId,
         int? homeTeamGoal,
         int? awayTeamGoal)
     {
@@ -26,9 +25,8 @@ public sealed class FootballMatch
         LeagueId = leagueId;
         Season = season.Trim();
         Date = date;
-        MatchApiId = matchApiId;
-        HomeTeamApiId = homeTeamApiId;
-        AwayTeamApiId = awayTeamApiId;
+        HomeTeamId = homeTeamId;
+        AwayTeamId = awayTeamId;
         HomeTeamGoal = homeTeamGoal;
         AwayTeamGoal = awayTeamGoal;
     }
@@ -43,11 +41,9 @@ public sealed class FootballMatch
 
     public DateTime Date { get; private set; }
 
-    public int MatchApiId { get; private set; }
+    public int HomeTeamId { get; private set; }
 
-    public int HomeTeamApiId { get; private set; }
-
-    public int AwayTeamApiId { get; private set; }
+    public int AwayTeamId { get; private set; }
 
     public int? HomeTeamGoal { get; private set; }
 
