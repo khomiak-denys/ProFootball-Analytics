@@ -1,0 +1,113 @@
+﻿<UserControl x:Class="ProFootball.Presentation.Views.SettingsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignHeight="720"
+             d:DesignWidth="1140"
+             DataContext="{Binding Settings}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="20,14,20,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel>
+                <TextBlock FontSize="42"
+                           FontWeight="SemiBold"
+                           Foreground="{DynamicResource TitleForegroundBrush}"
+                           Text="Налаштування" />
+                <TextBlock Margin="0,8,0,0"
+                           FontSize="16"
+                           Foreground="{DynamicResource MutedForegroundBrush}"
+                           Text="Керуйте налаштуваннями вашого облікового запису та вподобаннями програми" />
+            </StackPanel>
+
+            <Border Grid.Row="1"
+                    Margin="0,24,0,0"
+                    Padding="24"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal">
+                        <Border Width="46"
+                                Height="46"
+                                CornerRadius="10"
+                                Background="{DynamicResource SuccessSoftBackgroundBrush}">
+                            <TextBlock HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       FontSize="20"
+                                       Foreground="{DynamicResource SuccessForegroundBrush}"
+                                       Text="&#xE7F8;" />
+                        </Border>
+                        <StackPanel Margin="12,0,0,0">
+                            <TextBlock FontSize="38"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                       Text="Зовнішній вигляд" />
+                            <TextBlock Margin="0,6,0,0"
+                                       FontSize="15"
+                                       Foreground="{DynamicResource MutedForegroundBrush}"
+                                       Text="Налаштуйте вигляд програми під ваші вподобання" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Border Grid.Row="1"
+                            Margin="0,24,0,0"
+                            Height="1"
+                            Background="{DynamicResource SubtleBorderBrush}" />
+
+                    <Grid Grid.Row="2" Margin="0,24,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="260" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock VerticalAlignment="Center"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                   Text="Тема інтерфейсу" />
+                        <ComboBox Grid.Column="1"
+                                  Width="240"
+                                  HorizontalAlignment="Left"
+                                  ItemsSource="{Binding ThemeOptions}"
+                                  SelectedItem="{Binding SelectedTheme, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Grid.Row="1"
+                                   Margin="0,16,0,0"
+                                   VerticalAlignment="Center"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                   Text="Мова інтерфейсу" />
+                        <ComboBox Grid.Row="1"
+                                  Grid.Column="1"
+                                  Margin="0,16,0,0"
+                                  Width="240"
+                                  HorizontalAlignment="Left"
+                                  ItemsSource="{Binding LanguageOptions}"
+                                  SelectedItem="{Binding SelectedLanguage, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+    </ScrollViewer>
+</UserControl>
