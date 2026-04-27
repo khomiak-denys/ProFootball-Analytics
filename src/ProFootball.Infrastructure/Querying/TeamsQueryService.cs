@@ -12,7 +12,7 @@ public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> db
     IQueryHandler<TeamSearchQuery, PagedResult<TeamListItemDto>>,
     IQueryHandler<GetTeamDetailsQuery, TeamDetailsDto?>
 {
-    public async Task<PagedResult<TeamListItemDto>> HandleAsync(
+    public async Task<Result<PagedResult<TeamListItemDto>>> HandleAsync(
         TeamSearchQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -40,10 +40,10 @@ public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> db
                 null))
             .ToListAsync(cancellationToken);
 
-        return new PagedResult<TeamListItemDto>(items, totalCount, page, pageSize);
+        return Result<PagedResult<TeamListItemDto>>.Success(new PagedResult<TeamListItemDto>(items, totalCount, page, pageSize));
     }
 
-    public async Task<TeamDetailsDto?> HandleAsync(
+    public async Task<Result<TeamDetailsDto?>> HandleAsync(
         GetTeamDetailsQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -57,7 +57,7 @@ public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> db
 
         if (team is null)
         {
-            return null;
+            return Result<TeamDetailsDto?>.Success(null);
         }
 
         var attributes = await dbContext.TeamAttributes
@@ -74,7 +74,7 @@ public sealed class TeamsQueryService(IDbContextFactory<ProFootballDbContext> db
                 attribute.DefencePressure))
             .ToListAsync(cancellationToken);
 
-        return new TeamDetailsDto(team, attributes);
+        return Result<TeamDetailsDto?>.Success(new TeamDetailsDto(team, attributes));
     }
 
     private static IQueryable<Team> ApplySorting(

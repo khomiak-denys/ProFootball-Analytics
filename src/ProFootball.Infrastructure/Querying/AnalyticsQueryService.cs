@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Common;
 using ProFootball.Application.Player.Dtos;
 using ProFootball.Application.Player.Queries;
 using ProFootball.Infrastructure.Persistence;
@@ -10,13 +11,13 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
     IQueryHandler<GetPlayerTrendQuery, IReadOnlyList<PlayerTrendPointDto>>,
     IQueryHandler<TopPlayersQuery, IReadOnlyList<TopPlayerDto>>
 {
-    public async Task<IReadOnlyList<PlayerTrendPointDto>> HandleAsync(
+    public async Task<Result<IReadOnlyList<PlayerTrendPointDto>>> HandleAsync(
         GetPlayerTrendQuery query,
         CancellationToken cancellationToken = default)
     {
         var playerId = query.PlayerApiId;
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        return await dbContext.PlayerAttributes
+        var trend = await dbContext.PlayerAttributes
             .AsNoTracking()
             .Where(attribute => attribute.PlayerId == playerId)
             .OrderBy(attribute => attribute.Date)
@@ -25,9 +26,11 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
                 attribute.OverallRating,
                 attribute.Potential))
             .ToListAsync(cancellationToken);
+
+        return Result<IReadOnlyList<PlayerTrendPointDto>>.Success(trend);
     }
 
-    public async Task<IReadOnlyList<TopPlayerDto>> HandleAsync(
+    public async Task<Result<IReadOnlyList<TopPlayerDto>>> HandleAsync(
         TopPlayersQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -92,6 +95,7 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
                               Math.Round(grouped.AveragePotential, 2),
                               grouped.Samples);
 
-        return await queryResult.ToListAsync(cancellationToken);
+        var topPlayers = await queryResult.ToListAsync(cancellationToken);
+        return Result<IReadOnlyList<TopPlayerDto>>.Success(topPlayers);
     }
 }

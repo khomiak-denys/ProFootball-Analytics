@@ -13,16 +13,18 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
 {
     private const string SqliteProviderName = "Microsoft.EntityFrameworkCore.Sqlite";
 
-    public async Task<PagedResult<PlayerListItemDto>> HandleAsync(
+    public async Task<Result<PagedResult<PlayerListItemDto>>> HandleAsync(
         PlayerSearchQuery query,
         CancellationToken cancellationToken = default)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var (page, pageSize, skip) = Paging.Normalize(query.Page, query.PageSize);
 
-        return string.Equals(dbContext.Database.ProviderName, SqliteProviderName, StringComparison.Ordinal)
+        var pagedResult = string.Equals(dbContext.Database.ProviderName, SqliteProviderName, StringComparison.Ordinal)
             ? await SearchPlayersSqliteAsync(dbContext, query, page, pageSize, skip, cancellationToken)
             : await SearchPlayersPostgresAsync(dbContext, query, page, pageSize, skip, cancellationToken);
+
+        return Result<PagedResult<PlayerListItemDto>>.Success(pagedResult);
     }
 
     private static async Task<PagedResult<PlayerListItemDto>> SearchPlayersPostgresAsync(
@@ -346,7 +348,7 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
         return new PagedResult<PlayerListItemDto>(items, totalCount, page, pageSize);
     }
 
-    public async Task<PlayerDetailsDto?> HandleAsync(
+    public async Task<Result<PlayerDetailsDto?>> HandleAsync(
         GetPlayerDetailsQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -367,7 +369,7 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
 
         if (player is null)
         {
-            return null;
+            return Result<PlayerDetailsDto?>.Success(null);
         }
 
         var attributes = await dbContext.PlayerAttributes
@@ -385,13 +387,13 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
                 attribute.DefensiveWorkRate))
             .ToListAsync(cancellationToken);
 
-        return new PlayerDetailsDto(
+        return Result<PlayerDetailsDto?>.Success(new PlayerDetailsDto(
             player.Id,
             null,
             player.Name,
             player.Birthday,
             player.Height,
             player.Weight,
-            attributes);
+            attributes));
     }
 }

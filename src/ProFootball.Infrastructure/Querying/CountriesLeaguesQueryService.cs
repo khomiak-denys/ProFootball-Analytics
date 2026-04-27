@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Common;
 using ProFootball.Application.Country.Dtos;
 using ProFootball.Application.Country.Queries;
 using ProFootball.Application.League.Dtos;
@@ -14,12 +15,12 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
     IQueryHandler<GetCountriesWithLeagueCountQuery, IReadOnlyList<CountryLeagueListItemDto>>,
     IQueryHandler<GetCountrySnapshotQuery, CountryLeagueSnapshotDto>
 {
-    public async Task<IReadOnlyList<CountryDto>> HandleAsync(
+    public async Task<Result<IReadOnlyList<CountryDto>>> HandleAsync(
         GetCountriesQuery _,
         CancellationToken cancellationToken = default)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        return await dbContext.Leagues
+        var countries = await dbContext.Leagues
             .AsNoTracking()
             .Where(league => !string.IsNullOrWhiteSpace(league.CountryName))
             .Select(league => league.CountryName)
@@ -27,9 +28,11 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             .OrderBy(countryName => countryName)
             .Select(countryName => new CountryDto(countryName))
             .ToListAsync(cancellationToken);
+
+        return Result<IReadOnlyList<CountryDto>>.Success(countries);
     }
 
-    public async Task<IReadOnlyList<LeagueDto>> HandleAsync(
+    public async Task<Result<IReadOnlyList<LeagueDto>>> HandleAsync(
         GetLeaguesQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -42,21 +45,23 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             leaguesQuery = leaguesQuery.Where(league => league.CountryName == countryName);
         }
 
-        return await leaguesQuery
+        var leagues = await leaguesQuery
             .OrderBy(league => league.Name)
             .Select(league => new LeagueDto(
                 league.Id,
                 league.Name,
                 league.CountryName))
             .ToListAsync(cancellationToken);
+
+        return Result<IReadOnlyList<LeagueDto>>.Success(leagues);
     }
 
-    public async Task<IReadOnlyList<CountryLeagueListItemDto>> HandleAsync(
+    public async Task<Result<IReadOnlyList<CountryLeagueListItemDto>>> HandleAsync(
         GetCountriesWithLeagueCountQuery _,
         CancellationToken cancellationToken = default)
     {
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
-        return await dbContext.Leagues
+        var countries = await dbContext.Leagues
             .AsNoTracking()
             .Where(league => !string.IsNullOrWhiteSpace(league.CountryName))
             .GroupBy(league => league.CountryName)
@@ -65,15 +70,19 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
                 grouped.Key,
                 grouped.Count()))
             .ToListAsync(cancellationToken);
+
+        return Result<IReadOnlyList<CountryLeagueListItemDto>>.Success(countries);
     }
 
-    public async Task<CountryLeagueSnapshotDto> HandleAsync(
+    public async Task<Result<CountryLeagueSnapshotDto>> HandleAsync(
         GetCountrySnapshotQuery query,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(query.CountryName))
         {
-            return new CountryLeagueSnapshotDto(Array.Empty<LeagueCountryCardDto>(), new CountryLeagueSummaryDto(0, 0, 0));
+            return Result<CountryLeagueSnapshotDto>.Success(new CountryLeagueSnapshotDto(
+                Array.Empty<LeagueCountryCardDto>(),
+                new CountryLeagueSummaryDto(0, 0, 0)));
         }
 
         var countryName = query.CountryName.Trim();
@@ -84,7 +93,8 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             TotalClubs: cards.Sum(card => card.TeamsCount),
             ActiveLeagues: activeLeagues,
             Divisions: CalculateDivisions(cards));
-        return new CountryLeagueSnapshotDto(cards, summary);
+
+        return Result<CountryLeagueSnapshotDto>.Success(new CountryLeagueSnapshotDto(cards, summary));
     }
 
     private static int CalculateDivisions(IReadOnlyList<LeagueCountryCardDto> cards)
