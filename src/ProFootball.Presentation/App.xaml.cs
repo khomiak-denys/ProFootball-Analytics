@@ -58,6 +58,7 @@ public partial class App : System.Windows.Application
                 {
                     services.AddInfrastructure(context.Configuration);
                     services.AddSingleton<IThemeService, ThemeService>();
+                    services.AddSingleton<IAppSettingsService, AppSettingsService>();
                     services.AddScoped<MainViewModel>();
                     services.AddScoped<MainWindow>();
                 })
