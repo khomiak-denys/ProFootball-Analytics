@@ -1,22 +1,83 @@
 namespace ProFootball.Application.Common;
 
-public sealed record ResultError(string Code, string Message);
-
-public sealed class Result
+public sealed record Error(string Code, string Message)
 {
-    private Result(bool isSuccess, ResultError? error)
-    {
-        IsSuccess = isSuccess;
-        Error = error;
-    }
+    public static readonly Error None = new(string.Empty, string.Empty);
+
+    public static Error Unexpected(string message) => new("common.unexpected", message);
+}
+
+public interface IResult
+{
+    Error Error { get; }
+
+    bool IsSuccess { get; }
+
+    bool IsFailure { get; }
+}
+
+public interface IResult<out TValue> : IResult
+{
+    TValue Value { get; }
+}
+
+public class Result : IResult
+{
+    public Error Error { get; }
 
     public bool IsSuccess { get; }
 
     public bool IsFailure => !IsSuccess;
 
-    public ResultError? Error { get; }
+    private Result()
+    {
+        IsSuccess = true;
+        Error = Error.None;
+    }
 
-    public static Result Success() => new(true, null);
+    private Result(Error error)
+    {
+        IsSuccess = false;
+        Error = error;
+    }
 
-    public static Result Failure(string code, string message) => new(false, new ResultError(code, message));
+    public static Result Success() => new();
+
+    public static Result Failure(Error error) => new(error);
+
+    public static Result Failure(string code, string message) => new(new Error(code, message));
+}
+
+public class Result<TValue> : IResult<TValue>
+{
+    public TValue Value { get; }
+
+    public Error Error { get; }
+
+    public bool IsSuccess { get; }
+
+    public bool IsFailure => !IsSuccess;
+
+    private Result(TValue value)
+    {
+        IsSuccess = true;
+        Value = value;
+        Error = Error.None;
+    }
+
+    private Result(Error error)
+    {
+        IsSuccess = false;
+        Error = error;
+        Value = default!;
+    }
+
+    public static Result<TValue> Success(TValue value) => new(value);
+
+    public static Result<TValue> Failure(Error error) => new(error);
+
+    public static Result<TValue> Failure(string code, string message) => new(new Error(code, message));
+
+    public TOut Match<TOut>(Func<TValue, TOut> onSuccess, Func<Error, TOut> onFailure) =>
+        IsSuccess ? onSuccess(Value) : onFailure(Error);
 }
