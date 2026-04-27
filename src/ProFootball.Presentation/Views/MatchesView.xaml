@@ -76,7 +76,7 @@
                            Foreground="{DynamicResource TitleForegroundBrush}"
                            Text="Date From" />
                 <DatePicker Margin="0,8,0,0"
-                            Style="{StaticResource PlayersFilterDatePickerStyle}"
+                            Style="{StaticResource MatchesFilterDatePickerStyle}"
                             SelectedDate="{Binding Matches.DateFrom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                 <TextBlock Margin="0,14,0,0"
@@ -85,7 +85,7 @@
                            Foreground="{DynamicResource TitleForegroundBrush}"
                            Text="Date To" />
                 <DatePicker Margin="0,8,0,0"
-                            Style="{StaticResource PlayersFilterDatePickerStyle}"
+                            Style="{StaticResource MatchesFilterDatePickerStyle}"
                             SelectedDate="{Binding Matches.DateTo, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                 <Border Margin="0,16,0,0"
@@ -156,6 +156,7 @@
                                   BorderThickness="0"
                                   Background="Transparent"
                                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                  CellStyle="{StaticResource MatchesTableCellStyle}"
                                   RowStyle="{StaticResource MatchesTableRowStyle}">
                             <DataGrid.Style>
                                 <Style TargetType="DataGrid">
@@ -188,6 +189,7 @@
                                   BorderThickness="0"
                                   Background="Transparent"
                                   ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                                  CellStyle="{StaticResource MatchesTableCellStyle}"
                                   RowStyle="{StaticResource MatchesTableRowStyle}">
                             <DataGrid.Style>
                                 <Style TargetType="DataGrid">
