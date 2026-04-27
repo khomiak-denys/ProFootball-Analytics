@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging;
 using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Auth.Commands;
 using ProFootball.Application.Auth.Dtos;
 using ProFootball.Application.Auth.Queries;
+using ProFootball.Application.Common;
 using ProFootball.Presentation.ViewModels.Auth;
 using ProFootball.Presentation.Commands;
 using ProFootball.Presentation.Services;
@@ -13,6 +15,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private AppTab _selectedTab = AppTab.Dashboard;
     private readonly ILogger<MainViewModel> _logger;
     private readonly IThemeService _themeService;
+    private readonly ICommandDispatcher _commandDispatcher;
     private readonly IQueryDispatcher _queryDispatcher;
     private string _currentUserDisplayName = "Unknown";
     private string _currentUserRole = "Analyst";
@@ -24,6 +27,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         IThemeService themeService,
         ILoggerFactory loggerFactory)
     {
+        _commandDispatcher = commandDispatcher;
         _queryDispatcher = queryDispatcher;
         _themeService = themeService;
         _logger = loggerFactory.CreateLogger<MainViewModel>();
@@ -156,6 +160,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public async Task LoadInitialDataAsync()
     {
+        await RestorePersistedSessionAsync();
         await RefreshSessionStateAsync();
         if (!IsAuthenticated)
         {
@@ -169,6 +174,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             Players.SearchAsync(),
             LoadMatchesAsync(),
             Analytics.RefreshAllAsync());
+    }
+
+    private async Task RestorePersistedSessionAsync()
+    {
+        var result = await _commandDispatcher.DispatchAsync<RestoreSessionCommand, Result>(new RestoreSessionCommand());
+        if (result.IsFailure)
+        {
+            _logger.LogWarning("Session restore failed: {Code} {Message}", result.Error.Code, result.Error.Message);
+        }
     }
 
     private async Task LoadMatchesAsync()
