@@ -20,6 +20,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private string _currentUserDisplayName = "Unknown";
     private string _currentUserRole = "Analyst";
     private bool _isAuthenticated;
+    private bool _isSessionResolved;
+    private bool _isUserMenuOpen;
 
     public MainViewModel(
         ICommandDispatcher commandDispatcher,
@@ -48,6 +50,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         LoadInitialDataCommand = new AsyncRelayCommand(LoadInitialDataAsync, OnBackgroundCommandException);
         ToggleThemeCommand = new RelayCommand(ToggleTheme);
+        ToggleUserMenuCommand = new RelayCommand(ToggleUserMenu, () => IsAuthenticated);
+        OpenSettingsCommand = new RelayCommand(OpenSettings, () => IsAuthenticated);
+        LogoutCommand = new AsyncRelayCommand(LogoutAsync, OnBackgroundCommandException, () => IsAuthenticated);
     }
 
     public DashboardViewModel Dashboard { get; }
@@ -121,6 +126,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public RelayCommand ToggleThemeCommand { get; }
 
+    public RelayCommand ToggleUserMenuCommand { get; }
+
+    public RelayCommand OpenSettingsCommand { get; }
+
+    public AsyncRelayCommand LogoutCommand { get; }
+
     public bool IsDarkTheme => _themeService.CurrentTheme == AppThemeMode.Dark;
 
     public string ThemeToggleLabel => IsDarkTheme ? "Light" : "Dark";
@@ -130,7 +141,45 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool IsAuthenticated
     {
         get => _isAuthenticated;
-        private set => SetProperty(ref _isAuthenticated, value);
+        private set
+        {
+            if (SetProperty(ref _isAuthenticated, value))
+            {
+                if (!value)
+                {
+                    IsUserMenuOpen = false;
+                }
+
+                RaisePropertyChanged(nameof(ShowAuthenticatedShell));
+                RaisePropertyChanged(nameof(ShowAuthScreen));
+                ToggleUserMenuCommand.RaiseCanExecuteChanged();
+                OpenSettingsCommand.RaiseCanExecuteChanged();
+                LogoutCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public bool IsSessionResolved
+    {
+        get => _isSessionResolved;
+        private set
+        {
+            if (SetProperty(ref _isSessionResolved, value))
+            {
+                RaisePropertyChanged(nameof(ShowAuthenticatedShell));
+                RaisePropertyChanged(nameof(ShowAuthScreen));
+            }
+        }
+    }
+
+    public bool ShowAuthenticatedShell => IsSessionResolved && IsAuthenticated;
+
+    public bool ShowAuthScreen => IsSessionResolved && !IsAuthenticated;
+
+    public bool IsUserMenuOpen
+    {
+        get => _isUserMenuOpen;
+        set => SetProperty(ref _isUserMenuOpen, value);
     }
 
     public string CurrentUserDisplayName
@@ -160,7 +209,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public async Task LoadInitialDataAsync()
     {
-        await RestorePersistedSessionAsync();
+        if (!IsSessionResolved)
+        {
+            await RestorePersistedSessionAsync();
+            IsSessionResolved = true;
+        }
+
         await RefreshSessionStateAsync();
         if (!IsAuthenticated)
         {
@@ -225,6 +279,31 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RaisePropertyChanged(nameof(IsDarkTheme));
         RaisePropertyChanged(nameof(ThemeToggleLabel));
         RaisePropertyChanged(nameof(ThemeToggleGlyph));
+    }
+
+    private void ToggleUserMenu()
+    {
+        if (!IsAuthenticated)
+        {
+            IsUserMenuOpen = false;
+            return;
+        }
+
+        IsUserMenuOpen = !IsUserMenuOpen;
+    }
+
+    private void OpenSettings()
+    {
+        IsUserMenuOpen = false;
+        _logger.LogInformation("Settings action clicked.");
+    }
+
+    private async Task LogoutAsync()
+    {
+        IsUserMenuOpen = false;
+        await _commandDispatcher.DispatchAsync(new SignOutCommand());
+        await RefreshSessionStateAsync();
+        SelectedTab = AppTab.Dashboard;
     }
 
     private async Task RefreshSessionStateAsync()

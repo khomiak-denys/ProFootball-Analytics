@@ -15,7 +15,7 @@
         ResizeMode="CanResize"
         Background="{DynamicResource ShellMainBackgroundBrush}">
     <Grid>
-        <Grid Visibility="{Binding IsAuthenticated, Converter={StaticResource BooleanToVisibilityConverter}}">
+        <Grid Visibility="{Binding ShowAuthenticatedShell, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="256" />
                 <ColumnDefinition Width="*" />
@@ -139,60 +139,95 @@
                                            VerticalAlignment="Center"
                                            FontSize="16"
                                            Foreground="{DynamicResource MutedForegroundBrush}"
-                                           Text="Search players, teams, matches..." />
+                                           Text="Search players..." />
                             </Grid>
                         </Border>
                         <StackPanel Grid.Column="2"
                                     Orientation="Horizontal"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Center">
-                            <Button Width="40"
-                                    Height="40"
-                                    Padding="0"
-                                    Command="{Binding ToggleThemeCommand}"
-                                    ToolTip="Toggle theme">
-                                <TextBlock HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           FontFamily="Segoe MDL2 Assets"
-                                           FontSize="18"
-                                           Text="{Binding ThemeToggleGlyph}" />
-                            </Button>
-                            <Border Margin="12,0,0,0"
-                                    Padding="12,0"
-                                    Height="40"
-                                    VerticalAlignment="Center"
-                                    Background="{DynamicResource CardBackgroundBrush}"
-                                    BorderBrush="{DynamicResource CardBorderBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="8">
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Border Width="24"
-                                            Height="24"
-                                            CornerRadius="12"
-                                            Background="{DynamicResource SuccessSoftBackgroundBrush}">
-                                        <TextBlock HorizontalAlignment="Center"
+                            <Grid VerticalAlignment="Center">
+                                <Button x:Name="UserMenuButton"
+                                        Padding="12,0"
+                                        Height="40"
+                                        Background="{DynamicResource CardBackgroundBrush}"
+                                        BorderBrush="{DynamicResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        Command="{Binding ToggleUserMenuCommand}">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <Border Width="24"
+                                                Height="24"
+                                                CornerRadius="12"
+                                                Background="{DynamicResource SuccessSoftBackgroundBrush}">
+                                            <TextBlock HorizontalAlignment="Center"
+                                                       VerticalAlignment="Center"
+                                                       FontFamily="Segoe MDL2 Assets"
+                                                       Foreground="{DynamicResource SuccessForegroundBrush}"
+                                                       Text="&#xE77B;" />
+                                        </Border>
+                                        <TextBlock Margin="8,0,0,0"
                                                    VerticalAlignment="Center"
-                                                   FontFamily="Segoe MDL2 Assets"
-                                                   Foreground="{DynamicResource SuccessForegroundBrush}"
-                                                   Text="&#xE77B;" />
-                                    </Border>
-                                    <TextBlock Margin="8,0,0,0"
-                                               VerticalAlignment="Center"
-                                               FontSize="14"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource TitleForegroundBrush}"
-                                               Text="{Binding CurrentUserDisplayName}" />
-                                    <Border Margin="10,0,0,0"
-                                            Padding="8,3"
-                                            Background="{DynamicResource BadgeSurfaceBrush}"
-                                            CornerRadius="999">
-                                        <TextBlock FontSize="12"
+                                                   FontSize="14"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource TitleForegroundBrush}"
-                                                   Text="{Binding CurrentUserRole}" />
+                                                   Text="{Binding CurrentUserDisplayName}" />
+                                        <Border Margin="10,0,0,0"
+                                                Padding="8,3"
+                                                Background="{DynamicResource BadgeSurfaceBrush}"
+                                                CornerRadius="999">
+                                                <TextBlock FontSize="12"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TitleForegroundBrush}"
+                                                           Text="{Binding CurrentUserRole}" />
+                                        </Border>
+                                    </StackPanel>
+                                </Button>
+                                <Popup IsOpen="{Binding IsUserMenuOpen, Mode=TwoWay}"
+                                       PlacementTarget="{Binding ElementName=UserMenuButton}"
+                                       Placement="Bottom"
+                                       VerticalOffset="8"
+                                       StaysOpen="False"
+                                       AllowsTransparency="True">
+                                    <Border Width="170"
+                                            Padding="6"
+                                            Background="{DynamicResource CardBackgroundBrush}"
+                                            BorderBrush="{DynamicResource CardBorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            SnapsToDevicePixels="True">
+                                        <StackPanel>
+                                            <Button HorizontalContentAlignment="Left"
+                                                    Padding="10,8"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Command="{Binding OpenSettingsCommand}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                               Foreground="{DynamicResource TitleForegroundBrush}"
+                                                               Text="&#xE713;" />
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               Foreground="{DynamicResource TitleForegroundBrush}"
+                                                               Text="Settings" />
+                                                </StackPanel>
+                                            </Button>
+                                            <Button HorizontalContentAlignment="Left"
+                                                    Padding="10,8"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    Command="{Binding LogoutCommand}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                                                               Foreground="{DynamicResource DangerForegroundBrush}"
+                                                               Text="&#xE8AC;" />
+                                                    <TextBlock Margin="8,0,0,0"
+                                                               Foreground="{DynamicResource DangerForegroundBrush}"
+                                                               Text="Logout" />
+                                                </StackPanel>
+                                            </Button>
+                                        </StackPanel>
                                     </Border>
-                                </StackPanel>
-                            </Border>
+                                </Popup>
+                            </Grid>
                         </StackPanel>
                     </Grid>
                 </Border>
@@ -241,7 +276,7 @@
             </Grid>
         </Grid>
 
-          <Grid Visibility="{Binding IsAuthenticated, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+          <Grid Visibility="{Binding ShowAuthScreen, Converter={StaticResource BooleanToVisibilityConverter}}">
             <Grid.Background>
                 <RadialGradientBrush GradientOrigin="0.25,0.2" Center="0.25,0.2" RadiusX="1" RadiusY="1">
                     <GradientStop Color="#F1F6F2" Offset="0" />
@@ -480,6 +515,17 @@
                     </Grid>
                 </Grid>
             </Border>
+        </Grid>
+
+        <Grid Visibility="{Binding IsSessionResolved, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+            <Border Background="{DynamicResource ShellMainBackgroundBrush}" />
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar Width="180" Height="6" IsIndeterminate="True" />
+                <TextBlock Margin="0,12,0,0"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource MutedForegroundBrush}"
+                           Text="Restoring session..." />
+            </StackPanel>
         </Grid>
     </Grid>
 </Window>
