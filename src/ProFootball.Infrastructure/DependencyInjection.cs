@@ -57,12 +57,14 @@ public static class DependencyInjection
         services.AddScoped<IFootballMatchRepository, EfFootballMatchRepository>();
         services.AddScoped<IAppUserAuthRepository, EfAppUserAuthRepository>();
         services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
+        services.AddSingleton<ISessionPersistence, DpapiSessionPersistence>();
         services.AddScoped<IQueryDispatcher, QueryDispatcher>();
         services.AddScoped<ICommandDispatcher, CommandDispatcher>();
 
         services.AddSingleton<IUserSessionStore, InMemorySessionStore>();
         services.AddScoped<ICommandHandler<SignInCommand, Result>, SignInCommandHandler>();
         services.AddScoped<ICommandHandler<RegisterUserCommand, Result>, RegisterUserCommandHandler>();
+        services.AddScoped<ICommandHandler<RestoreSessionCommand, Result>, RestoreSessionCommandHandler>();
         services.AddScoped<ICommandHandler<SignOutCommand>, SignOutCommandHandler>();
         services.AddScoped<IQueryHandler<GetSessionStateQuery, SessionStateDto>, GetSessionStateQueryHandler>();
 
