@@ -1,4 +1,5 @@
 using ProFootball.Application.Abstractions.Cqrs;
+using ProFootball.Application.Common;
 
 namespace ProFootball.Application.Auth.Commands;
 
@@ -7,4 +8,4 @@ public sealed record RegisterUserCommand(
     string LastName,
     string Login,
     string Password,
-    string ConfirmPassword) : ICommand;
+    string ConfirmPassword) : ICommand<Result>;

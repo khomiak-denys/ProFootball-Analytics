@@ -61,8 +61,8 @@ public static class DependencyInjection
         services.AddScoped<ICommandDispatcher, CommandDispatcher>();
 
         services.AddSingleton<IUserSessionStore, InMemorySessionStore>();
-        services.AddScoped<ICommandHandler<SignInCommand>, SignInCommandHandler>();
-        services.AddScoped<ICommandHandler<RegisterUserCommand>, RegisterUserCommandHandler>();
+        services.AddScoped<ICommandHandler<SignInCommand, Result>, SignInCommandHandler>();
+        services.AddScoped<ICommandHandler<RegisterUserCommand, Result>, RegisterUserCommandHandler>();
         services.AddScoped<ICommandHandler<SignOutCommand>, SignOutCommandHandler>();
         services.AddScoped<IQueryHandler<GetSessionStateQuery, SessionStateDto>, GetSessionStateQueryHandler>();
 

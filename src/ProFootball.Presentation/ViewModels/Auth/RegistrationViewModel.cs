@@ -1,5 +1,6 @@
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Auth.Commands;
+using ProFootball.Application.Common;
 
 namespace ProFootball.Presentation.ViewModels.Auth;
 
@@ -62,17 +63,18 @@ public sealed class RegistrationViewModel(ICommandDispatcher commandDispatcher) 
         IsBusy = true;
         try
         {
-            await commandDispatcher.DispatchAsync(
+            var result = await commandDispatcher.DispatchAsync<RegisterUserCommand, Result>(
                 new RegisterUserCommand(FirstName, LastName, Login, password, confirmPassword),
                 cancellationToken);
 
+            if (result.IsFailure)
+            {
+                ErrorMessage = result.Error?.Message ?? "Registration failed.";
+                return false;
+            }
+
             SuccessMessage = "Registration completed. You can now sign in.";
             return true;
-        }
-        catch (Exception exception)
-        {
-            ErrorMessage = exception.Message;
-            return false;
         }
         finally
         {

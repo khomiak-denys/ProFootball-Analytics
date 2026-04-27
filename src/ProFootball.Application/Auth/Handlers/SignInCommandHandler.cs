@@ -1,6 +1,7 @@
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Auth.Abstractions;
 using ProFootball.Application.Auth.Commands;
+using ProFootball.Application.Common;
 using ProFootball.Domain.Entities;
 
 namespace ProFootball.Application.Auth.Handlers;
@@ -8,27 +9,30 @@ namespace ProFootball.Application.Auth.Handlers;
 public sealed class SignInCommandHandler(
     IUserSessionStore sessionStore,
     IAppUserAuthRepository userRepository,
-    IPasswordHasher passwordHasher) : ICommandHandler<SignInCommand>
+    IPasswordHasher passwordHasher) : ICommandHandler<SignInCommand, Result>
 {
-    public async Task HandleAsync(SignInCommand command, CancellationToken cancellationToken = default)
+    public async Task<Result> HandleAsync(SignInCommand command, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        ArgumentException.ThrowIfNullOrWhiteSpace(command.Login);
-        ArgumentException.ThrowIfNullOrWhiteSpace(command.Password);
+        if (string.IsNullOrWhiteSpace(command.Login) || string.IsNullOrWhiteSpace(command.Password))
+        {
+            return Result.Failure("auth.validation", "Login and password are required.");
+        }
 
         var normalizedLogin = command.Login.Trim().ToUpperInvariant();
         var user = await userRepository.FindByNormalizedLoginAsync(normalizedLogin, cancellationToken);
         if (user is null || !user.IsActive)
         {
-            throw new UnauthorizedAccessException("Invalid login or password.");
+            return Result.Failure("auth.invalid_credentials", "Invalid login or password.");
         }
 
         if (!passwordHasher.VerifyPassword(command.Password, user.PasswordHash))
         {
-            throw new UnauthorizedAccessException("Invalid login or password.");
+            return Result.Failure("auth.invalid_credentials", "Invalid login or password.");
         }
 
         sessionStore.SetCurrentUser(user.Login, user.GetDisplayName(), user.Role.ToString());
+        return Result.Success();
     }
 }

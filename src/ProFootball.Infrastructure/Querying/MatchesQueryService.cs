@@ -15,7 +15,7 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
     IQueryHandler<GetMatchesBySeasonQuery, IReadOnlyList<MatchesBySeasonDto>>,
     IQueryHandler<GetDashboardKpiQuery, DashboardKpiDto>
 {
-    public async Task<PagedResult<MatchListItemDto>> HandleAsync(
+    public async Task<Result<PagedResult<MatchListItemDto>>> HandleAsync(
         MatchSearchQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -99,10 +99,10 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
                 match.AwayTeamGoal))
             .ToListAsync(cancellationToken);
 
-        return new PagedResult<MatchListItemDto>(items, totalCount, page, pageSize);
+        return Result<PagedResult<MatchListItemDto>>.Success(new PagedResult<MatchListItemDto>(items, totalCount, page, pageSize));
     }
 
-    public async Task<IReadOnlyList<TeamListItemDto>> HandleAsync(
+    public async Task<Result<IReadOnlyList<TeamListItemDto>>> HandleAsync(
         GetMatchTeamsQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -130,10 +130,10 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
                 null))
             .ToListAsync(cancellationToken);
 
-        return teams;
+        return Result<IReadOnlyList<TeamListItemDto>>.Success(teams);
     }
 
-    public async Task<MatchDetailsDto?> HandleAsync(
+    public async Task<Result<MatchDetailsDto?>> HandleAsync(
         GetMatchDetailsQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -160,10 +160,10 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
                                item.AwayTeamGoal))
             .SingleOrDefaultAsync(cancellationToken);
 
-        return match;
+        return Result<MatchDetailsDto?>.Success(match);
     }
 
-    public async Task<IReadOnlyList<MatchesBySeasonDto>> HandleAsync(
+    public async Task<Result<IReadOnlyList<MatchesBySeasonDto>>> HandleAsync(
         GetMatchesBySeasonQuery query,
         CancellationToken cancellationToken = default)
     {
@@ -193,10 +193,11 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
                               league.Name,
                               grouped.MatchCount);
 
-        return await queryResult.ToListAsync(cancellationToken);
+        var seasons = await queryResult.ToListAsync(cancellationToken);
+        return Result<IReadOnlyList<MatchesBySeasonDto>>.Success(seasons);
     }
 
-    public async Task<DashboardKpiDto> HandleAsync(
+    public async Task<Result<DashboardKpiDto>> HandleAsync(
         GetDashboardKpiQuery _,
         CancellationToken cancellationToken = default)
     {
@@ -211,6 +212,6 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
         var players = await dbContext.Players.CountAsync(cancellationToken);
         var matches = await dbContext.Matches.CountAsync(cancellationToken);
 
-        return new DashboardKpiDto(countries, leagues, teams, players, matches);
+        return Result<DashboardKpiDto>.Success(new DashboardKpiDto(countries, leagues, teams, players, matches));
     }
 }

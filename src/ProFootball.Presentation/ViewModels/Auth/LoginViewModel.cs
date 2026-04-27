@@ -1,5 +1,6 @@
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Auth.Commands;
+using ProFootball.Application.Common;
 
 namespace ProFootball.Presentation.ViewModels.Auth;
 
@@ -40,13 +41,17 @@ public sealed class LoginViewModel(ICommandDispatcher commandDispatcher) : Obser
         IsBusy = true;
         try
         {
-            await commandDispatcher.DispatchAsync(new SignInCommand(Login, password), cancellationToken);
+            var result = await commandDispatcher.DispatchAsync<SignInCommand, Result>(
+                new SignInCommand(Login, password),
+                cancellationToken);
+
+            if (result.IsFailure)
+            {
+                ErrorMessage = result.Error?.Message ?? "Sign in failed.";
+                return false;
+            }
+
             return true;
-        }
-        catch (Exception exception)
-        {
-            ErrorMessage = exception.Message;
-            return false;
         }
         finally
         {

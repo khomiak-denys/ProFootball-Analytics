@@ -4,6 +4,7 @@ using Microsoft.Extensions.Primitives;
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Auth.Abstractions;
 using ProFootball.Application.Auth.Commands;
+using ProFootball.Application.Common;
 using ProFootball.Application.Match.Dtos;
 using ProFootball.Application.Match.Queries;
 using ProFootball.Domain.Entities;
@@ -51,7 +52,7 @@ public class DependencyInjectionTests
         Assert.NotNull(provider.GetService<IAppUserAuthRepository>());
         Assert.NotNull(provider.GetService<IPasswordHasher>());
         Assert.NotNull(provider.GetService<IQueryDispatcher>());
-        Assert.NotNull(provider.GetService<ICommandHandler<RegisterUserCommand>>());
+        Assert.NotNull(provider.GetService<ICommandHandler<RegisterUserCommand, Result>>());
         Assert.NotNull(provider.GetService<IQueryHandler<GetDashboardKpiQuery, DashboardKpiDto>>());
     }
 
