@@ -27,6 +27,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ICommandDispatcher commandDispatcher,
         IQueryDispatcher queryDispatcher,
         IThemeService themeService,
+        IAppSettingsService appSettingsService,
         ILoggerFactory loggerFactory)
     {
         _commandDispatcher = commandDispatcher;
@@ -47,6 +48,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Players = new PlayersViewModel(queryDispatcher, OpenPlayerDetails);
         Matches = new MatchesViewModel(queryDispatcher, OpenMatchDetails);
         Analytics = new AnalyticsViewModel(queryDispatcher);
+        Settings = new SettingsViewModel(themeService, appSettingsService);
 
         LoadInitialDataCommand = new AsyncRelayCommand(LoadInitialDataAsync, OnBackgroundCommandException);
         ToggleThemeCommand = new RelayCommand(ToggleTheme);
@@ -72,6 +74,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public MatchDetailsViewModel MatchDetails { get; }
 
     public AnalyticsViewModel Analytics { get; }
+
+    public SettingsViewModel Settings { get; }
 
     public LoginViewModel LoginForm { get; }
 
@@ -119,6 +123,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         AppTab.Matches => "Matches",
         AppTab.MatchDetails => "Match Details",
         AppTab.Analytics => "Analytics",
+        AppTab.Settings => "Settings",
         _ => "Dashboard",
     };
 
@@ -295,7 +300,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void OpenSettings()
     {
         IsUserMenuOpen = false;
-        _logger.LogInformation("Settings action clicked.");
+        SelectedTab = AppTab.Settings;
     }
 
     private async Task LogoutAsync()
