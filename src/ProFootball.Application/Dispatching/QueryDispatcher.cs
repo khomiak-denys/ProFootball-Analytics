@@ -2,6 +2,7 @@ using System.Data.Common;
 using Microsoft.Extensions.DependencyInjection;
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Common;
+using ProFootball.Application.Common.Errors;
 
 namespace ProFootball.Application.Dispatching;
 
