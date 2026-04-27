@@ -51,8 +51,10 @@ public class DependencyInjectionTests
 
         Assert.NotNull(provider.GetService<IAppUserAuthRepository>());
         Assert.NotNull(provider.GetService<IPasswordHasher>());
+        Assert.NotNull(provider.GetService<ISessionPersistence>());
         Assert.NotNull(provider.GetService<IQueryDispatcher>());
         Assert.NotNull(provider.GetService<ICommandHandler<RegisterUserCommand, Result>>());
+        Assert.NotNull(provider.GetService<ICommandHandler<RestoreSessionCommand, Result>>());
         Assert.NotNull(provider.GetService<IQueryHandler<GetDashboardKpiQuery, DashboardKpiDto>>());
     }
 
