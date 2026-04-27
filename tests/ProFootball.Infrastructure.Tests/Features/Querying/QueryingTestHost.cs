@@ -10,18 +10,13 @@ namespace ProFootball.Infrastructure.Tests.Features.Querying;
 internal sealed class QueryingTestHost : IAsyncDisposable
 {
     private readonly SqliteConnection _connection;
-    private readonly DbContextOptions<ProFootballDbContext> _options;
     private readonly ProFootballDbContext _queryDbContext;
 
-    private QueryingTestHost(SqliteConnection connection, DbContextOptions<ProFootballDbContext> options, ProFootballDbContext queryDbContext)
+    private QueryingTestHost(SqliteConnection connection, ProFootballDbContext queryDbContext)
     {
         _connection = connection;
-        _options = options;
         _queryDbContext = queryDbContext;
-        DbContextFactory = new TestDbContextFactory(_options);
     }
-
-    public IDbContextFactory<ProFootballDbContext> DbContextFactory { get; }
 
     public static async Task<QueryingTestHost> CreateAsync()
     {
@@ -42,7 +37,7 @@ internal sealed class QueryingTestHost : IAsyncDisposable
             }
 
             var queryDbContext = new ProFootballDbContext(options);
-            return new QueryingTestHost(connection, options, queryDbContext);
+            return new QueryingTestHost(connection, queryDbContext);
         }
         catch
         {
@@ -116,10 +111,5 @@ internal sealed class QueryingTestHost : IAsyncDisposable
             new FootballMatch(3, "Spain", 20, "2023/2024", new DateTime(2024, 1, 20, 0, 0, 0, DateTimeKind.Utc), 2, 4, 3, 0));
 
         await dbContext.SaveChangesAsync();
-    }
-
-    private sealed class TestDbContextFactory(DbContextOptions<ProFootballDbContext> options) : IDbContextFactory<ProFootballDbContext>
-    {
-        public ProFootballDbContext CreateDbContext() => new(options);
     }
 }
