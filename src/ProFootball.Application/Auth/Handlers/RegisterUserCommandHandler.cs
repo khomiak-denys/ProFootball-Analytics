@@ -1,32 +1,36 @@
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Auth.Abstractions;
 using ProFootball.Application.Auth.Commands;
+using ProFootball.Application.Common;
 using ProFootball.Domain.Entities;
 
 namespace ProFootball.Application.Auth.Handlers;
 
 public sealed class RegisterUserCommandHandler(
     IAppUserAuthRepository userRepository,
-    IPasswordHasher passwordHasher) : ICommandHandler<RegisterUserCommand>
+    IPasswordHasher passwordHasher) : ICommandHandler<RegisterUserCommand, Result>
 {
-    public async Task HandleAsync(RegisterUserCommand command, CancellationToken cancellationToken = default)
+    public async Task<Result> HandleAsync(RegisterUserCommand command, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        ArgumentException.ThrowIfNullOrWhiteSpace(command.FirstName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(command.LastName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(command.Login);
-        ArgumentException.ThrowIfNullOrWhiteSpace(command.Password);
-        ArgumentException.ThrowIfNullOrWhiteSpace(command.ConfirmPassword);
+        if (string.IsNullOrWhiteSpace(command.FirstName)
+            || string.IsNullOrWhiteSpace(command.LastName)
+            || string.IsNullOrWhiteSpace(command.Login)
+            || string.IsNullOrWhiteSpace(command.Password)
+            || string.IsNullOrWhiteSpace(command.ConfirmPassword))
+        {
+            return Result.Failure("auth.validation", "First name, last name, login and passwords are required.");
+        }
 
         if (!string.Equals(command.Password, command.ConfirmPassword, StringComparison.Ordinal))
         {
-            throw new ArgumentException("Password confirmation does not match.", nameof(command.ConfirmPassword));
+            return Result.Failure("auth.password_mismatch", "Password confirmation does not match.");
         }
 
         if (!MeetsPasswordPolicy(command.Password))
         {
-            throw new ArgumentException("Password must be at least 8 characters and contain at least one letter and one digit.", nameof(command.Password));
+            return Result.Failure("auth.password_policy", "Password must be at least 8 characters and contain at least one letter and one digit.");
         }
 
         var login = command.Login.Trim();
@@ -34,7 +38,7 @@ public sealed class RegisterUserCommandHandler(
 
         if (await userRepository.ExistsByNormalizedLoginAsync(normalizedLogin, cancellationToken))
         {
-            throw new InvalidOperationException("A user with this login already exists.");
+            return Result.Failure("auth.login_exists", "A user with this login already exists.");
         }
 
         var existingUsers = await userRepository.CountAsync(cancellationToken);
@@ -52,6 +56,7 @@ public sealed class RegisterUserCommandHandler(
             createdAtUtc: DateTime.UtcNow);
 
         await userRepository.AddAsync(user, cancellationToken);
+        return Result.Success();
     }
 
     private static bool MeetsPasswordPolicy(string password)
