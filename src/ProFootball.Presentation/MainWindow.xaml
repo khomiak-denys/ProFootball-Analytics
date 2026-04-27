@@ -306,18 +306,6 @@
                                        Foreground="{DynamicResource MutedForegroundBrush}"
                                        TextWrapping="Wrap"
                                        Text="Sign in to view analytics and browse football data, or register a new account to start with a clean profile." />
-
-                            <Border Margin="0,24,0,0"
-                                    Padding="18"
-                                    Background="#F7FBF8"
-                                    BorderBrush="{DynamicResource CardBorderBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="14">
-                                <StackPanel>
-                                    <TextBlock FontSize="15" FontWeight="SemiBold" Text="What you can do" />
-                                    <TextBlock Margin="0,10,0,0" TextWrapping="Wrap" Foreground="{DynamicResource MutedForegroundBrush}" Text="Login to continue with an analyst account. Registration will create the first user as Admin and subsequent accounts as Analyst." />
-                                </StackPanel>
-                            </Border>
                         </StackPanel>
 
                         <Border Grid.Column="1"
