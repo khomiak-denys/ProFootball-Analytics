@@ -19,3 +19,27 @@
 **Update 18/04/2026 - Country as Text + File Logging (#7)**  
 **Goal.** Simplify country modeling and improve runtime observability.  
 **Description.** Migrated country usage to text-based representation across layers and added file logging/configuration improvements for easier diagnostics.
+
+**Update 18/04/2026 - Application CQRS Reorganization (#6)**  
+**Goal.** Restructure application flow around CQRS contracts and dispatching.  
+**Description.** Added command/query contracts and dispatchers, moved handling to CQRS-driven paths, and aligned presentation/data-loader integration with dispatcher-based execution.
+
+**Update 18/04/2026 - XUnit Feature Coverage Expansion (#5)**  
+**Goal.** Improve automated test coverage across solution layers.  
+**Description.** Expanded xUnit coverage for domain/application/infrastructure scenarios and stabilized key feature tests for query/import/auth-related behavior.
+
+**Update 18/04/2026 - Leagues & Analytics Reference Redesign (#4)**  
+**Goal.** Improve leagues and analytics UX/data presentation.  
+**Description.** Refined league/analytics reference pages, improved data visualization behavior, and adjusted related query/presentation logic for clearer dashboard insights.
+
+**Update 16/04/2026 - Players & Teams Reference Redesign (#3)**  
+**Goal.** Redesign players/teams reference experience.  
+**Description.** Delivered updated players and teams reference flows, including improved page structure and interaction behavior for those sections.
+
+**Update 16/04/2026 - Dashboard Reference Shell (#2)**  
+**Goal.** Build a baseline dashboard shell for further features.  
+**Description.** Added foundational dashboard shell/navigation structure that subsequent feature branches integrated with.
+
+**Update 16/04/2026 - MVP Read-Only Analytics (#1)**  
+**Goal.** Deliver initial end-to-end analytics MVP in read-only mode.  
+**Description.** Introduced first read-only analytics slice with core browsing/overview capabilities to bootstrap the product baseline.
