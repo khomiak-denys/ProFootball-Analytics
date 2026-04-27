@@ -4,12 +4,14 @@ using ProFootball.Application.Auth.Commands;
 
 namespace ProFootball.Application.Auth.Handlers;
 
-public sealed class SignOutCommandHandler(IUserSessionStore sessionStore) : ICommandHandler<SignOutCommand>
+public sealed class SignOutCommandHandler(
+    IUserSessionStore sessionStore,
+    ISessionPersistence sessionPersistence) : ICommandHandler<SignOutCommand>
 {
-    public Task HandleAsync(SignOutCommand _, CancellationToken cancellationToken = default)
+    public async Task HandleAsync(SignOutCommand _, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         sessionStore.Clear();
-        return Task.CompletedTask;
+        await sessionPersistence.ClearAsync(cancellationToken);
     }
 }
