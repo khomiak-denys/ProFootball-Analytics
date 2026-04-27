@@ -1,6 +1,7 @@
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Auth.Abstractions;
 using ProFootball.Application.Auth.Commands;
+using ProFootball.Application.Auth.Dtos;
 using ProFootball.Application.Common;
 using ProFootball.Domain.Entities;
 
@@ -8,6 +9,7 @@ namespace ProFootball.Application.Auth.Handlers;
 
 public sealed class SignInCommandHandler(
     IUserSessionStore sessionStore,
+    ISessionPersistence sessionPersistence,
     IAppUserAuthRepository userRepository,
     IPasswordHasher passwordHasher) : ICommandHandler<SignInCommand, Result>
 {
@@ -32,7 +34,15 @@ public sealed class SignInCommandHandler(
             return Result.Failure("auth.invalid_credentials", "Invalid login or password.");
         }
 
-        sessionStore.SetCurrentUser(user.Login, user.GetDisplayName(), user.Role.ToString());
+        var displayName = user.GetDisplayName();
+        var role = user.Role.ToString();
+        sessionStore.SetCurrentUser(user.Login, displayName, role);
+        await sessionPersistence.SaveAsync(new PersistedSessionDto(
+            PersistedSessionDto.CurrentVersion,
+            user.Login,
+            displayName,
+            role,
+            DateTime.UtcNow), cancellationToken);
         return Result.Success();
     }
 }
