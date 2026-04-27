@@ -11,13 +11,7 @@ using ProFootball.Infrastructure.Persistence;
 namespace ProFootball.Infrastructure.Importing;
 
 public sealed class DataImportService(
-    ProFootballDbContext dbContext,
-    ILeagueRepository leagueRepository,
-    ITeamRepository teamRepository,
-    IPlayerRepository playerRepository,
-    IFootballMatchRepository footballMatchRepository,
-    ITeamAttributeRepository teamAttributeRepository,
-    IPlayerAttributeRepository playerAttributeRepository,
+    IDbContextFactory<ProFootballDbContext> dbContextFactory,
     ILogger<DataImportService> logger) : ICommandHandler<ImportDataCommand, DataImportResult>
 {
     public async Task<DataImportResult> HandleAsync(
@@ -34,6 +28,7 @@ public sealed class DataImportService(
         ArgumentOutOfRangeException.ThrowIfLessThan(request.BatchSize, 1);
         var batchSize = request.BatchSize;
         var stopwatch = Stopwatch.StartNew();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
 
         await PrepareDatabaseAsync(dbContext, cancellationToken);
 
@@ -41,14 +36,7 @@ public sealed class DataImportService(
 
         try
         {
-            await ClearExistingDataAsync(
-                playerAttributeRepository,
-                teamAttributeRepository,
-                footballMatchRepository,
-                playerRepository,
-                teamRepository,
-                leagueRepository,
-                cancellationToken);
+            await ClearExistingDataAsync(dbContext, cancellationToken);
 
             var sqliteConnectionString = new SqliteConnectionStringBuilder
             {
@@ -63,12 +51,12 @@ public sealed class DataImportService(
 
             var skipped = 0;
             var countryLookup = await ReadCountryLookupAsync(sqliteConnection, value => skipped += value, cancellationToken);
-            var leagues = await ImportLeaguesAsync(leagueRepository, sqliteConnection, countryLookup, batchSize, value => skipped += value, cancellationToken);
-            var (teams, teamIdMap) = await ImportTeamsAsync(teamRepository, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-            var (players, playerIdMap) = await ImportPlayersAsync(playerRepository, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-            var matches = await ImportMatchesAsync(footballMatchRepository, sqliteConnection, countryLookup, teamIdMap, batchSize, value => skipped += value, cancellationToken);
-            var teamAttributes = await ImportTeamAttributesAsync(teamAttributeRepository, sqliteConnection, teamIdMap, batchSize, value => skipped += value, cancellationToken);
-            var playerAttributes = await ImportPlayerAttributesAsync(playerAttributeRepository, sqliteConnection, playerIdMap, batchSize, value => skipped += value, cancellationToken);
+            var leagues = await ImportLeaguesAsync(dbContext, sqliteConnection, countryLookup, batchSize, value => skipped += value, cancellationToken);
+            var (teams, teamIdMap) = await ImportTeamsAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+            var (players, playerIdMap) = await ImportPlayersAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+            var matches = await ImportMatchesAsync(dbContext, sqliteConnection, countryLookup, teamIdMap, batchSize, value => skipped += value, cancellationToken);
+            var teamAttributes = await ImportTeamAttributesAsync(dbContext, sqliteConnection, teamIdMap, batchSize, value => skipped += value, cancellationToken);
+            var playerAttributes = await ImportPlayerAttributesAsync(dbContext, sqliteConnection, playerIdMap, batchSize, value => skipped += value, cancellationToken);
 
             await importTransaction.CommitAsync(cancellationToken);
 
@@ -103,21 +91,14 @@ public sealed class DataImportService(
         }
     }
 
-    private static async Task ClearExistingDataAsync(
-        IPlayerAttributeRepository playerAttributeRepository,
-        ITeamAttributeRepository teamAttributeRepository,
-        IFootballMatchRepository footballMatchRepository,
-        IPlayerRepository playerRepository,
-        ITeamRepository teamRepository,
-        ILeagueRepository leagueRepository,
-        CancellationToken cancellationToken)
+    private static async Task ClearExistingDataAsync(ProFootballDbContext dbContext, CancellationToken cancellationToken)
     {
-        await playerAttributeRepository.DeleteAllAsync(cancellationToken);
-        await teamAttributeRepository.DeleteAllAsync(cancellationToken);
-        await footballMatchRepository.DeleteAllAsync(cancellationToken);
-        await playerRepository.DeleteAllAsync(cancellationToken);
-        await teamRepository.DeleteAllAsync(cancellationToken);
-        await leagueRepository.DeleteAllAsync(cancellationToken);
+        await dbContext.PlayerAttributes.ExecuteDeleteAsync(cancellationToken);
+        await dbContext.TeamAttributes.ExecuteDeleteAsync(cancellationToken);
+        await dbContext.Matches.ExecuteDeleteAsync(cancellationToken);
+        await dbContext.Players.ExecuteDeleteAsync(cancellationToken);
+        await dbContext.Teams.ExecuteDeleteAsync(cancellationToken);
+        await dbContext.Leagues.ExecuteDeleteAsync(cancellationToken);
     }
 
     private static async Task PrepareDatabaseAsync(ProFootballDbContext dbContext, CancellationToken cancellationToken)
@@ -165,7 +146,7 @@ public sealed class DataImportService(
     }
 
     private async Task<int> ImportLeaguesAsync(
-        ILeagueRepository leagueRepository,
+        ProFootballDbContext dbContext,
         SqliteConnection sqliteConnection,
         IReadOnlyDictionary<int, string> countryLookup,
         int batchSize,
@@ -198,11 +179,11 @@ public sealed class DataImportService(
             batch.Add(new League(id.Value, countryName, name));
             if (batch.Count >= batchSize)
             {
-                imported += await PersistBatchAsync(batch, leagueRepository.AddRangeAsync, cancellationToken);
+                imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
             }
         }
 
-        imported += await PersistBatchAsync(batch, leagueRepository.AddRangeAsync, cancellationToken);
+        imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
         addSkipped(skipped);
 
         logger.LogInformation("Imported leagues: {Imported}, skipped: {Skipped}", imported, skipped);
@@ -210,7 +191,7 @@ public sealed class DataImportService(
     }
 
     private async Task<(int Imported, IReadOnlyDictionary<int, int> TeamIdMap)> ImportTeamsAsync(
-        ITeamRepository teamRepository,
+        ProFootballDbContext dbContext,
         SqliteConnection sqliteConnection,
         int batchSize,
         Action<int> addSkipped,
@@ -244,11 +225,11 @@ public sealed class DataImportService(
             batch.Add(new Team(id.Value, longName, shortName));
             if (batch.Count >= batchSize)
             {
-                imported += await PersistBatchAsync(batch, teamRepository.AddRangeAsync, cancellationToken);
+                imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
             }
         }
 
-        imported += await PersistBatchAsync(batch, teamRepository.AddRangeAsync, cancellationToken);
+        imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
         addSkipped(skipped);
 
         logger.LogInformation("Imported teams: {Imported}, skipped: {Skipped}", imported, skipped);
@@ -256,7 +237,7 @@ public sealed class DataImportService(
     }
 
     private async Task<(int Imported, IReadOnlyDictionary<int, int> PlayerIdMap)> ImportPlayersAsync(
-        IPlayerRepository playerRepository,
+        ProFootballDbContext dbContext,
         SqliteConnection sqliteConnection,
         int batchSize,
         Action<int> addSkipped,
@@ -292,11 +273,11 @@ public sealed class DataImportService(
             batch.Add(new Player(id.Value, name, birthday, height, weight));
             if (batch.Count >= batchSize)
             {
-                imported += await PersistBatchAsync(batch, playerRepository.AddRangeAsync, cancellationToken);
+                imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
             }
         }
 
-        imported += await PersistBatchAsync(batch, playerRepository.AddRangeAsync, cancellationToken);
+        imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
         addSkipped(skipped);
 
         logger.LogInformation("Imported players: {Imported}, skipped: {Skipped}", imported, skipped);
@@ -304,7 +285,7 @@ public sealed class DataImportService(
     }
 
     private async Task<int> ImportMatchesAsync(
-        IFootballMatchRepository footballMatchRepository,
+        ProFootballDbContext dbContext,
         SqliteConnection sqliteConnection,
         IReadOnlyDictionary<int, string> countryLookup,
         IReadOnlyDictionary<int, int> teamIdMap,
@@ -365,11 +346,11 @@ public sealed class DataImportService(
 
             if (batch.Count >= batchSize)
             {
-                imported += await PersistBatchAsync(batch, footballMatchRepository.AddRangeAsync, cancellationToken);
+                imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
             }
         }
 
-        imported += await PersistBatchAsync(batch, footballMatchRepository.AddRangeAsync, cancellationToken);
+        imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
         addSkipped(skipped);
 
         logger.LogInformation("Imported matches: {Imported}, skipped: {Skipped}", imported, skipped);
@@ -377,7 +358,7 @@ public sealed class DataImportService(
     }
 
     private async Task<int> ImportTeamAttributesAsync(
-        ITeamAttributeRepository teamAttributeRepository,
+        ProFootballDbContext dbContext,
         SqliteConnection sqliteConnection,
         IReadOnlyDictionary<int, int> teamIdMap,
         int batchSize,
@@ -424,11 +405,11 @@ public sealed class DataImportService(
 
             if (batch.Count >= batchSize)
             {
-                imported += await PersistBatchAsync(batch, teamAttributeRepository.AddRangeAsync, cancellationToken);
+                imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
             }
         }
 
-        imported += await PersistBatchAsync(batch, teamAttributeRepository.AddRangeAsync, cancellationToken);
+        imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
         addSkipped(skipped);
 
         logger.LogInformation("Imported team attributes: {Imported}, skipped: {Skipped}", imported, skipped);
@@ -436,7 +417,7 @@ public sealed class DataImportService(
     }
 
     private async Task<int> ImportPlayerAttributesAsync(
-        IPlayerAttributeRepository playerAttributeRepository,
+        ProFootballDbContext dbContext,
         SqliteConnection sqliteConnection,
         IReadOnlyDictionary<int, int> playerIdMap,
         int batchSize,
@@ -485,11 +466,11 @@ public sealed class DataImportService(
 
             if (batch.Count >= batchSize)
             {
-                imported += await PersistBatchAsync(batch, playerAttributeRepository.AddRangeAsync, cancellationToken);
+                imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
             }
         }
 
-        imported += await PersistBatchAsync(batch, playerAttributeRepository.AddRangeAsync, cancellationToken);
+        imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
         addSkipped(skipped);
 
         logger.LogInformation("Imported player attributes: {Imported}, skipped: {Skipped}", imported, skipped);
@@ -497,8 +478,8 @@ public sealed class DataImportService(
     }
 
     private static async Task<int> PersistBatchAsync<TEntity>(
+        ProFootballDbContext dbContext,
         List<TEntity> batch,
-        Func<IReadOnlyCollection<TEntity>, CancellationToken, Task> persistBatch,
         CancellationToken cancellationToken)
         where TEntity : class
     {
@@ -507,7 +488,9 @@ public sealed class DataImportService(
             return 0;
         }
 
-        await persistBatch(batch, cancellationToken);
+        dbContext.Set<TEntity>().AddRange(batch);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        dbContext.ChangeTracker.Clear();
 
         var persisted = batch.Count;
         batch.Clear();

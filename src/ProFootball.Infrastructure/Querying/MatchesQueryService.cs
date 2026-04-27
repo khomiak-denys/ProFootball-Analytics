@@ -4,15 +4,11 @@ using ProFootball.Application.Common;
 using ProFootball.Application.Match.Dtos;
 using ProFootball.Application.Match.Queries;
 using ProFootball.Application.Team.Dtos;
-using ProFootball.Domain.Entities;
+using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
-public sealed class MatchesQueryService(
-    IFootballMatchRepository matchRepository,
-    ILeagueRepository leagueRepository,
-    ITeamRepository teamRepository,
-    IPlayerRepository playerRepository) :
+public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) :
     IQueryHandler<MatchSearchQuery, PagedResult<MatchListItemDto>>,
     IQueryHandler<GetMatchTeamsQuery, IReadOnlyList<TeamListItemDto>>,
     IQueryHandler<GetMatchDetailsQuery, MatchDetailsDto?>,
@@ -23,13 +19,14 @@ public sealed class MatchesQueryService(
         MatchSearchQuery query,
         CancellationToken cancellationToken = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var (page, pageSize, skip) = Paging.Normalize(query.Page, query.PageSize);
 
-        var projectedQuery = from match in matchRepository.Query()
-                             join league in leagueRepository.Query() on match.LeagueId equals league.Id
-                             join homeTeam in teamRepository.Query() on match.HomeTeamId equals homeTeam.Id into homeTeamJoin
+        var projectedQuery = from match in dbContext.Matches.AsNoTracking()
+                             join league in dbContext.Leagues.AsNoTracking() on match.LeagueId equals league.Id
+                             join homeTeam in dbContext.Teams.AsNoTracking() on match.HomeTeamId equals homeTeam.Id into homeTeamJoin
                              from homeTeam in homeTeamJoin.DefaultIfEmpty()
-                             join awayTeam in teamRepository.Query() on match.AwayTeamId equals awayTeam.Id into awayTeamJoin
+                             join awayTeam in dbContext.Teams.AsNoTracking() on match.AwayTeamId equals awayTeam.Id into awayTeamJoin
                              from awayTeam in awayTeamJoin.DefaultIfEmpty()
                              select new
                              {
@@ -109,7 +106,9 @@ public sealed class MatchesQueryService(
         GetMatchTeamsQuery query,
         CancellationToken cancellationToken = default)
     {
-        var matchesQuery = matchRepository.Query();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var matchesQuery = dbContext.Matches.AsNoTracking();
         if (query.LeagueId.HasValue)
         {
             matchesQuery = matchesQuery.Where(match => match.LeagueId == query.LeagueId.Value);
@@ -120,7 +119,8 @@ public sealed class MatchesQueryService(
             .Concat(matchesQuery.Select(match => match.AwayTeamId))
             .Distinct();
 
-        return await teamRepository.Query()
+        var teams = await dbContext.Teams
+            .AsNoTracking()
             .Where(team => teamIds.Contains(team.Id))
             .OrderBy(team => team.LongName)
             .Select(team => new TeamListItemDto(
@@ -129,6 +129,8 @@ public sealed class MatchesQueryService(
                 team.ShortName,
                 null))
             .ToListAsync(cancellationToken);
+
+        return teams;
     }
 
     public async Task<MatchDetailsDto?> HandleAsync(
@@ -136,33 +138,37 @@ public sealed class MatchesQueryService(
         CancellationToken cancellationToken = default)
     {
         var matchId = query.MatchApiId;
-        return await (from item in matchRepository.Query()
-                      where item.Id == matchId
-                      join league in leagueRepository.Query() on item.LeagueId equals league.Id
-                      join homeTeam in teamRepository.Query() on item.HomeTeamId equals homeTeam.Id into homeTeamJoin
-                      from homeTeam in homeTeamJoin.DefaultIfEmpty()
-                      join awayTeam in teamRepository.Query() on item.AwayTeamId equals awayTeam.Id into awayTeamJoin
-                      from awayTeam in awayTeamJoin.DefaultIfEmpty()
-                      select new MatchDetailsDto(
-                          item.Id,
-                          item.Date,
-                          item.Season,
-                          league.Name,
-                          item.CountryName,
-                          item.HomeTeamId,
-                          homeTeam == null ? item.HomeTeamId.ToString() : homeTeam.LongName,
-                          item.AwayTeamId,
-                          awayTeam == null ? item.AwayTeamId.ToString() : awayTeam.LongName,
-                          item.HomeTeamGoal,
-                          item.AwayTeamGoal))
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        var match = await (from item in dbContext.Matches.AsNoTracking()
+                           where item.Id == matchId
+                           join league in dbContext.Leagues.AsNoTracking() on item.LeagueId equals league.Id
+                           join homeTeam in dbContext.Teams.AsNoTracking() on item.HomeTeamId equals homeTeam.Id into homeTeamJoin
+                           from homeTeam in homeTeamJoin.DefaultIfEmpty()
+                           join awayTeam in dbContext.Teams.AsNoTracking() on item.AwayTeamId equals awayTeam.Id into awayTeamJoin
+                           from awayTeam in awayTeamJoin.DefaultIfEmpty()
+                           select new MatchDetailsDto(
+                               item.Id,
+                               item.Date,
+                               item.Season,
+                               league.Name,
+                               item.CountryName,
+                               item.HomeTeamId,
+                               homeTeam == null ? item.HomeTeamId.ToString() : homeTeam.LongName,
+                               item.AwayTeamId,
+                               awayTeam == null ? item.AwayTeamId.ToString() : awayTeam.LongName,
+                               item.HomeTeamGoal,
+                               item.AwayTeamGoal))
             .SingleOrDefaultAsync(cancellationToken);
+
+        return match;
     }
 
     public async Task<IReadOnlyList<MatchesBySeasonDto>> HandleAsync(
         GetMatchesBySeasonQuery query,
         CancellationToken cancellationToken = default)
     {
-        var matchesQuery = matchRepository.Query();
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        var matchesQuery = dbContext.Matches.AsNoTracking();
 
         if (query.LeagueId.HasValue)
         {
@@ -180,7 +186,7 @@ public sealed class MatchesQueryService(
                            };
 
         var queryResult = from grouped in groupedQuery
-                          join league in leagueRepository.Query() on grouped.LeagueId equals league.Id
+                          join league in dbContext.Leagues.AsNoTracking() on grouped.LeagueId equals league.Id
                           orderby grouped.Season, league.Name
                           select new MatchesBySeasonDto(
                               grouped.Season,
@@ -194,14 +200,16 @@ public sealed class MatchesQueryService(
         GetDashboardKpiQuery _,
         CancellationToken cancellationToken = default)
     {
-        var countries = await leagueRepository.Query()
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        var countries = await dbContext.Leagues
+            .AsNoTracking()
             .Select(league => league.CountryName)
             .Distinct()
             .CountAsync(cancellationToken);
-        var leagues = await leagueRepository.CountAsync(cancellationToken);
-        var teams = await teamRepository.CountAsync(cancellationToken);
-        var players = await playerRepository.CountAsync(cancellationToken);
-        var matches = await matchRepository.CountAsync(cancellationToken);
+        var leagues = await dbContext.Leagues.CountAsync(cancellationToken);
+        var teams = await dbContext.Teams.CountAsync(cancellationToken);
+        var players = await dbContext.Players.CountAsync(cancellationToken);
+        var matches = await dbContext.Matches.CountAsync(cancellationToken);
 
         return new DashboardKpiDto(countries, leagues, teams, players, matches);
     }

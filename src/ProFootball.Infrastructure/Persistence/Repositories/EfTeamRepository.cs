@@ -3,10 +3,8 @@ using ProFootball.Domain.Entities;
 
 namespace ProFootball.Infrastructure.Persistence.Repositories;
 
-public sealed class EfTeamRepository(ProFootballDbContext dbContext) : ITeamRepository
+public sealed class EfTeamRepository(IDbContextFactory<ProFootballDbContext> dbContextFactory) : ITeamRepository
 {
-    public IQueryable<Team> Query() => dbContext.Teams.AsNoTracking();
-
     public async Task AddRangeAsync(IReadOnlyCollection<Team> teams, CancellationToken cancellationToken = default)
     {
         if (teams.Count == 0)
@@ -14,14 +12,20 @@ public sealed class EfTeamRepository(ProFootballDbContext dbContext) : ITeamRepo
             return;
         }
 
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         await dbContext.Teams.AddRangeAsync(teams, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
-        dbContext.ChangeTracker.Clear();
     }
 
-    public Task DeleteAllAsync(CancellationToken cancellationToken = default)
-        => dbContext.Teams.ExecuteDeleteAsync(cancellationToken);
+    public async Task DeleteAllAsync(CancellationToken cancellationToken = default)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await dbContext.Teams.ExecuteDeleteAsync(cancellationToken);
+    }
 
-    public Task<int> CountAsync(CancellationToken cancellationToken = default)
-        => dbContext.Teams.CountAsync(cancellationToken);
+    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        return await dbContext.Teams.CountAsync(cancellationToken);
+    }
 }

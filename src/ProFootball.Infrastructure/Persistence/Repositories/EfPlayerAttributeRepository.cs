@@ -3,10 +3,8 @@ using ProFootball.Domain.Entities;
 
 namespace ProFootball.Infrastructure.Persistence.Repositories;
 
-public sealed class EfPlayerAttributeRepository(ProFootballDbContext dbContext) : IPlayerAttributeRepository
+public sealed class EfPlayerAttributeRepository(IDbContextFactory<ProFootballDbContext> dbContextFactory) : IPlayerAttributeRepository
 {
-    public IQueryable<PlayerAttribute> Query() => dbContext.PlayerAttributes.AsNoTracking();
-
     public async Task AddRangeAsync(IReadOnlyCollection<PlayerAttribute> attributes, CancellationToken cancellationToken = default)
     {
         if (attributes.Count == 0)
@@ -14,11 +12,14 @@ public sealed class EfPlayerAttributeRepository(ProFootballDbContext dbContext) 
             return;
         }
 
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         await dbContext.PlayerAttributes.AddRangeAsync(attributes, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
-        dbContext.ChangeTracker.Clear();
     }
 
-    public Task DeleteAllAsync(CancellationToken cancellationToken = default)
-        => dbContext.PlayerAttributes.ExecuteDeleteAsync(cancellationToken);
+    public async Task DeleteAllAsync(CancellationToken cancellationToken = default)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        await dbContext.PlayerAttributes.ExecuteDeleteAsync(cancellationToken);
+    }
 }

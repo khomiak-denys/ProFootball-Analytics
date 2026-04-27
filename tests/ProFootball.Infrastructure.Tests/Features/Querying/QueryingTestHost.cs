@@ -2,21 +2,22 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using ProFootball.Domain.Entities;
 using ProFootball.Infrastructure.Persistence;
-using ProFootball.Infrastructure.Persistence.Repositories;
-using ProFootball.Infrastructure.Querying;
 
 namespace ProFootball.Infrastructure.Tests.Features.Querying;
 
 internal sealed class QueryingTestHost : IAsyncDisposable
 {
     private readonly SqliteConnection _connection;
-    private readonly ProFootballDbContext _queryDbContext;
+    private readonly DbContextOptions<ProFootballDbContext> _options;
 
-    private QueryingTestHost(SqliteConnection connection, ProFootballDbContext queryDbContext)
+    private QueryingTestHost(SqliteConnection connection, DbContextOptions<ProFootballDbContext> options)
     {
         _connection = connection;
-        _queryDbContext = queryDbContext;
+        _options = options;
+        DbContextFactory = new TestDbContextFactory(_options);
     }
+
+    public IDbContextFactory<ProFootballDbContext> DbContextFactory { get; }
 
     public static async Task<QueryingTestHost> CreateAsync()
     {
@@ -36,8 +37,7 @@ internal sealed class QueryingTestHost : IAsyncDisposable
                 await SeedAsync(dbContext);
             }
 
-            var queryDbContext = new ProFootballDbContext(options);
-            return new QueryingTestHost(connection, queryDbContext);
+            return new QueryingTestHost(connection, options);
         }
         catch
         {
@@ -52,28 +52,8 @@ internal sealed class QueryingTestHost : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        await _queryDbContext.DisposeAsync();
         await _connection.DisposeAsync();
     }
-
-    public TeamsQueryService CreateTeamsService()
-        => new(new EfTeamRepository(_queryDbContext), new EfTeamAttributeRepository(_queryDbContext));
-
-    public PlayersQueryService CreatePlayersService()
-        => new(new EfPlayerRepository(_queryDbContext), new EfPlayerAttributeRepository(_queryDbContext));
-
-    public MatchesQueryService CreateMatchesService()
-        => new(
-            new EfFootballMatchRepository(_queryDbContext),
-            new EfLeagueRepository(_queryDbContext),
-            new EfTeamRepository(_queryDbContext),
-            new EfPlayerRepository(_queryDbContext));
-
-    public CountriesLeaguesQueryService CreateCountriesLeaguesService()
-        => new(new EfLeagueRepository(_queryDbContext), new EfFootballMatchRepository(_queryDbContext));
-
-    public AnalyticsQueryService CreateAnalyticsService()
-        => new(new EfPlayerAttributeRepository(_queryDbContext), new EfPlayerRepository(_queryDbContext));
 
     private static async Task SeedAsync(ProFootballDbContext dbContext)
     {
@@ -111,5 +91,10 @@ internal sealed class QueryingTestHost : IAsyncDisposable
             new FootballMatch(3, "Spain", 20, "2023/2024", new DateTime(2024, 1, 20, 0, 0, 0, DateTimeKind.Utc), 2, 4, 3, 0));
 
         await dbContext.SaveChangesAsync();
+    }
+
+    private sealed class TestDbContextFactory(DbContextOptions<ProFootballDbContext> options) : IDbContextFactory<ProFootballDbContext>
+    {
+        public ProFootballDbContext CreateDbContext() => new(options);
     }
 }

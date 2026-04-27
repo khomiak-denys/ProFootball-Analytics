@@ -2,13 +2,11 @@ using Microsoft.EntityFrameworkCore;
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Player.Dtos;
 using ProFootball.Application.Player.Queries;
-using ProFootball.Domain.Entities;
+using ProFootball.Infrastructure.Persistence;
 
 namespace ProFootball.Infrastructure.Querying;
 
-public sealed class AnalyticsQueryService(
-    IPlayerAttributeRepository playerAttributeRepository,
-    IPlayerRepository playerRepository) :
+public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) :
     IQueryHandler<GetPlayerTrendQuery, IReadOnlyList<PlayerTrendPointDto>>,
     IQueryHandler<TopPlayersQuery, IReadOnlyList<TopPlayerDto>>
 {
@@ -17,7 +15,9 @@ public sealed class AnalyticsQueryService(
         CancellationToken cancellationToken = default)
     {
         var playerId = query.PlayerApiId;
-        return await playerAttributeRepository.Query()
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        return await dbContext.PlayerAttributes
+            .AsNoTracking()
             .Where(attribute => attribute.PlayerId == playerId)
             .OrderBy(attribute => attribute.Date)
             .Select(attribute => new PlayerTrendPointDto(
@@ -31,13 +31,14 @@ public sealed class AnalyticsQueryService(
         TopPlayersQuery query,
         CancellationToken cancellationToken = default)
     {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
         var limit = query.Limit < 1 ? 20 : query.Limit;
         if (limit > 200)
         {
             limit = 200;
         }
 
-        var attributesQuery = playerAttributeRepository.Query();
+        var attributesQuery = dbContext.PlayerAttributes.AsNoTracking();
 
         if (query.MinOverallRating.HasValue)
         {
@@ -53,10 +54,10 @@ public sealed class AnalyticsQueryService(
 
         if (!string.IsNullOrWhiteSpace(query.PreferredFoot))
         {
-            var preferredFoot = query.PreferredFoot.Trim().ToLowerInvariant();
+            var footPattern = LikePattern.Exact(query.PreferredFoot.Trim());
             attributesQuery = attributesQuery.Where(attribute =>
                 attribute.PreferredFoot != null &&
-                attribute.PreferredFoot.ToLower() == preferredFoot);
+                EF.Functions.ILike(attribute.PreferredFoot, footPattern, "\\"));
         }
 
         var groupedQuery = from attribute in attributesQuery
@@ -83,7 +84,7 @@ public sealed class AnalyticsQueryService(
         var topGrouped = groupedQuery.Take(limit);
 
         var queryResult = from grouped in topGrouped
-                          join player in playerRepository.Query() on grouped.PlayerId equals player.Id
+                          join player in dbContext.Players.AsNoTracking() on grouped.PlayerId equals player.Id
                           select new TopPlayerDto(
                               grouped.PlayerId,
                               player.Name,
