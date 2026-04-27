@@ -4,14 +4,13 @@ namespace ProFootball.Presentation.ViewModels;
 
 public sealed class SettingsViewModel : ObservableObject
 {
-    private const string ThemeSystem = "System";
     private const string ThemeLight = "Light";
     private const string ThemeDark = "Dark";
 
     private readonly IThemeService _themeService;
     private readonly IAppSettingsService _appSettingsService;
 
-    private string _selectedTheme = ThemeSystem;
+    private string _selectedTheme = ThemeLight;
     private string _selectedLanguage = "Ukrainian";
     private bool _isApplying;
 
@@ -20,7 +19,7 @@ public sealed class SettingsViewModel : ObservableObject
         _themeService = themeService;
         _appSettingsService = appSettingsService;
 
-        ThemeOptions = [ThemeSystem, ThemeLight, ThemeDark];
+        ThemeOptions = [ThemeLight, ThemeDark];
         LanguageOptions = ["Ukrainian", "English"];
 
         Initialize();
@@ -80,31 +79,9 @@ public sealed class SettingsViewModel : ObservableObject
         var targetTheme = value switch
         {
             ThemeDark => AppThemeMode.Dark,
-            ThemeLight => AppThemeMode.Light,
-            _ => GetSystemThemePreference(),
+            _ => AppThemeMode.Light,
         };
 
         _themeService.SetTheme(targetTheme);
-    }
-
-    private static AppThemeMode GetSystemThemePreference()
-    {
-        const string personalizePath = @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize";
-        const string lightThemeValueName = "AppsUseLightTheme";
-
-        try
-        {
-            using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(personalizePath, writable: false);
-            if (key?.GetValue(lightThemeValueName) is int rawValue)
-            {
-                return rawValue == 0 ? AppThemeMode.Dark : AppThemeMode.Light;
-            }
-        }
-        catch
-        {
-            // Keep fallback default.
-        }
-
-        return AppThemeMode.Light;
     }
 }

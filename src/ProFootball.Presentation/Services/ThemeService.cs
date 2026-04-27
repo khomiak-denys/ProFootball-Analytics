@@ -52,49 +52,76 @@ public sealed class ThemeService : IThemeService
             return;
         }
 
+        if (!app.Dispatcher.CheckAccess())
+        {
+            app.Dispatcher.Invoke(() => ApplyThemeDictionary(theme));
+            return;
+        }
+
         var themeSource = new Uri(theme == AppThemeMode.Light ? LightDictionary : DarkDictionary, UriKind.Relative);
         var materialThemeSource = new Uri(
             theme == AppThemeMode.Light ? MaterialDesignLightDictionary : MaterialDesignDarkDictionary,
             UriKind.Absolute);
         var resources = app.Resources.MergedDictionaries;
 
-        var existingTheme = resources.FirstOrDefault(dict =>
-            dict.Source is not null &&
-            (dict.Source.OriginalString.EndsWith("Theme.Light.xaml", StringComparison.OrdinalIgnoreCase)
-             || dict.Source.OriginalString.EndsWith("Theme.Dark.xaml", StringComparison.OrdinalIgnoreCase)));
+        UpdateOrInsertDictionary(resources, IsMaterialThemeDictionary, materialThemeSource, 0);
+        UpdateOrInsertDictionary(resources, IsAppThemeDictionary, themeSource, resources.Count);
+    }
 
-        if (existingTheme is null)
-        {
-            resources.Insert(0, new ResourceDictionary { Source = themeSource });
-            return;
-        }
-
-        if (existingTheme.Source == themeSource)
-        {
-            // Keep going - material dictionary may still need update.
-        }
-        else
-        {
-            existingTheme.Source = themeSource;
-        }
-
-        var existingMaterialTheme = resources.FirstOrDefault(dict =>
-            dict.Source is not null &&
-            (dict.Source.OriginalString.EndsWith("MaterialDesignTheme.Light.xaml", StringComparison.OrdinalIgnoreCase)
-             || dict.Source.OriginalString.EndsWith("MaterialDesignTheme.Dark.xaml", StringComparison.OrdinalIgnoreCase)));
-
-        if (existingMaterialTheme is null)
-        {
-            resources.Insert(0, new ResourceDictionary { Source = materialThemeSource });
-            return;
-        }
-
-        if (existingMaterialTheme.Source == materialThemeSource)
+    private static void UpdateOrInsertDictionary(
+        ICollection<ResourceDictionary> dictionaries,
+        Func<ResourceDictionary, bool> selector,
+        Uri source,
+        int insertIndex)
+    {
+        if (dictionaries is not IList<ResourceDictionary> list)
         {
             return;
         }
 
-        existingMaterialTheme.Source = materialThemeSource;
+        var existing = list.FirstOrDefault(selector);
+        if (existing is null)
+        {
+            list.Insert(Math.Clamp(insertIndex, 0, list.Count), new ResourceDictionary { Source = source });
+            return;
+        }
+
+        if (existing.Source != source)
+        {
+            existing.Source = source;
+        }
+    }
+
+    private static bool IsMaterialThemeDictionary(ResourceDictionary dictionary)
+    {
+        var source = dictionary.Source?.OriginalString;
+        if (string.IsNullOrWhiteSpace(source))
+        {
+            return false;
+        }
+
+        return source.EndsWith("MaterialDesignTheme.Light.xaml", StringComparison.OrdinalIgnoreCase) ||
+               source.EndsWith("MaterialDesignTheme.Dark.xaml", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsAppThemeDictionary(ResourceDictionary dictionary)
+    {
+        var source = dictionary.Source?.OriginalString;
+        if (string.IsNullOrWhiteSpace(source))
+        {
+            return false;
+        }
+
+        // Match only project theme dictionaries and exclude MaterialDesign theme dictionaries.
+        if (source.Contains("MaterialDesignTheme.", StringComparison.OrdinalIgnoreCase))
+        {
+            return false;
+        }
+
+        return source.EndsWith("/Themes/Theme.Light.xaml", StringComparison.OrdinalIgnoreCase) ||
+               source.EndsWith("/Themes/Theme.Dark.xaml", StringComparison.OrdinalIgnoreCase) ||
+               source.EndsWith("Themes/Theme.Light.xaml", StringComparison.OrdinalIgnoreCase) ||
+               source.EndsWith("Themes/Theme.Dark.xaml", StringComparison.OrdinalIgnoreCase);
     }
 
     private AppThemeMode? ReadThemeFromStorage()
