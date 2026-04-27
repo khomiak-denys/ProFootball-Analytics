@@ -31,9 +31,10 @@ public class CqrsDispatcherAndContractsTests
         await using var scope = rootProvider.CreateAsyncScope();
         var dispatcher = scope.ServiceProvider.GetRequiredService<IQueryDispatcher>();
 
-        var result = await dispatcher.DispatchAsync<TestQuery, int>(new TestQuery(5));
+        var result = await dispatcher.DispatchResultAsync<TestQuery, int>(new TestQuery(5));
 
-        Assert.Equal(10, result);
+        Assert.True(result.IsSuccess);
+        Assert.Equal(10, result.Value);
     }
 
     [Fact]
@@ -237,7 +238,8 @@ public class CqrsDispatcherAndContractsTests
     private sealed record TestQuery(int Value) : IQuery<int>;
     private sealed class TestQueryHandler : IQueryHandler<TestQuery, int>
     {
-        public Task<int> HandleAsync(TestQuery query, CancellationToken cancellationToken = default) => Task.FromResult(query.Value * 2);
+        public Task<Result<int>> HandleAsync(TestQuery query, CancellationToken cancellationToken = default) =>
+            Task.FromResult(Result<int>.Success(query.Value * 2));
     }
 
     private sealed record TestCommand : ICommand;

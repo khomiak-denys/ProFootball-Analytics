@@ -1,4 +1,5 @@
 using ProFootball.Application.Country.Queries;
+using ProFootball.Application.Common;
 using ProFootball.Application.League.Queries;
 using ProFootball.Application.Match.Queries;
 using ProFootball.Application.Player.Queries;
@@ -16,19 +17,21 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new TeamsQueryService(host.DbContextFactory);
 
-        var firstPage = await service.HandleAsync(new TeamSearchQuery(
+        var firstPageResult = await service.HandleAsync(new TeamSearchQuery(
             Name: null,
             SortBy: "teamapiid",
             SortDescending: true,
             Page: 1,
             PageSize: 2));
+        var firstPage = AssertSuccess(firstPageResult);
 
-        var secondPage = await service.HandleAsync(new TeamSearchQuery(
+        var secondPageResult = await service.HandleAsync(new TeamSearchQuery(
             Name: null,
             SortBy: "teamapiid",
             SortDescending: true,
             Page: 2,
             PageSize: 2));
+        var secondPage = AssertSuccess(secondPageResult);
 
         Assert.Equal(4, firstPage.TotalCount);
         Assert.Equal(new[] { 4, 3 }, firstPage.Items.Select(item => item.TeamApiId));
@@ -41,7 +44,8 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new TeamsQueryService(host.DbContextFactory);
 
-        var details = await service.HandleAsync(new GetTeamDetailsQuery(999999));
+        var detailsResult = await service.HandleAsync(new GetTeamDetailsQuery(999999));
+        var details = AssertSuccess(detailsResult);
 
         Assert.Null(details);
     }
@@ -52,7 +56,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new PlayersQueryService(host.DbContextFactory);
 
-        var result = await service.HandleAsync(new PlayerSearchQuery(
+        var resultValue = await service.HandleAsync(new PlayerSearchQuery(
             Name: null,
             MinOverallRating: null,
             MaxOverallRating: null,
@@ -65,6 +69,7 @@ public class QueryServicesTests
             SortDescending: true,
             Page: 1,
             PageSize: 10));
+        var result = AssertSuccess(resultValue);
 
         Assert.Equal(3, result.TotalCount);
         Assert.Equal(1, result.Items[0].PlayerApiId);
@@ -78,7 +83,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new PlayersQueryService(host.DbContextFactory);
 
-        var result = await service.HandleAsync(new PlayerSearchQuery(
+        var resultValue = await service.HandleAsync(new PlayerSearchQuery(
             Name: "kEvIn",
             MinOverallRating: null,
             MaxOverallRating: null,
@@ -91,6 +96,7 @@ public class QueryServicesTests
             SortDescending: false,
             Page: 1,
             PageSize: 10));
+        var result = AssertSuccess(resultValue);
 
         var player = Assert.Single(result.Items);
         Assert.Equal(1, player.PlayerApiId);
@@ -102,7 +108,8 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new PlayersQueryService(host.DbContextFactory);
 
-        var details = await service.HandleAsync(new GetPlayerDetailsQuery(2));
+        var detailsResult = await service.HandleAsync(new GetPlayerDetailsQuery(2));
+        var details = AssertSuccess(detailsResult);
 
         Assert.NotNull(details);
         Assert.Equal(3, details!.Attributes.Count);
@@ -117,7 +124,7 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new MatchesQueryService(host.DbContextFactory);
 
-        var result = await service.HandleAsync(new MatchSearchQuery(
+        var resultValue = await service.HandleAsync(new MatchSearchQuery(
             LeagueId: 10,
             Season: "2024/2025",
             TeamApiId: 1,
@@ -127,6 +134,7 @@ public class QueryServicesTests
             SortDescending: false,
             Page: 1,
             PageSize: 10));
+        var result = AssertSuccess(resultValue);
 
         Assert.Single(result.Items);
         Assert.Equal(1, result.Items[0].MatchApiId);
@@ -138,7 +146,8 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new MatchesQueryService(host.DbContextFactory);
 
-        var teams = await service.HandleAsync(new GetMatchTeamsQuery(10));
+        var teamsResult = await service.HandleAsync(new GetMatchTeamsQuery(10));
+        var teams = AssertSuccess(teamsResult);
 
         Assert.Equal(2, teams.Count);
         Assert.Equal(new[] { 1, 3 }, teams.Select(team => team.TeamApiId));
@@ -151,7 +160,8 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new MatchesQueryService(host.DbContextFactory);
 
-        var teams = await service.HandleAsync(new GetMatchTeamsQuery());
+        var teamsResult = await service.HandleAsync(new GetMatchTeamsQuery());
+        var teams = AssertSuccess(teamsResult);
 
         Assert.Equal(4, teams.Count);
         Assert.Equal(new[] { 1, 2, 3, 4 }, teams.Select(team => team.TeamApiId).OrderBy(id => id));
@@ -163,7 +173,8 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new MatchesQueryService(host.DbContextFactory);
 
-        var details = await service.HandleAsync(new GetMatchDetailsQuery(77777));
+        var detailsResult = await service.HandleAsync(new GetMatchDetailsQuery(77777));
+        var details = AssertSuccess(detailsResult);
 
         Assert.Null(details);
     }
@@ -174,7 +185,8 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new CountriesLeaguesQueryService(host.DbContextFactory);
 
-        var leagues = await service.HandleAsync(new GetLeaguesQuery("England"));
+        var leaguesResult = await service.HandleAsync(new GetLeaguesQuery("England"));
+        var leagues = AssertSuccess(leaguesResult);
 
         Assert.Equal(2, leagues.Count);
         Assert.All(leagues, league => Assert.Equal("England", league.CountryName));
@@ -186,7 +198,8 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new CountriesLeaguesQueryService(host.DbContextFactory);
 
-        var countries = await service.HandleAsync(new GetCountriesWithLeagueCountQuery());
+        var countriesResult = await service.HandleAsync(new GetCountriesWithLeagueCountQuery());
+        var countries = AssertSuccess(countriesResult);
         var england = Assert.Single(countries.Where(country => country.Name == "England"));
         var spain = Assert.Single(countries.Where(country => country.Name == "Spain"));
 
@@ -200,7 +213,8 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new CountriesLeaguesQueryService(host.DbContextFactory);
 
-        var snapshot = await service.HandleAsync(new GetCountrySnapshotQuery("Emptyland"));
+        var snapshotResult = await service.HandleAsync(new GetCountrySnapshotQuery("Emptyland"));
+        var snapshot = AssertSuccess(snapshotResult);
 
         Assert.Empty(snapshot.LeagueCards);
         Assert.Equal(0, snapshot.Summary.TotalClubs);
@@ -214,7 +228,8 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new CountriesLeaguesQueryService(host.DbContextFactory);
 
-        var snapshot = await service.HandleAsync(new GetCountrySnapshotQuery("England"));
+        var snapshotResult = await service.HandleAsync(new GetCountrySnapshotQuery("England"));
+        var snapshot = AssertSuccess(snapshotResult);
 
         Assert.Equal(2, snapshot.LeagueCards.Count);
         Assert.Equal(4, snapshot.Summary.TotalClubs);
@@ -228,13 +243,14 @@ public class QueryServicesTests
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new AnalyticsQueryService(host.DbContextFactory);
 
-        var topPlayers = await service.HandleAsync(new TopPlayersQuery(
+        var topPlayersResult = await service.HandleAsync(new TopPlayersQuery(
             Limit: 500,
             MinOverallRating: null,
             MinPotential: null,
             PreferredFoot: null,
             SortBy: "samples",
             SortDescending: true));
+        var topPlayers = AssertSuccess(topPlayersResult);
 
         Assert.Equal(2, topPlayers.Count);
         Assert.Equal(2, topPlayers[0].PlayerApiId);
@@ -246,8 +262,10 @@ public class QueryServicesTests
     {
         await using var host = await QueryingTestHost.CreateAsync();
         var matchService = new MatchesQueryService(host.DbContextFactory);
-        var allLeagues = await matchService.HandleAsync(new GetMatchesBySeasonQuery());
-        var filtered = await matchService.HandleAsync(new GetMatchesBySeasonQuery(10));
+        var allLeaguesResult = await matchService.HandleAsync(new GetMatchesBySeasonQuery());
+        var filteredResult = await matchService.HandleAsync(new GetMatchesBySeasonQuery(10));
+        var allLeagues = AssertSuccess(allLeaguesResult);
+        var filtered = AssertSuccess(filteredResult);
 
         Assert.Equal(3, allLeagues.Count);
         var single = Assert.Single(filtered);
@@ -261,12 +279,19 @@ public class QueryServicesTests
     {
         await using var host = await QueryingTestHost.CreateAsync();
         var service = new MatchesQueryService(host.DbContextFactory);
-        var kpis = await service.HandleAsync(new GetDashboardKpiQuery());
+        var kpisResult = await service.HandleAsync(new GetDashboardKpiQuery());
+        var kpis = AssertSuccess(kpisResult);
 
         Assert.Equal(2, kpis.Countries);
         Assert.Equal(3, kpis.Leagues);
         Assert.Equal(4, kpis.Teams);
         Assert.Equal(3, kpis.Players);
         Assert.Equal(3, kpis.Matches);
+    }
+
+    private static TValue AssertSuccess<TValue>(Result<TValue> result)
+    {
+        Assert.True(result.IsSuccess);
+        return result.Value;
     }
 }

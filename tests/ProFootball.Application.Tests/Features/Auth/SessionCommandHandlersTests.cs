@@ -73,7 +73,9 @@ public class SessionCommandHandlersTests
         var signInResult = await signInHandler.HandleAsync(new SignInCommand("manager", "Password1"));
         Assert.True(registerResult.IsSuccess);
         Assert.True(signInResult.IsSuccess);
-        var state = await stateHandler.HandleAsync(new GetSessionStateQuery());
+        var stateResult = await stateHandler.HandleAsync(new GetSessionStateQuery());
+        Assert.True(stateResult.IsSuccess);
+        var state = stateResult.Value;
 
         Assert.True(state.IsAuthenticated);
         Assert.Equal("manager", state.Login);
@@ -97,7 +99,9 @@ public class SessionCommandHandlersTests
         Assert.True(signInResult.IsSuccess);
         await signOutHandler.HandleAsync(new SignOutCommand());
 
-        var state = await stateHandler.HandleAsync(new GetSessionStateQuery());
+        var stateResult = await stateHandler.HandleAsync(new GetSessionStateQuery());
+        Assert.True(stateResult.IsSuccess);
+        var state = stateResult.Value;
         Assert.False(state.IsAuthenticated);
         Assert.Null(state.Login);
     }
@@ -112,7 +116,9 @@ public class SessionCommandHandlersTests
         await signOutHandler.HandleAsync(new SignOutCommand());
         await signOutHandler.HandleAsync(new SignOutCommand());
 
-        var state = await stateHandler.HandleAsync(new GetSessionStateQuery());
+        var stateResult = await stateHandler.HandleAsync(new GetSessionStateQuery());
+        Assert.True(stateResult.IsSuccess);
+        var state = stateResult.Value;
         Assert.False(state.IsAuthenticated);
         Assert.Null(state.Login);
     }
