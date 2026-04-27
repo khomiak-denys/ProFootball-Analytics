@@ -2,6 +2,7 @@ using ProFootball.Application.Auth.Commands;
 using ProFootball.Application.Auth.Abstractions;
 using ProFootball.Application.Auth.Handlers;
 using ProFootball.Application.Auth.Queries;
+using ProFootball.Application.Common;
 using ProFootball.Domain.Entities;
 using Xunit;
 
@@ -13,14 +14,16 @@ public class SessionCommandHandlersTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task SignIn_ShouldThrow_WhenLoginIsMissing(string? login)
+    public async Task SignIn_ShouldFail_WhenLoginIsMissing(string? login)
     {
         var store = new InMemorySessionStore();
         var repository = new InMemoryUserRepository();
         var hasher = new TestPasswordHasher();
         var handler = new SignInCommandHandler(store, repository, hasher);
 
-        await Assert.ThrowsAnyAsync<ArgumentException>(() => handler.HandleAsync(new SignInCommand(login!, "password123")));
+        var result = await handler.HandleAsync(new SignInCommand(login!, "password123"));
+        Assert.True(result.IsFailure);
+        Assert.Equal("auth.validation", result.Error?.Code);
     }
 
     [Fact]
@@ -30,7 +33,8 @@ public class SessionCommandHandlersTests
         var hasher = new TestPasswordHasher();
         var registerHandler = new RegisterUserCommandHandler(repository, hasher);
 
-        await registerHandler.HandleAsync(new RegisterUserCommand("Test", "Admin", "admin", "Password1", "Password1"));
+        var registerResult = await registerHandler.HandleAsync(new RegisterUserCommand("Test", "Admin", "admin", "Password1", "Password1"));
+        Assert.True(registerResult.IsSuccess);
 
         var user = await repository.FindByNormalizedLoginAsync("ADMIN");
         Assert.NotNull(user);
@@ -45,8 +49,10 @@ public class SessionCommandHandlersTests
         var hasher = new TestPasswordHasher();
         var registerHandler = new RegisterUserCommandHandler(repository, hasher);
 
-        await registerHandler.HandleAsync(new RegisterUserCommand("First", "Admin", "admin", "Password1", "Password1"));
-        await registerHandler.HandleAsync(new RegisterUserCommand("Second", "User", "analyst", "Password1", "Password1"));
+        var first = await registerHandler.HandleAsync(new RegisterUserCommand("First", "Admin", "admin", "Password1", "Password1"));
+        var second = await registerHandler.HandleAsync(new RegisterUserCommand("Second", "User", "analyst", "Password1", "Password1"));
+        Assert.True(first.IsSuccess);
+        Assert.True(second.IsSuccess);
 
         var user = await repository.FindByNormalizedLoginAsync("ANALYST");
         Assert.NotNull(user);
@@ -63,8 +69,10 @@ public class SessionCommandHandlersTests
         var signInHandler = new SignInCommandHandler(store, repository, hasher);
         var stateHandler = new GetSessionStateQueryHandler(store);
 
-        await registerHandler.HandleAsync(new RegisterUserCommand("John", "Manager", "manager", "Password1", "Password1"));
-        await signInHandler.HandleAsync(new SignInCommand("manager", "Password1"));
+        var registerResult = await registerHandler.HandleAsync(new RegisterUserCommand("John", "Manager", "manager", "Password1", "Password1"));
+        var signInResult = await signInHandler.HandleAsync(new SignInCommand("manager", "Password1"));
+        Assert.True(registerResult.IsSuccess);
+        Assert.True(signInResult.IsSuccess);
         var state = await stateHandler.HandleAsync(new GetSessionStateQuery());
 
         Assert.True(state.IsAuthenticated);
@@ -83,8 +91,10 @@ public class SessionCommandHandlersTests
         var signOutHandler = new SignOutCommandHandler(store);
         var stateHandler = new GetSessionStateQueryHandler(store);
 
-        await registerHandler.HandleAsync(new RegisterUserCommand("Coach", "Person", "coach", "Password1", "Password1"));
-        await signInHandler.HandleAsync(new SignInCommand("coach", "Password1"));
+        var registerResult = await registerHandler.HandleAsync(new RegisterUserCommand("Coach", "Person", "coach", "Password1", "Password1"));
+        var signInResult = await signInHandler.HandleAsync(new SignInCommand("coach", "Password1"));
+        Assert.True(registerResult.IsSuccess);
+        Assert.True(signInResult.IsSuccess);
         await signOutHandler.HandleAsync(new SignOutCommand());
 
         var state = await stateHandler.HandleAsync(new GetSessionStateQuery());
@@ -108,7 +118,7 @@ public class SessionCommandHandlersTests
     }
 
     [Fact]
-    public async Task SignIn_ShouldThrow_WhenPasswordIsInvalid()
+    public async Task SignIn_ShouldFail_WhenPasswordIsInvalid()
     {
         var store = new InMemorySessionStore();
         var repository = new InMemoryUserRepository();
@@ -116,22 +126,25 @@ public class SessionCommandHandlersTests
         var registerHandler = new RegisterUserCommandHandler(repository, hasher);
         var signInHandler = new SignInCommandHandler(store, repository, hasher);
 
-        await registerHandler.HandleAsync(new RegisterUserCommand("John", "Manager", "manager", "Password1", "Password1"));
-
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() => signInHandler.HandleAsync(new SignInCommand("manager", "wrong-password")));
+        var registerResult = await registerHandler.HandleAsync(new RegisterUserCommand("John", "Manager", "manager", "Password1", "Password1"));
+        Assert.True(registerResult.IsSuccess);
+        var signInResult = await signInHandler.HandleAsync(new SignInCommand("manager", "wrong-password"));
+        Assert.True(signInResult.IsFailure);
+        Assert.Equal("auth.invalid_credentials", signInResult.Error?.Code);
     }
 
     [Fact]
-    public async Task Register_ShouldThrow_WhenLoginAlreadyExists()
+    public async Task Register_ShouldFail_WhenLoginAlreadyExists()
     {
         var repository = new InMemoryUserRepository();
         var hasher = new TestPasswordHasher();
         var registerHandler = new RegisterUserCommandHandler(repository, hasher);
 
-        await registerHandler.HandleAsync(new RegisterUserCommand("First", "User", "manager", "Password1", "Password1"));
-
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            registerHandler.HandleAsync(new RegisterUserCommand("Second", "User", "manager", "Password1", "Password1")));
+        var first = await registerHandler.HandleAsync(new RegisterUserCommand("First", "User", "manager", "Password1", "Password1"));
+        Assert.True(first.IsSuccess);
+        var second = await registerHandler.HandleAsync(new RegisterUserCommand("Second", "User", "manager", "Password1", "Password1"));
+        Assert.True(second.IsFailure);
+        Assert.Equal("auth.login_exists", second.Error?.Code);
     }
 
     private sealed class InMemoryUserRepository : IAppUserAuthRepository
