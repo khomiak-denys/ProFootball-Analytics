@@ -16,8 +16,12 @@ using ProFootball.Application.Importing.Dtos;
 using ProFootball.Application.League.Dtos;
 using ProFootball.Application.League.Queries;
 using ProFootball.Application.Match.Dtos;
+using ProFootball.Application.Match.Commands;
+using ProFootball.Application.Match.Handlers;
 using ProFootball.Application.Match.Queries;
+using ProFootball.Application.Player.Commands;
 using ProFootball.Application.Player.Dtos;
+using ProFootball.Application.Player.Handlers;
 using ProFootball.Application.Player.Queries;
 using ProFootball.Application.Team.Dtos;
 using ProFootball.Application.Team.Queries;
@@ -66,6 +70,12 @@ public static class DependencyInjection
         services.AddScoped<ICommandHandler<RegisterUserCommand, Result>, RegisterUserCommandHandler>();
         services.AddScoped<ICommandHandler<RestoreSessionCommand, Result>, RestoreSessionCommandHandler>();
         services.AddScoped<ICommandHandler<SignOutCommand>, SignOutCommandHandler>();
+        services.AddScoped<ICommandHandler<CreatePlayerCommand, Result>, CreatePlayerCommandHandler>();
+        services.AddScoped<ICommandHandler<UpdatePlayerCommand, Result>, UpdatePlayerCommandHandler>();
+        services.AddScoped<ICommandHandler<DeletePlayerCommand, Result>, DeletePlayerCommandHandler>();
+        services.AddScoped<ICommandHandler<CreateMatchCommand, Result>, CreateMatchCommandHandler>();
+        services.AddScoped<ICommandHandler<UpdateMatchCommand, Result>, UpdateMatchCommandHandler>();
+        services.AddScoped<ICommandHandler<DeleteMatchCommand, Result>, DeleteMatchCommandHandler>();
         services.AddScoped<IQueryHandler<GetSessionStateQuery, SessionStateDto>, GetSessionStateQueryHandler>();
 
         services.AddScoped<ICommandHandler<ImportDataCommand, DataImportResult>, DataImportService>();
