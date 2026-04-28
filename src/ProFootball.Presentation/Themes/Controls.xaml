@@ -89,6 +89,66 @@
         <Setter Property="FontSize" Value="14" />
     </Style>
 
+    <ControlTemplate x:Key="AuthInputTextBoxTemplate" TargetType="TextBox">
+        <Grid>
+            <Border x:Name="InputBorder"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}" />
+            <ScrollViewer x:Name="PART_ContentHost"
+                          Margin="{TemplateBinding Padding}"
+                          VerticalAlignment="Center" />
+            <Border x:Name="FocusIndicator"
+                    Height="2"
+                    VerticalAlignment="Bottom"
+                    Background="{DynamicResource SuccessForegroundBrush}"
+                    Visibility="Collapsed" />
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter TargetName="FocusIndicator" Property="Visibility" Value="Visible" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <ControlTemplate x:Key="AuthInputPasswordBoxTemplate" TargetType="PasswordBox">
+        <Grid>
+            <Border x:Name="InputBorder"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}" />
+            <ScrollViewer x:Name="PART_ContentHost"
+                          Margin="{TemplateBinding Padding}"
+                          VerticalAlignment="Center" />
+            <Border x:Name="FocusIndicator"
+                    Height="2"
+                    VerticalAlignment="Bottom"
+                    Background="{DynamicResource SuccessForegroundBrush}"
+                    Visibility="Collapsed" />
+        </Grid>
+        <ControlTemplate.Triggers>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+                <Setter TargetName="FocusIndicator" Property="Visibility" Value="Visible" />
+            </Trigger>
+        </ControlTemplate.Triggers>
+    </ControlTemplate>
+
+    <Style x:Key="AuthInputTextBoxStyle" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+        <Setter Property="Template" Value="{StaticResource AuthInputTextBoxTemplate}" />
+    </Style>
+
+    <Style x:Key="AuthInputPasswordBoxStyle" TargetType="PasswordBox">
+        <Setter Property="Height" Value="40" />
+        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="FontFamily" Value="Segoe UI" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CardBorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource CardBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TitleForegroundBrush}" />
+        <Setter Property="Template" Value="{StaticResource AuthInputPasswordBoxTemplate}" />
+    </Style>
+
     <Style x:Key="StatusBadgeStyle" TargetType="Border">
         <Setter Property="CornerRadius" Value="999" />
         <Setter Property="Padding" Value="8,2" />

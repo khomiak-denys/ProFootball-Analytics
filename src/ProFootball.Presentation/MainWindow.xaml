@@ -383,17 +383,12 @@
                                                    Text="{loc:Loc Key=Auth_SignIn_Description}" />
 
                                         <TextBlock Margin="0,18,0,6" FontWeight="SemiBold" Text="{loc:Loc Key=Auth_Field_Login}" />
-                                        <TextBox Text="{Binding LoginForm.Login, UpdateSourceTrigger=PropertyChanged}" />
+                                        <TextBox Style="{StaticResource AuthInputTextBoxStyle}"
+                                                 Text="{Binding LoginForm.Login, UpdateSourceTrigger=PropertyChanged}" />
 
                                         <TextBlock Margin="0,14,0,6" FontWeight="SemiBold" Text="{loc:Loc Key=Auth_Field_Password}" />
                                         <PasswordBox x:Name="LoginPasswordBox"
-                                                     Height="40"
-                                                     Padding="12,0"
-                                                     FontSize="16"
-                                                     BorderThickness="1"
-                                                     BorderBrush="{DynamicResource CardBorderBrush}"
-                                                     Background="{DynamicResource CardBackgroundBrush}"
-                                                     Foreground="{DynamicResource TitleForegroundBrush}" />
+                                                     Style="{StaticResource AuthInputPasswordBoxStyle}" />
 
                                         <Border Margin="0,14,0,0"
                                                 Padding="10,8"
@@ -454,27 +449,16 @@
                                         <TextBox Text="{Binding RegistrationForm.LastName, UpdateSourceTrigger=PropertyChanged}" />
 
                                         <TextBlock Margin="0,12,0,6" FontWeight="SemiBold" Text="{loc:Loc Key=Auth_Field_Login}" />
-                                        <TextBox Text="{Binding RegistrationForm.Login, UpdateSourceTrigger=PropertyChanged}" />
+                                        <TextBox Style="{StaticResource AuthInputTextBoxStyle}"
+                                                 Text="{Binding RegistrationForm.Login, UpdateSourceTrigger=PropertyChanged}" />
 
                                         <TextBlock Margin="0,12,0,6" FontWeight="SemiBold" Text="{loc:Loc Key=Auth_Field_Password}" />
                                         <PasswordBox x:Name="RegisterPasswordBox"
-                                                     Height="40"
-                                                     Padding="12,0"
-                                                     FontSize="16"
-                                                     BorderThickness="1"
-                                                     BorderBrush="{DynamicResource CardBorderBrush}"
-                                                     Background="{DynamicResource CardBackgroundBrush}"
-                                                     Foreground="{DynamicResource TitleForegroundBrush}" />
+                                                     Style="{StaticResource AuthInputPasswordBoxStyle}" />
 
                                         <TextBlock Margin="0,12,0,6" FontWeight="SemiBold" Text="{loc:Loc Key=Auth_Field_ConfirmPassword}" />
                                         <PasswordBox x:Name="RegisterConfirmPasswordBox"
-                                                     Height="40"
-                                                     Padding="12,0"
-                                                     FontSize="16"
-                                                     BorderThickness="1"
-                                                     BorderBrush="{DynamicResource CardBorderBrush}"
-                                                     Background="{DynamicResource CardBackgroundBrush}"
-                                                     Foreground="{DynamicResource TitleForegroundBrush}" />
+                                                     Style="{StaticResource AuthInputPasswordBoxStyle}" />
 
                                         <TextBlock Margin="0,10,0,0"
                                                    Foreground="{DynamicResource DangerForegroundBrush}"
