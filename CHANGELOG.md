@@ -1,5 +1,9 @@
 ## Changelog (latest 5 pull requests)
 
+**Update 28/04/2026 - Localization + Auth About System + Input Style Reuse**  
+**Goal.** Finalize runtime UI localization and improve authentication screen usability/consistency.  
+**Description.** Added RESX-based localization wiring for presentation views, fixed runtime text refresh/label rendering issues, introduced a localized "About system" dialog from the login screen, and refactored auth input styling to reuse shared TextBox/PasswordBox styles with consistent focus behavior.
+
 **Update 27/04/2026 - Result Pattern Flow (#12)**  
 **Goal.** Replace exception-driven control flow with a result-based approach in core app paths.  
 **Description.** Introduced generic `Result` handling for commands/queries, moved errors to dedicated models, aligned dispatching behavior, and updated application/infrastructure tests for the new flow.

@@ -107,4 +107,14 @@ public partial class MainWindow : Window
             e.Handled = true;
         }
     }
+
+    private void OnAboutSystemClick(object sender, RoutedEventArgs e)
+    {
+        var aboutWindow = new AboutSystemWindow
+        {
+            Owner = this,
+            WindowStartupLocation = WindowStartupLocation.CenterOwner,
+        };
+        aboutWindow.ShowDialog();
+    }
 }

@@ -1,6 +1,7 @@
-<UserControl x:Class="ProFootball.Presentation.Views.PlayersView"
+﻿<UserControl x:Class="ProFootball.Presentation.Views.PlayersView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:ProFootball.Presentation.Localization"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:ProFootball.Presentation.ViewModels"
@@ -23,11 +24,11 @@
                                     <TextBlock FontSize="36"
                                                FontWeight="SemiBold"
                                                Foreground="{DynamicResource TitleForegroundBrush}"
-                                               Text="Filters" />
+                                               Text="{loc:Loc Key=Players_Filters_Title}" />
                                     <TextBlock Margin="0,26,0,0"
                                                                                              FontSize="26"
                                                Foreground="{DynamicResource TitleForegroundBrush}"
-                                               Text="Player Name" />
+                                               Text="{loc:Loc Key=Players_Filter_Name}" />
                                     <TextBox Margin="0,8,0,0"
                                                                                          Style="{StaticResource PlayersFilterTextBoxStyle}"
                                              Text="{Binding Players.NameFilter, UpdateSourceTrigger=PropertyChanged}" />
@@ -35,7 +36,7 @@
                                     <TextBlock Margin="0,22,0,0"
                                                                                              FontSize="26"
                                                Foreground="{DynamicResource TitleForegroundBrush}"
-                                               Text="Overall Rating" />
+                                               Text="{loc:Loc Key=Players_Filter_OverallRating}" />
                                     <ComboBox Margin="0,8,0,0"
                                                                                             Style="{StaticResource PlayersFilterComboBoxStyle}"
                                               ItemsSource="{Binding Players.OverallRatingOptions}"
@@ -44,7 +45,7 @@
                                     <TextBlock Margin="0,22,0,0"
                                                                                              FontSize="26"
                                                Foreground="{DynamicResource TitleForegroundBrush}"
-                                               Text="Preferred Foot" />
+                                               Text="{loc:Loc Key=Players_Filter_PreferredFoot}" />
                                     <ComboBox Margin="0,8,0,0"
                                                                                             Style="{StaticResource PlayersFilterComboBoxStyle}"
                                               ItemsSource="{Binding Players.PreferredFootOptions}"
@@ -55,12 +56,17 @@
                                                Text="{Binding Players.ErrorMessage}" />
                                     <TextBlock Margin="0,6,0,0"
                                                FontSize="16"
-                                               Foreground="{DynamicResource MutedForegroundBrush}"
-                                               Text="{Binding Players.IsLoadingList, StringFormat=Loading: {0}}" />
+                                               Foreground="{DynamicResource MutedForegroundBrush}">
+                                        <Run Text="{loc:Loc Key=Players_Info_Loading}" />
+                                        <Run Text="{Binding Path=Players.IsLoadingList, Mode=OneWay}" />
+                                    </TextBlock>
                                     <TextBlock Margin="0,20,0,0"
                                                FontSize="28"
-                                               Foreground="{DynamicResource MutedForegroundBrush}"
-                                               Text="{Binding Players.TotalCount, StringFormat=Total: {0} players}" />
+                                               Foreground="{DynamicResource MutedForegroundBrush}">
+                                        <Run Text="{loc:Loc Key=Players_Info_Total}" />
+                                        <Run Text="{Binding Path=Players.TotalCount, Mode=OneWay}" />
+                                        <Run Text="{loc:Loc Key=Players_Info_PlayersSuffix}" />
+                                    </TextBlock>
                                 </StackPanel>
                             </Border>
 
@@ -79,7 +85,7 @@
                                     <TextBlock FontSize="36"
                                                FontWeight="SemiBold"
                                                Foreground="{DynamicResource TitleForegroundBrush}"
-                                               Text="Players List" />
+                                               Text="{loc:Loc Key=Players_List_Title}" />
                                     <DataGrid Grid.Row="1"
                                               Margin="0,16,0,0"
                                               ItemsSource="{Binding Players.Players}"
@@ -95,13 +101,13 @@
                                             <StaticResource ResourceKey="PlayersTableRowStyle" />
                                         </DataGrid.RowStyle>
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*" />
-                                            <DataGridTextColumn Header="Pos" Binding="{Binding Position}" Width="65" />
-                                            <DataGridTextColumn Header="Age" Binding="{Binding Age}" Width="52" />
-                                            <DataGridTextColumn Header="Rating" Binding="{Binding OverallRating}" Width="58" />
-                                            <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="72" />
-                                            <DataGridTextColumn Header="Foot" Binding="{Binding PreferredFoot}" Width="58" />
-                                            <DataGridTextColumn Header="Height" Binding="{Binding HeightDisplay}" Width="72" />
+                                            <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Name}" Binding="{Binding Name}" Width="*" />
+                                            <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Pos}" Binding="{Binding Position}" Width="65" />
+                                            <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Age}" Binding="{Binding Age}" Width="52" />
+                                            <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Rating}" Binding="{Binding OverallRating}" Width="58" />
+                                            <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Potential}" Binding="{Binding Potential}" Width="72" />
+                                            <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Foot}" Binding="{Binding PreferredFoot}" Width="58" />
+                                            <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Height}" Binding="{Binding HeightDisplay}" Width="72" />
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </Grid>
@@ -123,7 +129,7 @@
                                         <TextBlock FontSize="36"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource TitleForegroundBrush}"
-                                                   Text="Player Details" />
+                                                   Text="{loc:Loc Key=Players_Details_Title}" />
                                         <TextBlock Margin="0,18,0,0"
                                                    FontSize="48"
                                                    FontWeight="SemiBold"
@@ -145,14 +151,26 @@
                                                 <RowDefinition Height="Auto" />
                                             </Grid.RowDefinitions>
 
-                                            <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="Overall" />
-                                            <TextBlock Grid.Column="1" FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="Potential" />
+                                            <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Players_Metric_Overall}" />
+                                            <TextBlock Grid.Column="1" FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Players_Metric_Potential}" />
                                             <TextBlock Grid.Row="1" FontSize="44" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Players.DetailsOverall}" />
                                             <TextBlock Grid.Row="1" Grid.Column="1" FontSize="44" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Players.DetailsPotential}" />
-                                            <TextBlock Grid.Row="2" Margin="0,10,0,0" FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="{Binding Players.DetailsAge, StringFormat=Age: {0}}" />
-                                            <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,10,0,0" FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="{Binding Players.DetailsFoot, StringFormat=Foot: {0}}" />
-                                            <TextBlock Grid.Row="3" Margin="0,10,0,0" FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="{Binding Players.DetailsHeight, StringFormat=Height: {0}}" />
-                                            <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,10,0,0" FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="{Binding Players.DetailsWeight, StringFormat=Weight: {0}}" />
+                                            <TextBlock Grid.Row="2" Margin="0,10,0,0" FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}">
+                                                <Run Text="{loc:Loc Key=Players_Info_Age}" />
+                                                <Run Text="{Binding Path=Players.DetailsAge, Mode=OneWay}" />
+                                            </TextBlock>
+                                            <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,10,0,0" FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}">
+                                                <Run Text="{loc:Loc Key=Players_Info_Foot}" />
+                                                <Run Text="{Binding Path=Players.DetailsFoot, Mode=OneWay}" />
+                                            </TextBlock>
+                                            <TextBlock Grid.Row="3" Margin="0,10,0,0" FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}">
+                                                <Run Text="{loc:Loc Key=Players_Info_Height}" />
+                                                <Run Text="{Binding Path=Players.DetailsHeight, Mode=OneWay}" />
+                                            </TextBlock>
+                                            <TextBlock Grid.Row="3" Grid.Column="1" Margin="0,10,0,0" FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}">
+                                                <Run Text="{loc:Loc Key=Players_Info_Weight}" />
+                                                <Run Text="{Binding Path=Players.DetailsWeight, Mode=OneWay}" />
+                                            </TextBlock>
                                         </Grid>
                                     </StackPanel>
                                 </Border>
@@ -173,7 +191,7 @@
                                                     Margin="0,0,6,0"
                                                     Command="{Binding Players.ShowOverviewCommand}"
                                                     FontSize="22"
-                                                    Content="Overview">
+                                                    Content="{loc:Loc Key=Players_Tab_Overview}">
                                                 <Button.Style>
                                                     <Style TargetType="Button">
                                                         <Setter Property="Background" Value="{DynamicResource SelectionSurfaceBrush}" />
@@ -208,7 +226,7 @@
                                                     Margin="6,0,0,0"
                                                     Command="{Binding Players.ShowHistoryCommand}"
                                                     FontSize="22"
-                                                    Content="History">
+                                                    Content="{loc:Loc Key=Players_Tab_History}">
                                                 <Button.Style>
                                                     <Style TargetType="Button">
                                                         <Setter Property="Background" Value="{DynamicResource SelectionSurfaceBrush}" />
@@ -275,12 +293,12 @@
                                                          Fill="{DynamicResource RadarFillBrush}"
                                                          Points="{Binding Players.RadarPolygonPoints}" />
 
-                                                <TextBlock Canvas.Left="126" Canvas.Top="12" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="Pace" />
-                                                <TextBlock Canvas.Left="272" Canvas.Top="86" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="Shooting" />
-                                                <TextBlock Canvas.Left="262" Canvas.Top="198" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="Passing" />
-                                                <TextBlock Canvas.Left="124" Canvas.Top="286" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="Dribbling" />
-                                                <TextBlock Canvas.Left="8" Canvas.Top="198" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="Defending" />
-                                                <TextBlock Canvas.Left="0" Canvas.Top="86" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="Physical" />
+                                                <TextBlock Canvas.Left="126" Canvas.Top="12" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Players_Attr_Pace}" />
+                                                <TextBlock Canvas.Left="272" Canvas.Top="86" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Players_Attr_Shooting}" />
+                                                <TextBlock Canvas.Left="262" Canvas.Top="198" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Players_Attr_Passing}" />
+                                                <TextBlock Canvas.Left="124" Canvas.Top="286" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Players_Attr_Dribbling}" />
+                                                <TextBlock Canvas.Left="8" Canvas.Top="198" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Players_Attr_Defending}" />
+                                                <TextBlock Canvas.Left="0" Canvas.Top="86" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Players_Attr_Physical}" />
                                             </Canvas>
                                         </Grid>
                                         <Border Margin="0,16,0,0"
@@ -347,8 +365,8 @@
                                                 </ItemsControl>
 
                                                 <StackPanel Grid.Row="2" Margin="0,8,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
-                                                    <TextBlock FontSize="14" Foreground="{DynamicResource SuccessForegroundBrush}" Text="- Overall" />
-                                                    <TextBlock Margin="10,0,0,0" FontSize="14" Foreground="{DynamicResource BlueAccentBrush}" Text="- Potential" />
+                                                    <TextBlock FontSize="14" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{loc:Loc Key=Players_Trend_Overall}" />
+                                                    <TextBlock Margin="10,0,0,0" FontSize="14" Foreground="{DynamicResource BlueAccentBrush}" Text="{loc:Loc Key=Players_Trend_Potential}" />
                                                 </StackPanel>
                                             </Grid>
                                         </Border>
@@ -358,3 +376,5 @@
                         </Grid>
                     
 </UserControl>
+
+

@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Microsoft.Extensions.Logging;
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Auth.Commands;
@@ -6,6 +7,7 @@ using ProFootball.Application.Auth.Queries;
 using ProFootball.Application.Common;
 using ProFootball.Presentation.ViewModels.Auth;
 using ProFootball.Presentation.Commands;
+using ProFootball.Presentation.Localization;
 using ProFootball.Presentation.Services;
 
 namespace ProFootball.Presentation.ViewModels;
@@ -15,6 +17,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private AppTab _selectedTab = AppTab.Dashboard;
     private readonly ILogger<MainViewModel> _logger;
     private readonly IThemeService _themeService;
+    private readonly ILocalizationService _localizationService;
     private readonly ICommandDispatcher _commandDispatcher;
     private readonly IQueryDispatcher _queryDispatcher;
     private string _currentUserDisplayName = "Unknown";
@@ -27,11 +30,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ICommandDispatcher commandDispatcher,
         IQueryDispatcher queryDispatcher,
         IThemeService themeService,
+        IAppSettingsService appSettingsService,
+        ILocalizationService localizationService,
         ILoggerFactory loggerFactory)
     {
         _commandDispatcher = commandDispatcher;
         _queryDispatcher = queryDispatcher;
         _themeService = themeService;
+        _localizationService = localizationService;
         _logger = loggerFactory.CreateLogger<MainViewModel>();
         LoginForm = new LoginViewModel(commandDispatcher);
         RegistrationForm = new RegistrationViewModel(commandDispatcher);
@@ -47,12 +53,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Players = new PlayersViewModel(queryDispatcher, OpenPlayerDetails);
         Matches = new MatchesViewModel(queryDispatcher, OpenMatchDetails);
         Analytics = new AnalyticsViewModel(queryDispatcher);
+        Settings = new SettingsViewModel(themeService, appSettingsService, localizationService);
 
         LoadInitialDataCommand = new AsyncRelayCommand(LoadInitialDataAsync, OnBackgroundCommandException);
         ToggleThemeCommand = new RelayCommand(ToggleTheme);
         ToggleUserMenuCommand = new RelayCommand(ToggleUserMenu, () => IsAuthenticated);
         OpenSettingsCommand = new RelayCommand(OpenSettings, () => IsAuthenticated);
         LogoutCommand = new AsyncRelayCommand(LogoutAsync, OnBackgroundCommandException, () => IsAuthenticated);
+        _localizationService.PropertyChanged += OnLocalizationPropertyChanged;
     }
 
     public DashboardViewModel Dashboard { get; }
@@ -72,6 +80,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public MatchDetailsViewModel MatchDetails { get; }
 
     public AnalyticsViewModel Analytics { get; }
+
+    public SettingsViewModel Settings { get; }
 
     public LoginViewModel LoginForm { get; }
 
@@ -110,16 +120,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public string CurrentSectionTitle => SelectedTab switch
     {
-        AppTab.Dashboard => "Dashboard",
-        AppTab.CountriesLeagues => "Leagues & Countries",
-        AppTab.Teams => "Teams",
-        AppTab.TeamDetails => "Team Details",
-        AppTab.Players => "Players",
-        AppTab.PlayerDetails => "Player Details",
-        AppTab.Matches => "Matches",
-        AppTab.MatchDetails => "Match Details",
-        AppTab.Analytics => "Analytics",
-        _ => "Dashboard",
+        AppTab.Dashboard => _localizationService["Main_Section_Dashboard"],
+        AppTab.CountriesLeagues => _localizationService["Main_Section_CountriesLeagues"],
+        AppTab.Teams => _localizationService["Main_Section_Teams"],
+        AppTab.TeamDetails => _localizationService["Main_Section_TeamDetails"],
+        AppTab.Players => _localizationService["Main_Section_Players"],
+        AppTab.PlayerDetails => _localizationService["Main_Section_PlayerDetails"],
+        AppTab.Matches => _localizationService["Main_Section_Matches"],
+        AppTab.MatchDetails => _localizationService["Main_Section_MatchDetails"],
+        AppTab.Analytics => _localizationService["Main_Section_Analytics"],
+        AppTab.Settings => _localizationService["Main_Section_Settings"],
+        _ => _localizationService["Main_Section_Dashboard"],
     };
 
     public AsyncRelayCommand LoadInitialDataCommand { get; }
@@ -295,7 +306,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private void OpenSettings()
     {
         IsUserMenuOpen = false;
-        _logger.LogInformation("Settings action clicked.");
+        SelectedTab = AppTab.Settings;
     }
 
     private async Task LogoutAsync()
@@ -314,8 +325,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         CurrentUserRole = string.IsNullOrWhiteSpace(session.Role) ? "Analyst" : session.Role;
     }
 
+    private void OnLocalizationPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (!string.Equals(e.PropertyName, "Item[]", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        RaisePropertyChanged(nameof(CurrentSectionTitle));
+    }
+
     public void Dispose()
     {
+        _localizationService.PropertyChanged -= OnLocalizationPropertyChanged;
         Analytics.Dispose();
         Teams.Dispose();
         Players.Dispose();
