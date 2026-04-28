@@ -135,8 +135,44 @@
   <data name="Auth_Tab_SignIn" xml:space="preserve">
     <value>Sign in</value>
   </data>
+  <data name="Auth_AboutSystem_Button" xml:space="preserve">
+    <value>About system</value>
+  </data>
+  <data name="Auth_AboutSystem_WindowTitle" xml:space="preserve">
+    <value>About ProFootball Analytics</value>
+  </data>
+  <data name="Auth_AboutSystem_Title" xml:space="preserve">
+    <value>About the system</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionConcept_Title" xml:space="preserve">
+    <value>Concept</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionConcept_Body" xml:space="preserve">
+    <value>ProFootball Analytics is a desktop platform for studying football data, comparing players and teams, and monitoring performance indicators across countries, leagues, clubs, and matches.</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionData_Title" xml:space="preserve">
+    <value>Data model</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionData_Body" xml:space="preserve">
+    <value>The system stores normalized entities for leagues, teams, players, matches, and attributes. Historical snapshots are preserved so analytical trends can be built from real records in the database.</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionArchitecture_Title" xml:space="preserve">
+    <value>Architecture</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionArchitecture_Body" xml:space="preserve">
+    <value>The application follows a layered architecture (Domain, Application, Infrastructure, Presentation), uses CQRS for operations, and applies asynchronous queries with pagination for stable UI responsiveness.</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionRoles_Title" xml:space="preserve">
+    <value>Access roles</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionRoles_Body" xml:space="preserve">
+    <value>Users authenticate with local credentials. Administrative roles can manage data workflows, while analyst roles are focused on read-only exploration and comparison scenarios.</value>
+  </data>
   <data name="Common_Action_Load" xml:space="preserve">
     <value>Load</value>
+  </data>
+  <data name="Common_Action_Close" xml:space="preserve">
+    <value>Close</value>
   </data>
   <data name="Common_Action_Next" xml:space="preserve">
     <value>Next</value>

@@ -135,8 +135,44 @@
   <data name="Auth_Tab_SignIn" xml:space="preserve">
     <value>Sign in</value>
   </data>
+  <data name="Auth_AboutSystem_Button" xml:space="preserve">
+    <value>Про систему</value>
+  </data>
+  <data name="Auth_AboutSystem_WindowTitle" xml:space="preserve">
+    <value>Про ProFootball Analytics</value>
+  </data>
+  <data name="Auth_AboutSystem_Title" xml:space="preserve">
+    <value>Про систему</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionConcept_Title" xml:space="preserve">
+    <value>Концепція</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionConcept_Body" xml:space="preserve">
+    <value>ProFootball Analytics це настільна платформа для аналізу футбольних даних, порівняння гравців і команд та відстеження показників по країнах, лігах, клубах і матчах.</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionData_Title" xml:space="preserve">
+    <value>Модель даних</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionData_Body" xml:space="preserve">
+    <value>Система зберігає нормалізовані сутності ліг, команд, гравців, матчів і атрибутів. Історичні знімки не видаляються, тому тренди будуються на реальних записах бази даних.</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionArchitecture_Title" xml:space="preserve">
+    <value>Архітектура</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionArchitecture_Body" xml:space="preserve">
+    <value>Застосунок має шарову архітектуру (Domain, Application, Infrastructure, Presentation), використовує CQRS, а також асинхронні запити з пагінацією для стабільної роботи інтерфейсу.</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionRoles_Title" xml:space="preserve">
+    <value>Ролі доступу</value>
+  </data>
+  <data name="Auth_AboutSystem_SectionRoles_Body" xml:space="preserve">
+    <value>Користувачі входять за локальними обліковими даними. Адміністративні ролі керують даними, а ролі аналітика орієнтовані на перегляд та порівняльний аналіз.</value>
+  </data>
   <data name="Common_Action_Load" xml:space="preserve">
     <value>Завантажити</value>
+  </data>
+  <data name="Common_Action_Close" xml:space="preserve">
+    <value>Закрити</value>
   </data>
   <data name="Common_Action_Next" xml:space="preserve">
     <value>Далі</value>

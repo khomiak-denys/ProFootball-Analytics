@@ -291,6 +291,21 @@
                 </RadialGradientBrush>
             </Grid.Background>
 
+            <Button Width="34"
+                    Height="34"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,16,16"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    Foreground="{DynamicResource TitleForegroundBrush}"
+                    FontFamily="Segoe MDL2 Assets"
+                    FontSize="16"
+                    ToolTip="{loc:Loc Key=Auth_AboutSystem_Button}"
+                    Content="&#xE946;"
+                    Click="OnAboutSystemClick" />
+
             <Border Width="760"
                     Padding="0"
                     HorizontalAlignment="Center"
