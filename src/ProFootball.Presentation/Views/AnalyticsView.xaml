@@ -2,6 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:loc="clr-namespace:ProFootball.Presentation.Localization"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:ProFootball.Presentation.ViewModels"
              mc:Ignorable="d">
@@ -15,8 +16,8 @@
                                                 <ColumnDefinition Width="*" />
                                                 <ColumnDefinition Width="Auto" />
                                             </Grid.ColumnDefinitions>
-                                            <TextBlock FontSize="30" FontWeight="SemiBold" Text="Comparison Dashboard" />
-                                            <Button Grid.Column="1" Width="120" Height="34" Content="Refresh" Command="{Binding Analytics.RefreshAllCommand}" />
+                                            <TextBlock FontSize="30" FontWeight="SemiBold" Text="{loc:Loc Key=Analytics_Comparison_Title}" />
+                                            <Button Grid.Column="1" Width="120" Height="34" Content="{loc:Loc Key=Common_Action_Refresh}" Command="{Binding Analytics.RefreshAllCommand}" />
                                         </Grid>
                                         <Border Margin="0,12,0,0" Padding="4" Background="{DynamicResource SegmentBackgroundBrush}" CornerRadius="12">
                                             <Grid>
@@ -39,7 +40,7 @@
                                                             Background="Transparent"
                                                             FontSize="20"
                                                             FontWeight="SemiBold"
-                                                            Content="Compare Players"
+                                                            Content="{loc:Loc Key=Analytics_Mode_ComparePlayers}"
                                                             Command="{Binding Analytics.ComparePlayersModeCommand}" />
                                                 </Border>
                                                 <Border Grid.Column="1" CornerRadius="9">
@@ -57,7 +58,7 @@
                                                             Background="Transparent"
                                                             FontSize="20"
                                                             FontWeight="SemiBold"
-                                                            Content="Compare Teams"
+                                                            Content="{loc:Loc Key=Analytics_Mode_CompareTeams}"
                                                             Command="{Binding Analytics.CompareTeamsModeCommand}" />
                                                 </Border>
                                             </Grid>
@@ -72,7 +73,7 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel>
-                                                <TextBlock FontSize="18" Text="Player 1" />
+                                                <TextBlock FontSize="18" Text="{loc:Loc Key=Analytics_Filter_Player1}" />
                                                 <ComboBox Margin="0,6,0,0"
                                                           Style="{StaticResource PlayersFilterComboBoxStyle}"
                                                           ItemsSource="{Binding Analytics.AvailablePlayers}"
@@ -80,7 +81,7 @@
                                                           DisplayMemberPath="DisplayName" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
-                                                <TextBlock FontSize="18" Text="Player 2" />
+                                                <TextBlock FontSize="18" Text="{loc:Loc Key=Analytics_Filter_Player2}" />
                                                 <ComboBox Margin="0,6,0,0"
                                                           Style="{StaticResource PlayersFilterComboBoxStyle}"
                                                           ItemsSource="{Binding Analytics.AvailablePlayers}"
@@ -88,7 +89,7 @@
                                                           DisplayMemberPath="DisplayName" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="4">
-                                                <TextBlock FontSize="18" Text="Metric" />
+                                                <TextBlock FontSize="18" Text="{loc:Loc Key=Analytics_Filter_Metric}" />
                                                 <ComboBox Margin="0,6,0,0"
                                                           Style="{StaticResource PlayersFilterComboBoxStyle}"
                                                           ItemsSource="{Binding Analytics.MetricOptions}"
@@ -105,7 +106,7 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel>
-                                                <TextBlock FontSize="18" Text="Team 1" />
+                                                <TextBlock FontSize="18" Text="{loc:Loc Key=Analytics_Filter_Team1}" />
                                                 <ComboBox Margin="0,6,0,0"
                                                           Style="{StaticResource PlayersFilterComboBoxStyle}"
                                                           ItemsSource="{Binding Analytics.AvailableTeams}"
@@ -113,7 +114,7 @@
                                                           DisplayMemberPath="DisplayName" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
-                                                <TextBlock FontSize="18" Text="Team 2" />
+                                                <TextBlock FontSize="18" Text="{loc:Loc Key=Analytics_Filter_Team2}" />
                                                 <ComboBox Margin="0,6,0,0"
                                                           Style="{StaticResource PlayersFilterComboBoxStyle}"
                                                           ItemsSource="{Binding Analytics.AvailableTeams}"
@@ -121,7 +122,7 @@
                                                           DisplayMemberPath="DisplayName" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="4">
-                                                <TextBlock FontSize="18" Text="Metric" />
+                                                <TextBlock FontSize="18" Text="{loc:Loc Key=Analytics_Filter_Metric}" />
                                                 <ComboBox Margin="0,6,0,0"
                                                           Style="{StaticResource PlayersFilterComboBoxStyle}"
                                                           ItemsSource="{Binding Analytics.TeamMetricOptions}"
@@ -149,20 +150,20 @@
                                         </Border>
                                         <Border Style="{StaticResource SectionPanelStyle}" Margin="0,0,10,0">
                                             <StackPanel>
-                                                <TextBlock FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="Average Value" />
+                                                <TextBlock FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Analytics_Card_AverageValue}" />
                                                 <TextBlock Margin="0,8,0,0" FontSize="34" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Analytics.AverageOverallRating, StringFormat={}{0:0.0}}" />
                                             </StackPanel>
                                         </Border>
                                         <Border Style="{StaticResource SectionPanelStyle}">
                                             <StackPanel>
-                                                <TextBlock FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="Absolute Gap" />
+                                                <TextBlock FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Analytics_Card_AbsoluteGap}" />
                                                 <TextBlock Margin="0,8,0,0" FontSize="34" FontWeight="SemiBold" Foreground="{DynamicResource BlueAccentBrush}" Text="{Binding Analytics.AveragePotential, StringFormat={}{0:0.0}}" />
                                             </StackPanel>
                                         </Border>
                                     </UniformGrid>
                                     <Border Style="{StaticResource SectionPanelStyle}">
                                         <StackPanel>
-                                            <TextBlock FontSize="22" FontWeight="SemiBold" Text="Team Comparison Summary" />
+                                            <TextBlock FontSize="22" FontWeight="SemiBold" Text="{loc:Loc Key=Analytics_TeamsSummary_Title}" />
                                             <TextBlock Margin="0,8,0,0"
                                                        FontSize="16"
                                                        Foreground="{DynamicResource MutedForegroundBrush}"
@@ -189,30 +190,30 @@
                                     <UniformGrid Columns="4" Margin="0,0,0,12">
                                         <Border Style="{StaticResource SectionPanelStyle}" Margin="0,0,10,0">
                                             <StackPanel>
-                                                <TextBlock FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="Avg Overall Rating" />
+                                                <TextBlock FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Analytics_Card_AvgOverall}" />
                                                 <TextBlock Margin="0,10,0,0" FontSize="38" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Analytics.AverageOverallRating, StringFormat={}{0:0.0}}" />
                                                 <TextBlock Margin="0,6,0,0" FontSize="16" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Analytics.AverageOverallDelta}" />
                                             </StackPanel>
                                         </Border>
                                         <Border Style="{StaticResource SectionPanelStyle}" Margin="0,0,10,0">
                                             <StackPanel>
-                                                <TextBlock FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="Avg Potential" />
+                                                <TextBlock FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Analytics_Card_AvgPotential}" />
                                                 <TextBlock Margin="0,10,0,0" FontSize="38" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Analytics.AveragePotential, StringFormat={}{0:0.0}}" />
                                                 <TextBlock Margin="0,6,0,0" FontSize="16" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Analytics.AveragePotentialDelta}" />
                                             </StackPanel>
                                         </Border>
                                         <Border Style="{StaticResource SectionPanelStyle}" Margin="0,0,10,0">
                                             <StackPanel>
-                                                <TextBlock FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="Top Performers" />
+                                                <TextBlock FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Analytics_Card_TopPerformers}" />
                                                 <TextBlock Margin="0,10,0,0" FontSize="38" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Analytics.TopPerformersCount}" />
-                                                <TextBlock Margin="0,6,0,0" FontSize="16" Foreground="{DynamicResource MutedForegroundBrush}" Text="90+ rating" />
+                                                <TextBlock Margin="0,6,0,0" FontSize="16" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Analytics_Card_TopPerformersHint}" />
                                             </StackPanel>
                                         </Border>
                                         <Border Style="{StaticResource SectionPanelStyle}">
                                             <StackPanel>
-                                                <TextBlock FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="Rising Stars" />
+                                                <TextBlock FontSize="18" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Analytics_Card_RisingStars}" />
                                                 <TextBlock Margin="0,10,0,0" FontSize="38" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Analytics.RisingStarsCount}" />
-                                                <TextBlock Margin="0,6,0,0" FontSize="16" Foreground="{DynamicResource MutedForegroundBrush}" Text="High potential" />
+                                                <TextBlock Margin="0,6,0,0" FontSize="16" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Analytics_Card_RisingStarsHint}" />
                                             </StackPanel>
                                         </Border>
                                     </UniformGrid>
@@ -226,11 +227,11 @@
 
                                         <Border Grid.Column="0" Style="{StaticResource SectionPanelStyle}">
                                             <StackPanel>
-                                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Player Profile Overview" />
+                                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="{loc:Loc Key=Analytics_ProfileOverview_Title}" />
                                                 <TextBlock Margin="0,4,0,0"
                                                            FontSize="13"
                                                            Foreground="{DynamicResource MutedForegroundBrush}"
-                                                           Text="Built from available player rating and potential data." />
+                                                           Text="{loc:Loc Key=Analytics_ProfileOverview_Subtitle}" />
                                                 <Canvas Margin="0,10,0,0" Width="350" Height="300">
                                                     <Polygon Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1" Fill="Transparent" Points="165,38 262,94 262,206 165,262 68,206 68,94" />
                                                     <Polygon Stroke="{DynamicResource ChartGridBrush}" StrokeThickness="1" Fill="Transparent" Points="165,66 238,108 238,192 165,234 92,192 92,108" />
@@ -249,7 +250,7 @@
 
                                         <Border Grid.Column="2" Style="{StaticResource SectionPanelStyle}">
                                             <StackPanel>
-                                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Average Performance Trend" />
+                                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="{loc:Loc Key=Analytics_Trend_Title}" />
                                                 <Canvas Margin="0,10,0,0"
                                                         Width="{x:Static viewModels:AnalyticsTrendChartLayout.CanvasWidth}"
                                                         Height="{x:Static viewModels:AnalyticsTrendChartLayout.CanvasHeight}">
@@ -329,7 +330,7 @@
                                         </Grid.ColumnDefinitions>
                                         <Border Grid.Column="0" Style="{StaticResource SectionPanelStyle}">
                                             <StackPanel>
-                                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Top Performers by Rating" />
+                                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="{loc:Loc Key=Analytics_TopPerformersByRating_Title}" />
                                                 <ItemsControl Margin="0,12,0,0"
                                                               ItemsSource="{Binding Analytics.TopPerformerBars}"
                                                               ItemTemplate="{StaticResource AnalyticsTopPerformerBarTemplate}" />
@@ -337,11 +338,11 @@
                                         </Border>
                                         <Border Grid.Column="2" Style="{StaticResource SectionPanelStyle}">
                                             <StackPanel>
-                                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Overall vs Potential" />
+                                                <TextBlock FontSize="24" FontWeight="SemiBold" Text="{loc:Loc Key=Analytics_OverallVsPotential_Title}" />
                                                 <TextBlock Margin="0,4,0,0"
                                                            FontSize="13"
                                                            Foreground="{DynamicResource MutedForegroundBrush}"
-                                                           Text="Bars are based on values loaded from player attributes in the database." />
+                                                           Text="{loc:Loc Key=Analytics_OverallVsPotential_Subtitle}" />
                                                 <ItemsControl Margin="0,12,0,0"
                                                               ItemsSource="{Binding Analytics.GoalsAssistsBars}"
                                                               ItemTemplate="{StaticResource AnalyticsGoalsAssistsBarTemplate}">
@@ -357,7 +358,7 @@
 
                                     <Border Margin="0,12,0,0" Style="{StaticResource SectionPanelStyle}">
                                         <StackPanel>
-                                            <TextBlock FontSize="24" FontWeight="SemiBold" Text="Top Performers Detailed View" />
+                                            <TextBlock FontSize="24" FontWeight="SemiBold" Text="{loc:Loc Key=Analytics_TopPerformersDetailed_Title}" />
                                             <ItemsControl Margin="0,12,0,0"
                                                           ItemsSource="{Binding Analytics.TopPerformerCards}"
                                                           ItemTemplate="{StaticResource AnalyticsTopPerformerCardTemplate}">

@@ -1,6 +1,7 @@
-<UserControl x:Class="ProFootball.Presentation.Views.CountriesLeaguesView"
+﻿<UserControl x:Class="ProFootball.Presentation.Views.CountriesLeaguesView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:ProFootball.Presentation.Localization"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:ProFootball.Presentation.ViewModels"
@@ -23,7 +24,7 @@
                                     <TextBlock FontSize="38"
                                                FontWeight="SemiBold"
                                                Foreground="{DynamicResource TitleForegroundBrush}"
-                                               Text="Countries" />
+                                               Text="{loc:Loc Key=CountriesLeagues_Countries_Title}" />
 
                                     <ListBox Grid.Row="1"
                                              Margin="0,18,0,18"
@@ -74,8 +75,10 @@
                                                                    Text="{Binding Name}" />
                                                         <TextBlock Margin="0,4,0,0"
                                                                    FontSize="24"
-                                                                   Foreground="{DynamicResource MutedForegroundBrush}"
-                                                                   Text="{Binding LeagueCount, StringFormat={}{0} leagues}" />
+                                                                   Foreground="{DynamicResource MutedForegroundBrush}">
+                                                            <Run Text="{Binding Path=LeagueCount, Mode=OneWay}" />
+                                                            <Run Text="{loc:Loc Key=CountriesLeagues_Info_LeaguesSuffix}" />
+                                                        </TextBlock>
                                                     </StackPanel>
                                                     <Border Grid.Column="1"
                                                             Style="{StaticResource StatusBadgeStyle}"
@@ -97,12 +100,16 @@
                                             Padding="0,14,0,0">
                                         <StackPanel>
                                             <TextBlock FontSize="26"
-                                                       Foreground="{DynamicResource MutedForegroundBrush}"
-                                                       Text="{Binding CountriesLeagues.TotalCountries, StringFormat=Total Countries: {0}}" />
+                                                       Foreground="{DynamicResource MutedForegroundBrush}">
+                                                <Run Text="{loc:Loc Key=CountriesLeagues_Info_TotalCountries}" />
+                                                <Run Text="{Binding Path=CountriesLeagues.TotalCountries, Mode=OneWay}" />
+                                            </TextBlock>
                                             <TextBlock Margin="0,4,0,0"
                                                        FontSize="26"
-                                                       Foreground="{DynamicResource MutedForegroundBrush}"
-                                                       Text="{Binding CountriesLeagues.TotalLeagues, StringFormat=Total Leagues: {0}}" />
+                                                       Foreground="{DynamicResource MutedForegroundBrush}">
+                                                <Run Text="{loc:Loc Key=CountriesLeagues_Info_TotalLeagues}" />
+                                                <Run Text="{Binding Path=CountriesLeagues.TotalLeagues, Mode=OneWay}" />
+                                            </TextBlock>
                                         </StackPanel>
                                     </Border>
                                 </Grid>
@@ -138,7 +145,7 @@
                                                                Text="{Binding CountriesLeagues.SelectedCountryName}" />
                                                     <TextBlock FontSize="30"
                                                                Foreground="{DynamicResource MutedForegroundBrush}"
-                                                               Text="Football Leagues" />
+                                                                Text="{loc:Loc Key=CountriesLeagues_Leagues_Title}" />
                                                 </StackPanel>
                                             </StackPanel>
                                             <StackPanel Grid.Column="1"
@@ -152,7 +159,7 @@
                                                     <TextBlock FontSize="20"
                                                                FontWeight="SemiBold"
                                                                Foreground="{DynamicResource SuccessForegroundBrush}"
-                                                               Text="Loading..." />
+                                                                Text="{loc:Loc Key=Common_Loading}" />
                                                 </Border>
                                             </StackPanel>
                                         </Grid>
@@ -210,8 +217,10 @@
                                                                                Text="{Binding LeagueName}" />
                                                                     <TextBlock Margin="0,2,0,0"
                                                                                FontSize="22"
-                                                                               Foreground="{DynamicResource MutedForegroundBrush}"
-                                                                               Text="{Binding LeagueId, StringFormat=League ID: {0}}" />
+                                                                               Foreground="{DynamicResource MutedForegroundBrush}">
+                                                                        <Run Text="{loc:Loc Key=CountriesLeagues_Info_LeagueId}" />
+                                                                        <Run Text="{Binding Path=LeagueId, Mode=OneWay}" />
+                                                                    </TextBlock>
                                                                 </StackPanel>
                                                             </Grid>
                                                             <Separator Grid.Row="1" Margin="0,10,0,10" />
@@ -224,7 +233,7 @@
                                                                 <StackPanel>
                                                                     <TextBlock FontSize="24"
                                                                                Foreground="{DynamicResource MutedForegroundBrush}"
-                                                                               Text="Teams" />
+                                                                                Text="{loc:Loc Key=CountriesLeagues_Metric_Teams}" />
                                                                     <TextBlock Margin="0,2,0,0"
                                                                                FontSize="34"
                                                                                FontWeight="SemiBold"
@@ -234,7 +243,7 @@
                                                                 <StackPanel Grid.Column="1">
                                                                     <TextBlock FontSize="24"
                                                                                Foreground="{DynamicResource MutedForegroundBrush}"
-                                                                               Text="Matches" />
+                                                                                Text="{loc:Loc Key=CountriesLeagues_Metric_Matches}" />
                                                                     <TextBlock Margin="0,2,0,0"
                                                                                FontSize="34"
                                                                                FontWeight="SemiBold"
@@ -244,7 +253,7 @@
                                                                 <StackPanel Grid.Column="2">
                                                                     <TextBlock FontSize="24"
                                                                                Foreground="{DynamicResource MutedForegroundBrush}"
-                                                                               Text="Season" />
+                                                                                Text="{loc:Loc Key=CountriesLeagues_Metric_Season}" />
                                                                     <TextBlock Margin="0,2,0,0"
                                                                                FontSize="34"
                                                                                FontWeight="SemiBold"
@@ -264,7 +273,7 @@
                                                    VerticalAlignment="Center"
                                                    FontSize="24"
                                                    Foreground="{DynamicResource MutedForegroundBrush}"
-                                                   Text="No leagues found for selected country.">
+                                                    Text="{loc:Loc Key=CountriesLeagues_NoLeagues}">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed" />
@@ -289,7 +298,7 @@
                                         <TextBlock FontSize="42"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource TitleForegroundBrush}"
-                                                   Text="League Information" />
+                                                    Text="{loc:Loc Key=CountriesLeagues_Information_Title}" />
                                         <TextBlock Margin="0,14,0,0"
                                                    FontSize="24"
                                                    Foreground="{DynamicResource MutedForegroundBrush}"
@@ -315,7 +324,7 @@
                                                 <StackPanel>
                                                     <TextBlock FontSize="24"
                                                                Foreground="{DynamicResource MutedForegroundBrush}"
-                                                               Text="Total Clubs" />
+                                                                Text="{loc:Loc Key=CountriesLeagues_Summary_TotalClubs}" />
                                                     <TextBlock Margin="0,4,0,0"
                                                                FontSize="44"
                                                                FontWeight="SemiBold"
@@ -330,7 +339,7 @@
                                                 <StackPanel>
                                                     <TextBlock FontSize="24"
                                                                Foreground="{DynamicResource MutedForegroundBrush}"
-                                                               Text="Active Leagues" />
+                                                                Text="{loc:Loc Key=CountriesLeagues_Summary_ActiveLeagues}" />
                                                     <TextBlock Margin="0,4,0,0"
                                                                FontSize="44"
                                                                FontWeight="SemiBold"
@@ -345,7 +354,7 @@
                                                 <StackPanel>
                                                     <TextBlock FontSize="24"
                                                                Foreground="{DynamicResource MutedForegroundBrush}"
-                                                               Text="Divisions" />
+                                                                Text="{loc:Loc Key=CountriesLeagues_Summary_Divisions}" />
                                                     <TextBlock Margin="0,4,0,0"
                                                                FontSize="44"
                                                                FontWeight="SemiBold"
@@ -360,3 +369,5 @@
                         </Grid>
                     
 </UserControl>
+
+

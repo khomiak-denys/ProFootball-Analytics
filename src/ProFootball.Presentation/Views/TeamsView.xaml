@@ -1,6 +1,7 @@
-<UserControl x:Class="ProFootball.Presentation.Views.TeamsView"
+﻿<UserControl x:Class="ProFootball.Presentation.Views.TeamsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:ProFootball.Presentation.Localization"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:ProFootball.Presentation.ViewModels"
@@ -49,12 +50,16 @@
                                                 Margin="0,10,0,0"
                                                 Orientation="Horizontal">
                                         <TextBlock FontSize="16"
-                                                   Foreground="{DynamicResource MutedForegroundBrush}"
-                                                   Text="{Binding Teams.TotalCount, StringFormat=Total: {0}}" />
+                                                   Foreground="{DynamicResource MutedForegroundBrush}">
+                                            <Run Text="{loc:Loc Key=Teams_Info_Total}" />
+                                            <Run Text="{Binding Path=Teams.TotalCount, Mode=OneWay}" />
+                                        </TextBlock>
                                         <TextBlock Margin="14,0,0,0"
                                                    FontSize="16"
-                                                   Foreground="{DynamicResource MutedForegroundBrush}"
-                                                   Text="{Binding Teams.IsLoadingList, StringFormat=Loading: {0}}" />
+                                                   Foreground="{DynamicResource MutedForegroundBrush}">
+                                            <Run Text="{loc:Loc Key=Teams_Info_Loading}" />
+                                            <Run Text="{Binding Path=Teams.IsLoadingList, Mode=OneWay}" />
+                                        </TextBlock>
                                     </StackPanel>
 
                                     <ListBox Grid.Row="2"
@@ -149,7 +154,7 @@
                                                    Margin="0,6,0,0"
                                                    FontSize="32"
                                                    Foreground="{DynamicResource MutedForegroundBrush}"
-                                                   Text="Team Profile" />
+                                                   Text="{loc:Loc Key=Teams_Profile_Title}" />
                                         <Border Grid.Column="1"
                                                 Padding="10,6"
                                                 HorizontalAlignment="Right"
@@ -173,17 +178,17 @@
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
                                             <StackPanel>
-                                                <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="Build Up Play" />
+                                                <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Teams_Metric_BuildUpPlay}" />
                                                 <TextBlock Margin="0,6,0,0" FontSize="50" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Teams.BuildUpPlayScore}" />
                                                 <ProgressBar Height="10" Margin="0,10,0,0" Value="{Binding Teams.BuildUpPlayScore, Mode=OneWay}" Maximum="100" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="2">
-                                                <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="Chance Creation" />
+                                                <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Teams_Metric_ChanceCreation}" />
                                                 <TextBlock Margin="0,6,0,0" FontSize="50" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Teams.ChanceCreationScore}" />
                                                 <ProgressBar Height="10" Margin="0,10,0,0" Value="{Binding Teams.ChanceCreationScore, Mode=OneWay}" Maximum="100" />
                                             </StackPanel>
                                             <StackPanel Grid.Column="4">
-                                                <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="Defence" />
+                                                <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Teams_Metric_Defence}" />
                                                 <TextBlock Margin="0,6,0,0" FontSize="50" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Teams.DefenceScore}" />
                                                 <ProgressBar Height="10" Margin="0,10,0,0" Value="{Binding Teams.DefenceScore, Mode=OneWay}" Maximum="100" />
                                             </StackPanel>
@@ -201,7 +206,7 @@
                                         <TextBlock FontSize="40"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource TitleForegroundBrush}"
-                                                   Text="Tactical Style Indicators" />
+                                                   Text="{loc:Loc Key=Teams_TacticalIndicators_Title}" />
                                         <ItemsControl Margin="0,20,0,0" ItemsSource="{Binding Teams.TacticalMetrics}">
                                             <ItemsControl.ItemTemplate>
                                                 <DataTemplate>
@@ -244,7 +249,7 @@
                                         <TextBlock FontSize="40"
                                                    FontWeight="SemiBold"
                                                    Foreground="{DynamicResource TitleForegroundBrush}"
-                                                   Text="Team Attribute Trends" />
+                                                   Text="{loc:Loc Key=Teams_AttributeTrends_Title}" />
                                         <Viewbox Height="220" Margin="0,16,0,0" Stretch="Fill" StretchDirection="Both">
                                             <Canvas Width="742" Height="220" Background="{DynamicResource SurfaceMutedBrush}">
                                                 <Line X1="30" Y1="20" X2="30" Y2="196" Stroke="{DynamicResource ChartAxisBrush}" StrokeThickness="1" />
@@ -264,3 +269,5 @@
                         </Grid>
                     
 </UserControl>
+
+

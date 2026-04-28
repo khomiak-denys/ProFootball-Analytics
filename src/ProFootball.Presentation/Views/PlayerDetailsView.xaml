@@ -1,6 +1,7 @@
 <UserControl x:Class="ProFootball.Presentation.Views.PlayerDetailsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:loc="clr-namespace:ProFootball.Presentation.Localization"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:ProFootball.Presentation.ViewModels"
@@ -14,11 +15,11 @@
                             <Border Style="{StaticResource SectionPanelStyle}">
                                 <StackPanel>
                                     <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                        <TextBlock Margin="0,6,10,0" Style="{StaticResource TypographyLabel}" Text="PlayerApiId:" />
+                                        <TextBlock Margin="0,6,10,0" Style="{StaticResource TypographyLabel}" Text="{loc:Loc Key=PlayerDetails_Field_PlayerApiId}" />
                                         <TextBox Width="160"
                                                  Margin="0,0,12,0"
                                                  Text="{Binding PlayerDetails.SelectedPlayerApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
-                                        <Button Width="120" Content="Load" Command="{Binding PlayerDetails.LoadCommand}" />
+                                        <Button Width="120" Content="{loc:Loc Key=Common_Action_Load}" Command="{Binding PlayerDetails.LoadCommand}" />
                                     </StackPanel>
                                     <TextBlock Style="{StaticResource TypographyH2}" Text="{Binding PlayerDetails.Details.Name}" />
                                     <Grid Margin="0,20,0,0">
@@ -40,10 +41,10 @@
                                                   AutoGenerateColumns="False"
                                                   IsReadOnly="True">
                                             <DataGrid.Columns>
-                                                <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat=\{0:yyyy-MM-dd\}}" Width="130" />
-                                                <DataGridTextColumn Header="Overall" Binding="{Binding OverallRating}" Width="80" />
-                                                <DataGridTextColumn Header="Potential" Binding="{Binding Potential}" Width="80" />
-                                                <DataGridTextColumn Header="Foot" Binding="{Binding PreferredFoot}" Width="80" />
+                                                <DataGridTextColumn Header="{loc:Loc Key=Common_Column_Date}" Binding="{Binding Date, StringFormat=\{0:yyyy-MM-dd\}}" Width="130" />
+                                                <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Overall}" Binding="{Binding OverallRating}" Width="80" />
+                                                <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Potential}" Binding="{Binding Potential}" Width="80" />
+                                                <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Foot}" Binding="{Binding PreferredFoot}" Width="80" />
                                             </DataGrid.Columns>
                                         </DataGrid>
                                     </Grid>
