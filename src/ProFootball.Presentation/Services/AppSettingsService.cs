@@ -12,7 +12,7 @@ public interface IAppSettingsService
 
 public sealed class AppSettingsService : IAppSettingsService
 {
-    private const string DefaultLanguage = "Ukrainian";
+    private const string DefaultLanguage = "en-US";
 
     private readonly string _settingsPath = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -35,7 +35,7 @@ public sealed class AppSettingsService : IAppSettingsService
                 return DefaultLanguage;
             }
 
-            return dto.Language.Trim();
+            return NormalizeLanguage(dto.Language);
         }
         catch
         {
@@ -58,7 +58,7 @@ public sealed class AppSettingsService : IAppSettingsService
                 Directory.CreateDirectory(directory);
             }
 
-            var payload = new AppSettingsDto(language.Trim());
+            var payload = new AppSettingsDto(NormalizeLanguage(language));
             var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(_settingsPath, json);
         }
@@ -66,6 +66,24 @@ public sealed class AppSettingsService : IAppSettingsService
         {
             // Best effort settings persistence.
         }
+    }
+
+    private static string NormalizeLanguage(string? language)
+    {
+        var value = language?.Trim();
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return DefaultLanguage;
+        }
+
+        return value.ToLowerInvariant() switch
+        {
+            "english" => "en-US",
+            "ukrainian" => "uk-UA",
+            "en-us" => "en-US",
+            "uk-ua" => "uk-UA",
+            _ => DefaultLanguage,
+        };
     }
 
     private sealed record AppSettingsDto(string Language);

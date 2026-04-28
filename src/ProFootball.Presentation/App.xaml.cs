@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Infrastructure;
+using ProFootball.Presentation.Localization;
 using ProFootball.Presentation.Services;
 using ProFootball.Presentation.ViewModels;
 using Serilog;
@@ -59,6 +60,7 @@ public partial class App : System.Windows.Application
                     services.AddInfrastructure(context.Configuration);
                     services.AddSingleton<IThemeService, ThemeService>();
                     services.AddSingleton<IAppSettingsService, AppSettingsService>();
+                    services.AddSingleton<ILocalizationService, LocalizationService>();
                     services.AddScoped<MainViewModel>();
                     services.AddScoped<MainWindow>();
                 })
@@ -69,6 +71,10 @@ public partial class App : System.Windows.Application
             _uiScope = _host.Services.CreateScope();
             var themeService = _uiScope.ServiceProvider.GetRequiredService<IThemeService>();
             themeService.Initialize();
+            var appSettingsService = _uiScope.ServiceProvider.GetRequiredService<IAppSettingsService>();
+            var localizationService = _uiScope.ServiceProvider.GetRequiredService<ILocalizationService>();
+            localizationService.SetCulture(appSettingsService.GetLanguagePreference());
+            Resources["LocalizationService"] = localizationService;
             var mainWindow = _uiScope.ServiceProvider.GetRequiredService<MainWindow>();
             MainWindow = mainWindow;
             mainWindow.Show();
