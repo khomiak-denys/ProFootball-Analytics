@@ -419,11 +419,14 @@
                                                 Foreground="White"
                                                 Click="OnAuthSignInClick" />
 
-                                        <StackPanel Margin="0,12,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <TextBlock Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Auth_NoAccount}" />
+                                        <StackPanel Margin="0,12,0,0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource MutedForegroundBrush}"
+                                                       Text="{loc:Loc Key=Auth_NoAccount}" />
                                             <Button Margin="6,0,0,0"
                                                     Padding="6,0"
                                                     Height="24"
+                                                    VerticalAlignment="Center"
                                                     Background="Transparent"
                                                     BorderThickness="0"
                                                     Foreground="{DynamicResource SuccessForegroundBrush}"
