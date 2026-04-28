@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows.Threading;
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Common;
+using ProFootball.Application.Player.Commands;
 using ProFootball.Application.Player.Dtos;
 using ProFootball.Application.Player.Queries;
 using ProFootball.Presentation.Commands;
@@ -26,6 +27,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     ];
 
     private readonly IQueryDispatcher _queryDispatcher;
+    private readonly ICommandDispatcher _commandDispatcher;
     private readonly Action<int> _openDetails;
     private readonly DispatcherTimer _nameSearchDebounceTimer;
     private readonly IReadOnlyList<string> _overallRatingOptions;
@@ -46,10 +48,15 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     private string _radarPolygonPoints = string.Empty;
     private long _searchVersion;
     private long _detailsVersion;
+    private string _editorName = string.Empty;
+    private DateTime? _editorBirthday;
+    private int? _editorHeight;
+    private int? _editorWeight;
 
-    public PlayersViewModel(IQueryDispatcher queryDispatcher, Action<int> openDetails)
+    public PlayersViewModel(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher, Action<int> openDetails)
     {
         _queryDispatcher = queryDispatcher;
+        _commandDispatcher = commandDispatcher;
         _openDetails = openDetails;
 
         _overallRatingOptions = ["All Ratings", "90+", "85+", "80+", "75+"];
@@ -71,6 +78,9 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         OpenDetailsCommand = new RelayCommand(OpenDetails, () => SelectedPlayer is not null);
         ShowOverviewCommand = new RelayCommand(ShowOverview);
         ShowHistoryCommand = new RelayCommand(ShowHistory);
+        CreatePlayerCommand = new AsyncRelayCommand(CreatePlayerAsync, CommandExceptionHandler.Handle);
+        UpdatePlayerCommand = new AsyncRelayCommand(UpdatePlayerAsync, CommandExceptionHandler.Handle, () => SelectedPlayer is not null);
+        DeletePlayerCommand = new AsyncRelayCommand(DeletePlayerAsync, CommandExceptionHandler.Handle, () => SelectedPlayer is not null);
     }
 
     public ObservableCollection<PlayerListEntryViewModel> Players { get; }
@@ -98,7 +108,10 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
             }
 
             OpenDetailsCommand.RaiseCanExecuteChanged();
+            UpdatePlayerCommand.RaiseCanExecuteChanged();
+            DeletePlayerCommand.RaiseCanExecuteChanged();
             RaiseSelectedPlayerPropertiesChanged();
+            SyncEditorWithSelection();
             _ = LoadSelectedPlayerDetailsSafeAsync();
         }
     }
@@ -243,6 +256,36 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
 
     public RelayCommand ShowHistoryCommand { get; }
 
+    public AsyncRelayCommand CreatePlayerCommand { get; }
+
+    public AsyncRelayCommand UpdatePlayerCommand { get; }
+
+    public AsyncRelayCommand DeletePlayerCommand { get; }
+
+    public string EditorName
+    {
+        get => _editorName;
+        set => SetProperty(ref _editorName, value);
+    }
+
+    public DateTime? EditorBirthday
+    {
+        get => _editorBirthday;
+        set => SetProperty(ref _editorBirthday, value);
+    }
+
+    public int? EditorHeight
+    {
+        get => _editorHeight;
+        set => SetProperty(ref _editorHeight, value);
+    }
+
+    public int? EditorWeight
+    {
+        get => _editorWeight;
+        set => SetProperty(ref _editorWeight, value);
+    }
+
     public async Task SearchAsync()
     {
         var searchVersion = Interlocked.Increment(ref _searchVersion);
@@ -355,6 +398,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
             }
 
             _selectedPlayerDetails = details;
+            SyncEditorWithSelection();
             SelectedPlayerHistory.Clear();
             if (details is not null)
             {
@@ -425,6 +469,75 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         }
 
         _openDetails(SelectedPlayer.PlayerApiId);
+    }
+
+    private async Task CreatePlayerAsync()
+    {
+        var result = await _commandDispatcher.DispatchAsync<CreatePlayerCommand, Result>(
+            new CreatePlayerCommand(EditorName, EditorBirthday, EditorHeight, EditorWeight));
+        if (result.IsFailure)
+        {
+            ErrorMessage = result.Error.Message;
+            return;
+        }
+
+        ErrorMessage = null;
+        await StartSearchAsync();
+    }
+
+    private async Task UpdatePlayerAsync()
+    {
+        if (SelectedPlayer is null)
+        {
+            return;
+        }
+
+        var result = await _commandDispatcher.DispatchAsync<UpdatePlayerCommand, Result>(
+            new UpdatePlayerCommand(SelectedPlayer.PlayerApiId, EditorName, EditorBirthday, EditorHeight, EditorWeight));
+        if (result.IsFailure)
+        {
+            ErrorMessage = result.Error.Message;
+            return;
+        }
+
+        ErrorMessage = null;
+        await SearchAsync();
+    }
+
+    private async Task DeletePlayerAsync()
+    {
+        if (SelectedPlayer is null)
+        {
+            return;
+        }
+
+        var result = await _commandDispatcher.DispatchAsync<DeletePlayerCommand, Result>(
+            new DeletePlayerCommand(SelectedPlayer.PlayerApiId));
+        if (result.IsFailure)
+        {
+            ErrorMessage = result.Error.Message;
+            return;
+        }
+
+        ErrorMessage = null;
+        await SearchAsync();
+    }
+
+    private void SyncEditorWithSelection()
+    {
+        if (SelectedPlayer is null)
+        {
+            EditorName = string.Empty;
+            EditorBirthday = null;
+            EditorHeight = null;
+            EditorWeight = null;
+            return;
+        }
+
+        EditorName = SelectedPlayer.Name;
+        EditorBirthday = _selectedPlayerDetails?.Birthday;
+        EditorHeight = SelectedPlayer.Height;
+        EditorWeight = SelectedPlayer.Weight;
     }
 
     private void RaiseSelectedPlayerPropertiesChanged()

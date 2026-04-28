@@ -50,6 +50,45 @@
                                                                                             Style="{StaticResource PlayersFilterComboBoxStyle}"
                                               ItemsSource="{Binding Players.PreferredFootOptions}"
                                               SelectedItem="{Binding Players.SelectedPreferredFootOption, Mode=TwoWay}" />
+
+                                    <Border Margin="0,16,0,0"
+                                            Padding="0,12,0,0"
+                                            BorderBrush="{DynamicResource SubtleBorderBrush}"
+                                            BorderThickness="0,1,0,0">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Collapsed" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding CanManageData}" Value="True">
+                                                        <Setter Property="Visibility" Value="Visible" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <StackPanel>
+                                            <TextBlock FontSize="18"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                                       Text="{loc:Loc Key=Players_Write_Title}" />
+                                            <TextBox Margin="0,8,0,0"
+                                                     Style="{StaticResource PlayersFilterTextBoxStyle}"
+                                                     Text="{Binding Players.EditorName, UpdateSourceTrigger=PropertyChanged}" />
+                                            <DatePicker Margin="0,8,0,0"
+                                                        Style="{StaticResource MatchesFilterDatePickerStyle}"
+                                                        SelectedDate="{Binding Players.EditorBirthday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBox Margin="0,8,0,0"
+                                                     Style="{StaticResource PlayersFilterTextBoxStyle}"
+                                                     Text="{Binding Players.EditorHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBox Margin="0,8,0,0"
+                                                     Style="{StaticResource PlayersFilterTextBoxStyle}"
+                                                     Text="{Binding Players.EditorWeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            <WrapPanel Margin="0,10,0,0">
+                                                <Button Width="70" Margin="0,0,8,0" Content="{loc:Loc Key=Common_Action_Create}" Command="{Binding Players.CreatePlayerCommand}" />
+                                                <Button Width="70" Margin="0,0,8,0" Content="{loc:Loc Key=Common_Action_Update}" Command="{Binding Players.UpdatePlayerCommand}" />
+                                                <Button Width="70" Content="{loc:Loc Key=Common_Action_Delete}" Command="{Binding Players.DeletePlayerCommand}" />
+                                            </WrapPanel>
+                                        </StackPanel>
+                                    </Border>
                                     <TextBlock Margin="0,12,0,0"
                                                FontSize="16"
                                                Foreground="{DynamicResource DangerForegroundBrush}"

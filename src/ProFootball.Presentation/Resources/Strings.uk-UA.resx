@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -13,76 +13,76 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Analytics_Card_AbsoluteGap" xml:space="preserve">
-    <value>Абсолютний розрив</value>
+    <value>РђР±СЃРѕР»СЋС‚РЅРёР№ СЂРѕР·СЂРёРІ</value>
   </data>
   <data name="Analytics_Card_AverageValue" xml:space="preserve">
-    <value>Середнє значення</value>
+    <value>РЎРµСЂРµРґРЅС” Р·РЅР°С‡РµРЅРЅСЏ</value>
   </data>
   <data name="Analytics_Card_AvgOverall" xml:space="preserve">
-    <value>Сер. загальний рейтинг</value>
+    <value>РЎРµСЂ. Р·Р°РіР°Р»СЊРЅРёР№ СЂРµР№С‚РёРЅРі</value>
   </data>
   <data name="Analytics_Card_AvgPotential" xml:space="preserve">
-    <value>Сер. потенціал</value>
+    <value>РЎРµСЂ. РїРѕС‚РµРЅС†С–Р°Р»</value>
   </data>
   <data name="Analytics_Card_RisingStars" xml:space="preserve">
-    <value>Висхідні зірки</value>
+    <value>Р’РёСЃС…С–РґРЅС– Р·С–СЂРєРё</value>
   </data>
   <data name="Analytics_Card_RisingStarsHint" xml:space="preserve">
-    <value>Високий потенціал</value>
+    <value>Р’РёСЃРѕРєРёР№ РїРѕС‚РµРЅС†С–Р°Р»</value>
   </data>
   <data name="Analytics_Card_TopPerformers" xml:space="preserve">
-    <value>Топ виконавці</value>
+    <value>РўРѕРї РІРёРєРѕРЅР°РІС†С–</value>
   </data>
   <data name="Analytics_Card_TopPerformersHint" xml:space="preserve">
-    <value>Рейтинг 90+</value>
+    <value>Р РµР№С‚РёРЅРі 90+</value>
   </data>
   <data name="Analytics_Comparison_Title" xml:space="preserve">
-    <value>Панель порівняння</value>
+    <value>РџР°РЅРµР»СЊ РїРѕСЂС–РІРЅСЏРЅРЅСЏ</value>
   </data>
   <data name="Analytics_Filter_Metric" xml:space="preserve">
-    <value>Метрика</value>
+    <value>РњРµС‚СЂРёРєР°</value>
   </data>
   <data name="Analytics_Filter_Player1" xml:space="preserve">
-    <value>Гравець 1</value>
+    <value>Р“СЂР°РІРµС†СЊ 1</value>
   </data>
   <data name="Analytics_Filter_Player2" xml:space="preserve">
-    <value>Гравець 2</value>
+    <value>Р“СЂР°РІРµС†СЊ 2</value>
   </data>
   <data name="Analytics_Filter_Team1" xml:space="preserve">
-    <value>Команда 1</value>
+    <value>РљРѕРјР°РЅРґР° 1</value>
   </data>
   <data name="Analytics_Filter_Team2" xml:space="preserve">
-    <value>Команда 2</value>
+    <value>РљРѕРјР°РЅРґР° 2</value>
   </data>
   <data name="Analytics_Mode_ComparePlayers" xml:space="preserve">
-    <value>Порівняти гравців</value>
+    <value>РџРѕСЂС–РІРЅСЏС‚Рё РіСЂР°РІС†С–РІ</value>
   </data>
   <data name="Analytics_Mode_CompareTeams" xml:space="preserve">
-    <value>Порівняти команди</value>
+    <value>РџРѕСЂС–РІРЅСЏС‚Рё РєРѕРјР°РЅРґРё</value>
   </data>
   <data name="Analytics_OverallVsPotential_Subtitle" xml:space="preserve">
-    <value>Стовпчики побудовані на значеннях атрибутів з бази даних.</value>
+    <value>РЎС‚РѕРІРїС‡РёРєРё РїРѕР±СѓРґРѕРІР°РЅС– РЅР° Р·РЅР°С‡РµРЅРЅСЏС… Р°С‚СЂРёР±СѓС‚С–РІ Р· Р±Р°Р·Рё РґР°РЅРёС….</value>
   </data>
   <data name="Analytics_OverallVsPotential_Title" xml:space="preserve">
-    <value>Загальний vs Потенціал</value>
+    <value>Р—Р°РіР°Р»СЊРЅРёР№ vs РџРѕС‚РµРЅС†С–Р°Р»</value>
   </data>
   <data name="Analytics_ProfileOverview_Subtitle" xml:space="preserve">
-    <value>Побудовано на доступних даних рейтингу та потенціалу.</value>
+    <value>РџРѕР±СѓРґРѕРІР°РЅРѕ РЅР° РґРѕСЃС‚СѓРїРЅРёС… РґР°РЅРёС… СЂРµР№С‚РёРЅРіСѓ С‚Р° РїРѕС‚РµРЅС†С–Р°Р»Сѓ.</value>
   </data>
   <data name="Analytics_ProfileOverview_Title" xml:space="preserve">
-    <value>Огляд профілю гравця</value>
+    <value>РћРіР»СЏРґ РїСЂРѕС„С–Р»СЋ РіСЂР°РІС†СЏ</value>
   </data>
   <data name="Analytics_TeamsSummary_Title" xml:space="preserve">
-    <value>Зведення команд</value>
+    <value>Р—РІРµРґРµРЅРЅСЏ РєРѕРјР°РЅРґ</value>
   </data>
   <data name="Analytics_TopPerformersByRating_Title" xml:space="preserve">
-    <value>Топ виконавці за рейтингом</value>
+    <value>РўРѕРї РІРёРєРѕРЅР°РІС†С– Р·Р° СЂРµР№С‚РёРЅРіРѕРј</value>
   </data>
   <data name="Analytics_TopPerformersDetailed_Title" xml:space="preserve">
-    <value>Детальний перегляд топ виконавців</value>
+    <value>Р”РµС‚Р°Р»СЊРЅРёР№ РїРµСЂРµРіР»СЏРґ С‚РѕРї РІРёРєРѕРЅР°РІС†С–РІ</value>
   </data>
   <data name="Analytics_Trend_Title" xml:space="preserve">
-    <value>Тренд середньої продуктивності</value>
+    <value>РўСЂРµРЅРґ СЃРµСЂРµРґРЅСЊРѕС— РїСЂРѕРґСѓРєС‚РёРІРЅРѕСЃС‚С–</value>
   </data>
   <data name="Auth_Access_Description" xml:space="preserve">
     <value>Sign in to view analytics and browse football data, or register a new account to start with a clean profile.</value>
@@ -136,106 +136,106 @@
     <value>Sign in</value>
   </data>
   <data name="Auth_AboutSystem_Button" xml:space="preserve">
-    <value>Про систему</value>
+    <value>РџСЂРѕ СЃРёСЃС‚РµРјСѓ</value>
   </data>
   <data name="Auth_AboutSystem_WindowTitle" xml:space="preserve">
-    <value>Про ProFootball Analytics</value>
+    <value>РџСЂРѕ ProFootball Analytics</value>
   </data>
   <data name="Auth_AboutSystem_Title" xml:space="preserve">
-    <value>Про систему</value>
+    <value>РџСЂРѕ СЃРёСЃС‚РµРјСѓ</value>
   </data>
   <data name="Auth_AboutSystem_SectionConcept_Title" xml:space="preserve">
-    <value>Концепція</value>
+    <value>РљРѕРЅС†РµРїС†С–СЏ</value>
   </data>
   <data name="Auth_AboutSystem_SectionConcept_Body" xml:space="preserve">
-    <value>ProFootball Analytics це настільна платформа для аналізу футбольних даних, порівняння гравців і команд та відстеження показників по країнах, лігах, клубах і матчах.</value>
+    <value>ProFootball Analytics С†Рµ РЅР°СЃС‚С–Р»СЊРЅР° РїР»Р°С‚С„РѕСЂРјР° РґР»СЏ Р°РЅР°Р»С–Р·Сѓ С„СѓС‚Р±РѕР»СЊРЅРёС… РґР°РЅРёС…, РїРѕСЂС–РІРЅСЏРЅРЅСЏ РіСЂР°РІС†С–РІ С– РєРѕРјР°РЅРґ С‚Р° РІС–РґСЃС‚РµР¶РµРЅРЅСЏ РїРѕРєР°Р·РЅРёРєС–РІ РїРѕ РєСЂР°С—РЅР°С…, Р»С–РіР°С…, РєР»СѓР±Р°С… С– РјР°С‚С‡Р°С….</value>
   </data>
   <data name="Auth_AboutSystem_SectionData_Title" xml:space="preserve">
-    <value>Модель даних</value>
+    <value>РњРѕРґРµР»СЊ РґР°РЅРёС…</value>
   </data>
   <data name="Auth_AboutSystem_SectionData_Body" xml:space="preserve">
-    <value>Система зберігає нормалізовані сутності ліг, команд, гравців, матчів і атрибутів. Історичні знімки не видаляються, тому тренди будуються на реальних записах бази даних.</value>
+    <value>РЎРёСЃС‚РµРјР° Р·Р±РµСЂС–РіР°С” РЅРѕСЂРјР°Р»С–Р·РѕРІР°РЅС– СЃСѓС‚РЅРѕСЃС‚С– Р»С–Рі, РєРѕРјР°РЅРґ, РіСЂР°РІС†С–РІ, РјР°С‚С‡С–РІ С– Р°С‚СЂРёР±СѓС‚С–РІ. Р†СЃС‚РѕСЂРёС‡РЅС– Р·РЅС–РјРєРё РЅРµ РІРёРґР°Р»СЏСЋС‚СЊСЃСЏ, С‚РѕРјСѓ С‚СЂРµРЅРґРё Р±СѓРґСѓСЋС‚СЊСЃСЏ РЅР° СЂРµР°Р»СЊРЅРёС… Р·Р°РїРёСЃР°С… Р±Р°Р·Рё РґР°РЅРёС….</value>
   </data>
   <data name="Auth_AboutSystem_SectionArchitecture_Title" xml:space="preserve">
-    <value>Архітектура</value>
+    <value>РђСЂС…С–С‚РµРєС‚СѓСЂР°</value>
   </data>
   <data name="Auth_AboutSystem_SectionArchitecture_Body" xml:space="preserve">
-    <value>Застосунок має шарову архітектуру (Domain, Application, Infrastructure, Presentation), використовує CQRS, а також асинхронні запити з пагінацією для стабільної роботи інтерфейсу.</value>
+    <value>Р—Р°СЃС‚РѕСЃСѓРЅРѕРє РјР°С” С€Р°СЂРѕРІСѓ Р°СЂС…С–С‚РµРєС‚СѓСЂСѓ (Domain, Application, Infrastructure, Presentation), РІРёРєРѕСЂРёСЃС‚РѕРІСѓС” CQRS, Р° С‚Р°РєРѕР¶ Р°СЃРёРЅС…СЂРѕРЅРЅС– Р·Р°РїРёС‚Рё Р· РїР°РіС–РЅР°С†С–С”СЋ РґР»СЏ СЃС‚Р°Р±С–Р»СЊРЅРѕС— СЂРѕР±РѕС‚Рё С–РЅС‚РµСЂС„РµР№СЃСѓ.</value>
   </data>
   <data name="Auth_AboutSystem_SectionRoles_Title" xml:space="preserve">
-    <value>Ролі доступу</value>
+    <value>Р РѕР»С– РґРѕСЃС‚СѓРїСѓ</value>
   </data>
   <data name="Auth_AboutSystem_SectionRoles_Body" xml:space="preserve">
-    <value>Користувачі входять за локальними обліковими даними. Адміністративні ролі керують даними, а ролі аналітика орієнтовані на перегляд та порівняльний аналіз.</value>
+    <value>РљРѕСЂРёСЃС‚СѓРІР°С‡С– РІС…РѕРґСЏС‚СЊ Р·Р° Р»РѕРєР°Р»СЊРЅРёРјРё РѕР±Р»С–РєРѕРІРёРјРё РґР°РЅРёРјРё. РђРґРјС–РЅС–СЃС‚СЂР°С‚РёРІРЅС– СЂРѕР»С– РєРµСЂСѓСЋС‚СЊ РґР°РЅРёРјРё, Р° СЂРѕР»С– Р°РЅР°Р»С–С‚РёРєР° РѕСЂС–С”РЅС‚РѕРІР°РЅС– РЅР° РїРµСЂРµРіР»СЏРґ С‚Р° РїРѕСЂС–РІРЅСЏР»СЊРЅРёР№ Р°РЅР°Р»С–Р·.</value>
   </data>
   <data name="Common_Action_Load" xml:space="preserve">
-    <value>Завантажити</value>
+    <value>Р—Р°РІР°РЅС‚Р°Р¶РёС‚Рё</value>
   </data>
   <data name="Common_Action_Close" xml:space="preserve">
-    <value>Закрити</value>
+    <value>Р—Р°РєСЂРёС‚Рё</value>
   </data>
   <data name="Common_Action_Next" xml:space="preserve">
-    <value>Далі</value>
+    <value>Р”Р°Р»С–</value>
   </data>
   <data name="Common_Action_Prev" xml:space="preserve">
-    <value>Назад</value>
+    <value>РќР°Р·Р°Рґ</value>
   </data>
   <data name="Common_Action_Refresh" xml:space="preserve">
-    <value>Оновити</value>
+    <value>РћРЅРѕРІРёС‚Рё</value>
   </data>
   <data name="Common_Column_Date" xml:space="preserve">
-    <value>Дата</value>
+    <value>Р”Р°С‚Р°</value>
   </data>
   <data name="Common_Loading" xml:space="preserve">
-    <value>Завантаження</value>
+    <value>Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ</value>
   </data>
   <data name="CountriesLeagues_Countries_Title" xml:space="preserve">
-    <value>Країни</value>
+    <value>РљСЂР°С—РЅРё</value>
   </data>
   <data name="CountriesLeagues_Information_Title" xml:space="preserve">
-    <value>Інформація</value>
+    <value>Р†РЅС„РѕСЂРјР°С†С–СЏ</value>
   </data>
   <data name="CountriesLeagues_Leagues_Title" xml:space="preserve">
-    <value>Ліги</value>
+    <value>Р›С–РіРё</value>
   </data>
   <data name="CountriesLeagues_Metric_Matches" xml:space="preserve">
-    <value>Матчі</value>
+    <value>РњР°С‚С‡С–</value>
   </data>
   <data name="CountriesLeagues_Metric_Season" xml:space="preserve">
-    <value>Сезон</value>
+    <value>РЎРµР·РѕРЅ</value>
   </data>
   <data name="CountriesLeagues_Metric_Teams" xml:space="preserve">
-    <value>Команди</value>
+    <value>РљРѕРјР°РЅРґРё</value>
   </data>
   <data name="CountriesLeagues_NoLeagues" xml:space="preserve">
-    <value>Ліги не знайдено</value>
+    <value>Р›С–РіРё РЅРµ Р·РЅР°Р№РґРµРЅРѕ</value>
   </data>
   <data name="CountriesLeagues_Summary_ActiveLeagues" xml:space="preserve">
-    <value>Активні ліги</value>
+    <value>РђРєС‚РёРІРЅС– Р»С–РіРё</value>
   </data>
   <data name="CountriesLeagues_Summary_Divisions" xml:space="preserve">
-    <value>Дивізіони</value>
+    <value>Р”РёРІС–Р·С–РѕРЅРё</value>
   </data>
   <data name="CountriesLeagues_Summary_TotalClubs" xml:space="preserve">
-    <value>Усього клубів</value>
+    <value>РЈСЃСЊРѕРіРѕ РєР»СѓР±С–РІ</value>
   </data>
   <data name="Dashboard_AsOf" xml:space="preserve">
     <value>As of </value>
   </data>
   <data name="Dashboard_Card_Countries" xml:space="preserve">
-    <value>Країни</value>
+    <value>РљСЂР°С—РЅРё</value>
   </data>
   <data name="Dashboard_Card_Leagues" xml:space="preserve">
-    <value>Ліги</value>
+    <value>Р›С–РіРё</value>
   </data>
   <data name="Dashboard_Card_Matches" xml:space="preserve">
-    <value>Матчі</value>
+    <value>РњР°С‚С‡С–</value>
   </data>
   <data name="Dashboard_Card_Players" xml:space="preserve">
-    <value>Гравці</value>
+    <value>Р“СЂР°РІС†С–</value>
   </data>
   <data name="Dashboard_Card_Teams" xml:space="preserve">
-    <value>Команди</value>
+    <value>РљРѕРјР°РЅРґРё</value>
   </data>
   <data name="Dashboard_Growth_Countries" xml:space="preserve">
     <value>+2 this year</value>
@@ -271,13 +271,13 @@
     <value>May</value>
   </data>
   <data name="Dashboard_QuickFilters_Title" xml:space="preserve">
-    <value>Швидкі фільтри</value>
+    <value>РЁРІРёРґРєС– С„С–Р»СЊС‚СЂРё</value>
   </data>
   <data name="Dashboard_RecentMatches_Empty" xml:space="preserve">
     <value>No recent matches available.</value>
   </data>
   <data name="Dashboard_RecentMatches_Title" xml:space="preserve">
-    <value>Останні матчі</value>
+    <value>РћСЃС‚Р°РЅРЅС– РјР°С‚С‡С–</value>
   </data>
   <data name="Dashboard_Stat_Assists" xml:space="preserve">
     <value>Assists</value>
@@ -292,46 +292,46 @@
     <value>Shots</value>
   </data>
   <data name="Dashboard_Stats_Title" xml:space="preserve">
-    <value>Статистика продуктивності</value>
+    <value>РЎС‚Р°С‚РёСЃС‚РёРєР° РїСЂРѕРґСѓРєС‚РёРІРЅРѕСЃС‚С–</value>
   </data>
   <data name="Dashboard_Trend_Legend" xml:space="preserve">
     <value>Average player rating trend</value>
   </data>
   <data name="Dashboard_Trend_Title" xml:space="preserve">
-    <value>Тренд продуктивності</value>
+    <value>РўСЂРµРЅРґ РїСЂРѕРґСѓРєС‚РёРІРЅРѕСЃС‚С–</value>
   </data>
   <data name="Main_Brand_Subtitle" xml:space="preserve">
-    <value>Платформа аналізу даних</value>
+    <value>РџР»Р°С‚С„РѕСЂРјР° Р°РЅР°Р»С–Р·Сѓ РґР°РЅРёС…</value>
   </data>
   <data name="Main_Brand_Title" xml:space="preserve">
-    <value>ProFootball Аналітика</value>
+    <value>ProFootball РђРЅР°Р»С–С‚РёРєР°</value>
   </data>
   <data name="Main_Header_SearchPlaceholder" xml:space="preserve">
-    <value>Пошук гравців...</value>
+    <value>РџРѕС€СѓРє РіСЂР°РІС†С–РІ...</value>
   </data>
   <data name="Main_RestoringSession" xml:space="preserve">
     <value>Restoring your session...</value>
   </data>
   <data name="Main_Section_Analytics" xml:space="preserve">
-    <value>Аналітика</value>
+    <value>РђРЅР°Р»С–С‚РёРєР°</value>
   </data>
   <data name="Main_Section_CountriesLeagues" xml:space="preserve">
-    <value>Ліги</value>
+    <value>Р›С–РіРё</value>
   </data>
   <data name="Main_Section_Dashboard" xml:space="preserve">
-    <value>Дашборд</value>
+    <value>Р”Р°С€Р±РѕСЂРґ</value>
   </data>
   <data name="Main_Section_MatchDetails" xml:space="preserve">
     <value>Match Details</value>
   </data>
   <data name="Main_Section_Matches" xml:space="preserve">
-    <value>Матчі</value>
+    <value>РњР°С‚С‡С–</value>
   </data>
   <data name="Main_Section_PlayerDetails" xml:space="preserve">
     <value>Player Details</value>
   </data>
   <data name="Main_Section_Players" xml:space="preserve">
-    <value>Гравці</value>
+    <value>Р“СЂР°РІС†С–</value>
   </data>
   <data name="Main_Section_Settings" xml:space="preserve">
     <value>Settings</value>
@@ -340,25 +340,25 @@
     <value>Team Details</value>
   </data>
   <data name="Main_Section_Teams" xml:space="preserve">
-    <value>Команди</value>
+    <value>РљРѕРјР°РЅРґРё</value>
   </data>
   <data name="Main_Sidebar_Analytics" xml:space="preserve">
-    <value>Аналітика</value>
+    <value>РђРЅР°Р»С–С‚РёРєР°</value>
   </data>
   <data name="Main_Sidebar_Dashboard" xml:space="preserve">
-    <value>Дашборд</value>
+    <value>Р”Р°С€Р±РѕСЂРґ</value>
   </data>
   <data name="Main_Sidebar_Leagues" xml:space="preserve">
-    <value>Ліги</value>
+    <value>Р›С–РіРё</value>
   </data>
   <data name="Main_Sidebar_Matches" xml:space="preserve">
-    <value>Матчі</value>
+    <value>РњР°С‚С‡С–</value>
   </data>
   <data name="Main_Sidebar_Players" xml:space="preserve">
-    <value>Гравці</value>
+    <value>Р“СЂР°РІС†С–</value>
   </data>
   <data name="Main_Sidebar_Teams" xml:space="preserve">
-    <value>Команди</value>
+    <value>РљРѕРјР°РЅРґРё</value>
   </data>
   <data name="Main_Tab_Analytics" xml:space="preserve">
     <value>Analytics</value>
@@ -391,157 +391,157 @@
     <value>Teams</value>
   </data>
   <data name="Main_UserMenu_Logout" xml:space="preserve">
-    <value>Вийти</value>
+    <value>Р’РёР№С‚Рё</value>
   </data>
   <data name="Main_UserMenu_Settings" xml:space="preserve">
-    <value>Налаштування</value>
+    <value>РќР°Р»Р°С€С‚СѓРІР°РЅРЅСЏ</value>
   </data>
   <data name="MatchDetails_Field_MatchApiId" xml:space="preserve">
     <value>Match ID</value>
   </data>
   <data name="Matches_Column_AwayTeam" xml:space="preserve">
-    <value>Гості</value>
+    <value>Р“РѕСЃС‚С–</value>
   </data>
   <data name="Matches_Column_Date" xml:space="preserve">
-    <value>Дата</value>
+    <value>Р”Р°С‚Р°</value>
   </data>
   <data name="Matches_Column_HomeTeam" xml:space="preserve">
-    <value>Господарі</value>
+    <value>Р“РѕСЃРїРѕРґР°СЂС–</value>
   </data>
   <data name="Matches_Column_League" xml:space="preserve">
-    <value>Ліга</value>
+    <value>Р›С–РіР°</value>
   </data>
   <data name="Matches_Column_Stage" xml:space="preserve">
-    <value>Тур</value>
+    <value>РўСѓСЂ</value>
   </data>
   <data name="Matches_Details_Competition" xml:space="preserve">
-    <value>Змагання</value>
+    <value>Р—РјР°РіР°РЅРЅСЏ</value>
   </data>
   <data name="Matches_Details_Country" xml:space="preserve">
-    <value>Країна</value>
+    <value>РљСЂР°С—РЅР°</value>
   </data>
   <data name="Matches_Details_Date" xml:space="preserve">
-    <value>Дата</value>
+    <value>Р”Р°С‚Р°</value>
   </data>
   <data name="Matches_Details_Season" xml:space="preserve">
-    <value>Сезон</value>
+    <value>РЎРµР·РѕРЅ</value>
   </data>
   <data name="Matches_Details_Stage" xml:space="preserve">
-    <value>Стадія</value>
+    <value>РЎС‚Р°РґС–СЏ</value>
   </data>
   <data name="Matches_Details_Title" xml:space="preserve">
-    <value>Деталі матчу</value>
+    <value>Р”РµС‚Р°Р»С– РјР°С‚С‡Сѓ</value>
   </data>
   <data name="Matches_Filter_DateFrom" xml:space="preserve">
-    <value>Дата від</value>
+    <value>Р”Р°С‚Р° РІС–Рґ</value>
   </data>
   <data name="Matches_Filter_DateTo" xml:space="preserve">
-    <value>Дата до</value>
+    <value>Р”Р°С‚Р° РґРѕ</value>
   </data>
   <data name="Matches_Filter_League" xml:space="preserve">
-    <value>Ліга</value>
+    <value>Р›С–РіР°</value>
   </data>
   <data name="Matches_Filter_Season" xml:space="preserve">
-    <value>Сезон</value>
+    <value>РЎРµР·РѕРЅ</value>
   </data>
   <data name="Matches_Filter_Team" xml:space="preserve">
-    <value>Команда</value>
+    <value>РљРѕРјР°РЅРґР°</value>
   </data>
   <data name="Matches_Filters_Title" xml:space="preserve">
-    <value>Фільтри</value>
+    <value>Р¤С–Р»СЊС‚СЂРё</value>
   </data>
   <data name="Matches_List_Subtitle" xml:space="preserve">
-    <value>Оберіть рядок, щоб переглянути деталі праворуч.</value>
+    <value>РћР±РµСЂС–С‚СЊ СЂСЏРґРѕРє, С‰РѕР± РїРµСЂРµРіР»СЏРЅСѓС‚Рё РґРµС‚Р°Р»С– РїСЂР°РІРѕСЂСѓС‡.</value>
   </data>
   <data name="Matches_List_Title" xml:space="preserve">
-    <value>Матчі</value>
+    <value>РњР°С‚С‡С–</value>
   </data>
   <data name="Matches_Score_Away" xml:space="preserve">
-    <value>Гості</value>
+    <value>Р“РѕСЃС‚С–</value>
   </data>
   <data name="Matches_Score_Home" xml:space="preserve">
-    <value>Господарі</value>
+    <value>Р“РѕСЃРїРѕРґР°СЂС–</value>
   </data>
   <data name="Matches_Score_Title" xml:space="preserve">
-    <value>Підсумковий рахунок</value>
+    <value>РџС–РґСЃСѓРјРєРѕРІРёР№ СЂР°С…СѓРЅРѕРє</value>
   </data>
   <data name="Matches_Statistics_Title" xml:space="preserve">
-    <value>Статистика матчу</value>
+    <value>РЎС‚Р°С‚РёСЃС‚РёРєР° РјР°С‚С‡Сѓ</value>
   </data>
   <data name="PlayerDetails_Field_PlayerApiId" xml:space="preserve">
     <value>Player ID</value>
   </data>
   <data name="Players_Attr_Defending" xml:space="preserve">
-    <value>Захист</value>
+    <value>Р—Р°С…РёСЃС‚</value>
   </data>
   <data name="Players_Attr_Dribbling" xml:space="preserve">
-    <value>Дриблінг</value>
+    <value>Р”СЂРёР±Р»С–РЅРі</value>
   </data>
   <data name="Players_Attr_Pace" xml:space="preserve">
-    <value>Швидкість</value>
+    <value>РЁРІРёРґРєС–СЃС‚СЊ</value>
   </data>
   <data name="Players_Attr_Passing" xml:space="preserve">
-    <value>Пас</value>
+    <value>РџР°СЃ</value>
   </data>
   <data name="Players_Attr_Physical" xml:space="preserve">
-    <value>Фізика</value>
+    <value>Р¤С–Р·РёРєР°</value>
   </data>
   <data name="Players_Attr_Shooting" xml:space="preserve">
-    <value>Удар</value>
+    <value>РЈРґР°СЂ</value>
   </data>
   <data name="Players_Column_Age" xml:space="preserve">
-    <value>Вік</value>
+    <value>Р’С–Рє</value>
   </data>
   <data name="Players_Column_Foot" xml:space="preserve">
-    <value>Нога</value>
+    <value>РќРѕРіР°</value>
   </data>
   <data name="Players_Column_Height" xml:space="preserve">
-    <value>Зріст</value>
+    <value>Р—СЂС–СЃС‚</value>
   </data>
   <data name="Players_Column_Name" xml:space="preserve">
-    <value>Ім’я</value>
+    <value>Р†РјвЂ™СЏ</value>
   </data>
   <data name="Players_Column_Overall" xml:space="preserve">
     <value>Overall</value>
   </data>
   <data name="Players_Column_Pos" xml:space="preserve">
-    <value>Поз</value>
+    <value>РџРѕР·</value>
   </data>
   <data name="Players_Column_Potential" xml:space="preserve">
-    <value>Потенціал</value>
+    <value>РџРѕС‚РµРЅС†С–Р°Р»</value>
   </data>
   <data name="Players_Column_Rating" xml:space="preserve">
-    <value>Рейтинг</value>
+    <value>Р РµР№С‚РёРЅРі</value>
   </data>
   <data name="Players_Details_Title" xml:space="preserve">
-    <value>Деталі гравця</value>
+    <value>Р”РµС‚Р°Р»С– РіСЂР°РІС†СЏ</value>
   </data>
   <data name="Players_Filter_Name" xml:space="preserve">
-    <value>Ім’я</value>
+    <value>Р†РјвЂ™СЏ</value>
   </data>
   <data name="Players_Filter_OverallRating" xml:space="preserve">
-    <value>Загальний рейтинг</value>
+    <value>Р—Р°РіР°Р»СЊРЅРёР№ СЂРµР№С‚РёРЅРі</value>
   </data>
   <data name="Players_Filter_PreferredFoot" xml:space="preserve">
-    <value>Робоча нога</value>
+    <value>Р РѕР±РѕС‡Р° РЅРѕРіР°</value>
   </data>
   <data name="Players_Filters_Title" xml:space="preserve">
-    <value>Фільтри</value>
+    <value>Р¤С–Р»СЊС‚СЂРё</value>
   </data>
   <data name="Players_List_Title" xml:space="preserve">
-    <value>Гравці</value>
+    <value>Р“СЂР°РІС†С–</value>
   </data>
   <data name="Players_Metric_Overall" xml:space="preserve">
-    <value>Загальний</value>
+    <value>Р—Р°РіР°Р»СЊРЅРёР№</value>
   </data>
   <data name="Players_Metric_Potential" xml:space="preserve">
-    <value>Потенціал</value>
+    <value>РџРѕС‚РµРЅС†С–Р°Р»</value>
   </data>
   <data name="Players_Tab_History" xml:space="preserve">
-    <value>Історія</value>
+    <value>Р†СЃС‚РѕСЂС–СЏ</value>
   </data>
   <data name="Players_Tab_Overview" xml:space="preserve">
-    <value>Огляд</value>
+    <value>РћРіР»СЏРґ</value>
   </data>
   <data name="Players_Trend_Overall" xml:space="preserve">
     <value>- Overall</value>
@@ -583,76 +583,76 @@
     <value>Team ID</value>
   </data>
   <data name="Teams_AttributeTrends_Title" xml:space="preserve">
-    <value>Тренди атрибутів</value>
+    <value>РўСЂРµРЅРґРё Р°С‚СЂРёР±СѓС‚С–РІ</value>
   </data>
   <data name="Teams_Metric_BuildUpPlay" xml:space="preserve">
-    <value>Побудова гри</value>
+    <value>РџРѕР±СѓРґРѕРІР° РіСЂРё</value>
   </data>
   <data name="Teams_Metric_ChanceCreation" xml:space="preserve">
-    <value>Створення моментів</value>
+    <value>РЎС‚РІРѕСЂРµРЅРЅСЏ РјРѕРјРµРЅС‚С–РІ</value>
   </data>
   <data name="Teams_Metric_Defence" xml:space="preserve">
-    <value>Захист</value>
+    <value>Р—Р°С…РёСЃС‚</value>
   </data>
   <data name="Teams_Profile_Title" xml:space="preserve">
-    <value>Профіль команди</value>
+    <value>РџСЂРѕС„С–Р»СЊ РєРѕРјР°РЅРґРё</value>
   </data>
   <data name="Teams_TacticalIndicators_Title" xml:space="preserve">
-    <value>Тактичні індикатори</value>
+    <value>РўР°РєС‚РёС‡РЅС– С–РЅРґРёРєР°С‚РѕСЂРё</value>
   </data>
   <data name="Matches_Info_Total" xml:space="preserve">
-    <value>Всього: </value>
+    <value>Р’СЃСЊРѕРіРѕ: </value>
   </data>
   <data name="Matches_Info_MatchesSuffix" xml:space="preserve">
-    <value> матчів</value>
+    <value> РјР°С‚С‡С–РІ</value>
   </data>
   <data name="Matches_Info_HasNextPage" xml:space="preserve">
-    <value>Є наступна сторінка: </value>
+    <value>Р„ РЅР°СЃС‚СѓРїРЅР° СЃС‚РѕСЂС–РЅРєР°: </value>
   </data>
   <data name="Matches_Info_SelectedDate" xml:space="preserve">
-    <value>Обрана дата: </value>
+    <value>РћР±СЂР°РЅР° РґР°С‚Р°: </value>
   </data>
   <data name="Matches_Info_Goals" xml:space="preserve">
     <value>Goals: </value>
   </data>
   <data name="Players_Info_Loading" xml:space="preserve">
-    <value>Завантаження: </value>
+    <value>Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ: </value>
   </data>
   <data name="Players_Info_Total" xml:space="preserve">
-    <value>Всього: </value>
+    <value>Р’СЃСЊРѕРіРѕ: </value>
   </data>
   <data name="Players_Info_PlayersSuffix" xml:space="preserve">
-    <value> гравців</value>
+    <value> РіСЂР°РІС†С–РІ</value>
   </data>
   <data name="Players_Info_Age" xml:space="preserve">
-    <value>Вік: </value>
+    <value>Р’С–Рє: </value>
   </data>
   <data name="Players_Info_Foot" xml:space="preserve">
-    <value>Нога: </value>
+    <value>РќРѕРіР°: </value>
   </data>
   <data name="Players_Info_Height" xml:space="preserve">
-    <value>Зріст: </value>
+    <value>Р—СЂС–СЃС‚: </value>
   </data>
   <data name="Players_Info_Weight" xml:space="preserve">
-    <value>Вага: </value>
+    <value>Р’Р°РіР°: </value>
   </data>
   <data name="Teams_Info_Total" xml:space="preserve">
-    <value>Всього: </value>
+    <value>Р’СЃСЊРѕРіРѕ: </value>
   </data>
   <data name="Teams_Info_Loading" xml:space="preserve">
-    <value>Завантаження: </value>
+    <value>Р—Р°РІР°РЅС‚Р°Р¶РµРЅРЅСЏ: </value>
   </data>
   <data name="CountriesLeagues_Info_LeaguesSuffix" xml:space="preserve">
-    <value> ліг</value>
+    <value> Р»С–Рі</value>
   </data>
   <data name="CountriesLeagues_Info_TotalCountries" xml:space="preserve">
-    <value>Всього країн: </value>
+    <value>Р’СЃСЊРѕРіРѕ РєСЂР°С—РЅ: </value>
   </data>
   <data name="CountriesLeagues_Info_TotalLeagues" xml:space="preserve">
-    <value>Всього ліг: </value>
+    <value>Р’СЃСЊРѕРіРѕ Р»С–Рі: </value>
   </data>
   <data name="CountriesLeagues_Info_LeagueId" xml:space="preserve">
-    <value>ID ліги: </value>
+    <value>ID Р»С–РіРё: </value>
   </data>
   <data name="Templates_Label_Ovr" xml:space="preserve">
     <value>Ovr: </value>
@@ -669,4 +669,21 @@
   <data name="Templates_Label_Samples" xml:space="preserve">
     <value>Samples: </value>
   </data>
-</root>
+  <data name="Common_Action_Create" xml:space="preserve">
+    <value>Створити</value>
+  </data>
+  <data name="Common_Action_Update" xml:space="preserve">
+    <value>Оновити</value>
+  </data>
+  <data name="Common_Action_Delete" xml:space="preserve">
+    <value>Видалити</value>
+  </data>
+  <data name="Players_Write_Title" xml:space="preserve">
+    <value>Керування гравцем</value>
+  </data>
+  <data name="Matches_Write_Title" xml:space="preserve">
+    <value>Керування матчем</value>
+  </data></root>
+
+
+

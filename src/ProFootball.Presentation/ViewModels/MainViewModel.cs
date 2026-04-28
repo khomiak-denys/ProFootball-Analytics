@@ -50,8 +50,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         MatchDetails = new MatchDetailsViewModel(queryDispatcher);
 
         Teams = new TeamsViewModel(queryDispatcher, OpenTeamDetails);
-        Players = new PlayersViewModel(queryDispatcher, OpenPlayerDetails);
-        Matches = new MatchesViewModel(queryDispatcher, OpenMatchDetails);
+        Players = new PlayersViewModel(queryDispatcher, commandDispatcher, OpenPlayerDetails);
+        Matches = new MatchesViewModel(queryDispatcher, commandDispatcher, OpenMatchDetails);
         Analytics = new AnalyticsViewModel(queryDispatcher);
         Settings = new SettingsViewModel(themeService, appSettingsService, localizationService);
 
