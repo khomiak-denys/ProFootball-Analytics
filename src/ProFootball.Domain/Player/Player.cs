@@ -31,4 +31,18 @@ public sealed class Player
     public int? Height { get; private set; }
 
     public int? Weight { get; private set; }
+
+    public void UpdateProfile(
+        string name,
+        DateTime? birthday,
+        int? height,
+        int? weight)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+
+        Name = name.Trim();
+        Birthday = birthday;
+        Height = height;
+        Weight = weight;
+    }
 }
