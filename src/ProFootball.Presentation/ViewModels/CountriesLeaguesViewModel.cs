@@ -38,6 +38,8 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     private string? _snapshotAboutDescription;
     private bool _isAddLeagueModalOpen;
     private string _newLeagueName = string.Empty;
+    private int? _newLeagueMaxTeams;
+    private string? _newLeagueDescription;
     private CountryLeagueListItemDto? _selectedCountryForNewLeague;
     private int _localLeagueIdSeed = -1;
 
@@ -74,6 +76,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
             _selectedCountry = value;
             RaisePropertyChanged(nameof(SelectedCountry));
             RaisePropertyChanged(nameof(SelectedCountryName));
+            RaisePropertyChanged(nameof(SelectedCountryFlag));
             RaisePropertyChanged(nameof(SelectedCountryAboutTitle));
             RaisePropertyChanged(nameof(SelectedCountryDescription));
             RaisePropertyChanged(nameof(EffectiveCountryDescription));
@@ -99,6 +102,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     }
 
     public string SelectedCountryName => SelectedCountry?.Name ?? "Select country";
+    public string SelectedCountryFlag => ResolveCountryFlag(SelectedCountry?.Name);
 
     public bool IsAddLeagueModalOpen
     {
@@ -110,6 +114,18 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     {
         get => _newLeagueName;
         set => SetProperty(ref _newLeagueName, value);
+    }
+
+    public int? NewLeagueMaxTeams
+    {
+        get => _newLeagueMaxTeams;
+        set => SetProperty(ref _newLeagueMaxTeams, value);
+    }
+
+    public string? NewLeagueDescription
+    {
+        get => _newLeagueDescription;
+        set => SetProperty(ref _newLeagueDescription, value);
     }
 
     public CountryLeagueListItemDto? SelectedCountryForNewLeague
@@ -127,6 +143,10 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         !string.IsNullOrWhiteSpace(_snapshotAboutDescription)
             ? _snapshotAboutDescription
             : BuildCountryDescription(SelectedCountry?.Name);
+    public string LeagueNamesLine =>
+        LeagueCards.Count == 0
+            ? "No leagues found"
+            : string.Join(", ", LeagueCards.Select(card => card.LeagueName));
 
     public int TotalCountries => Countries.Count;
 
@@ -237,6 +257,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
             {
                 LeagueCards.Add(card);
             }
+            RaisePropertyChanged(nameof(LeagueNamesLine));
 
             TotalClubs = summary.TotalClubs;
             ActiveLeagues = summary.ActiveLeagues;
@@ -272,6 +293,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     private void ClearCountrySnapshot()
     {
         LeagueCards.Clear();
+        RaisePropertyChanged(nameof(LeagueNamesLine));
         TotalClubs = 0;
         ActiveLeagues = 0;
         Divisions = 0;
@@ -375,6 +397,8 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     {
         ErrorMessage = null;
         NewLeagueName = string.Empty;
+        NewLeagueMaxTeams = null;
+        NewLeagueDescription = string.Empty;
         SelectedCountryForNewLeague = SelectedCountry ?? CountryOptions.FirstOrDefault();
         IsAddLeagueModalOpen = true;
     }
@@ -399,18 +423,28 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         }
 
         var normalizedLeagueName = NewLeagueName.Trim();
+        var normalizedDescription = string.IsNullOrWhiteSpace(NewLeagueDescription) ? null : NewLeagueDescription.Trim();
         var season = LeagueCards.Select(card => card.Season).FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)) ?? "2025/26";
         var countryName = SelectedCountryForNewLeague.Name;
         LeagueCards.Insert(0, new LeagueCountryCardDto(
             _localLeagueIdSeed--,
             normalizedLeagueName,
             season,
+            NewLeagueMaxTeams ?? 0,
             0,
-            0,
-            null,
-            null));
+            NewLeagueMaxTeams,
+            normalizedDescription));
+        RaisePropertyChanged(nameof(LeagueNamesLine));
+        ActiveLeagues = LeagueCards.Count;
+        TotalClubs = LeagueCards.Sum(card => card.TeamsCount);
 
         UpsertCountryAfterLeagueAdd(countryName);
+        if (string.Equals(SelectedCountry?.Name, countryName, StringComparison.OrdinalIgnoreCase)
+            && !string.IsNullOrWhiteSpace(normalizedDescription))
+        {
+            _snapshotAboutDescription = normalizedDescription;
+            RaisePropertyChanged(nameof(EffectiveCountryDescription));
+        }
 
         ErrorMessage = null;
         IsAddLeagueModalOpen = false;
@@ -444,6 +478,54 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
 
         RaisePropertyChanged(nameof(TotalCountries));
         RaisePropertyChanged(nameof(TotalLeagues));
+    }
+
+    private static string ResolveCountryFlag(string? countryName)
+    {
+        if (string.IsNullOrWhiteSpace(countryName))
+        {
+            return "\u2691";
+        }
+
+        var code = countryName.Trim().ToLowerInvariant() switch
+        {
+            "england" => "GB",
+            "scotland" => "GB",
+            "wales" => "GB",
+            "ireland" => "IE",
+            "northern ireland" => "GB",
+            "belgium" => "BE",
+            "france" => "FR",
+            "germany" => "DE",
+            "italy" => "IT",
+            "spain" => "ES",
+            "netherlands" => "NL",
+            "portugal" => "PT",
+            "switzerland" => "CH",
+            "ukraine" => "UA",
+            "tunisia" => "TN",
+            "turkey" => "TR",
+            "united states" => "US",
+            "brazil" => "BR",
+            "argentina" => "AR",
+            "japan" => "JP",
+            _ => null
+        };
+
+        return code is null ? "\u2691" : ToFlagEmoji(code);
+    }
+
+    private static string ToFlagEmoji(string isoCode)
+    {
+        var upper = isoCode.ToUpperInvariant();
+        if (upper.Length != 2 || !upper.All(c => c is >= 'A' and <= 'Z'))
+        {
+            return "\u2691";
+        }
+
+        var first = char.ConvertFromUtf32(0x1F1E6 + (upper[0] - 'A'));
+        var second = char.ConvertFromUtf32(0x1F1E6 + (upper[1] - 'A'));
+        return first + second;
     }
 
     public void Dispose()
