@@ -376,6 +376,7 @@
                             </StackPanel>
 
                             <Grid Grid.ColumnSpan="3"
+                                  Panel.ZIndex="1000"
                                   Background="#99000000"
                                   Visibility="{Binding CountriesLeagues.IsAddLeagueModalOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <Border Width="560"
@@ -439,7 +440,13 @@
                                                       Style="{StaticResource PlayersFilterComboBoxStyle}"
                                                       ItemsSource="{Binding CountriesLeagues.Countries}"
                                                       SelectedItem="{Binding CountriesLeagues.SelectedCountryForNewLeague, Mode=TwoWay}"
-                                                      DisplayMemberPath="Name" />
+                                                      TextSearch.TextPath="Name">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Name}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
                                         </StackPanel>
 
                                         <StackPanel Grid.Row="2"

@@ -30,6 +30,7 @@
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto" />
                                             <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
                                         </Grid.ColumnDefinitions>
                                         <TextBlock VerticalAlignment="Center"
                                                    FontFamily="Segoe MDL2 Assets"
@@ -44,6 +45,17 @@
                                                  BorderThickness="0"
                                                  Background="Transparent"
                                                  Text="{Binding Teams.NameFilter, UpdateSourceTrigger=PropertyChanged}" />
+                                        <Button Grid.Column="2"
+                                                Width="42"
+                                                Height="42"
+                                                Margin="10,0,0,0"
+                                                Background="{DynamicResource SuccessForegroundBrush}"
+                                                Foreground="White"
+                                                FontFamily="Segoe MDL2 Assets"
+                                                FontSize="18"
+                                                Content="&#xE710;"
+                                                ToolTip="{loc:Loc Key=Teams_Add_Button}"
+                                                Command="{Binding Teams.OpenAddTeamModalCommand}" />
                                     </Grid>
 
                                     <StackPanel Grid.Row="1"
@@ -264,6 +276,107 @@
                                                    Foreground="{DynamicResource DangerForegroundBrush}"
                                                    Text="{Binding Teams.ErrorMessage}" />
                                     </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <Grid Grid.ColumnSpan="3"
+                                  Panel.ZIndex="1000"
+                                  Background="#99000000"
+                                  Visibility="{Binding Teams.IsAddTeamModalOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Border Width="560"
+                                        Padding="22"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Background="{DynamicResource CardBackgroundBrush}"
+                                        BorderBrush="{DynamicResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="12">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock FontSize="36"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TitleForegroundBrush}"
+                                                           Text="{loc:Loc Key=Teams_Add_Title}" />
+                                                <TextBlock Margin="0,6,0,0"
+                                                           FontSize="18"
+                                                           Foreground="{DynamicResource MutedForegroundBrush}"
+                                                           Text="{loc:Loc Key=Teams_Add_Subtitle}" />
+                                            </StackPanel>
+                                            <Button Grid.Column="1"
+                                                    Width="32"
+                                                    Height="32"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    FontFamily="Segoe MDL2 Assets"
+                                                    FontSize="14"
+                                                    Foreground="{DynamicResource MutedForegroundBrush}"
+                                                    Content="&#xE711;"
+                                                    Command="{Binding Teams.CloseAddTeamModalCommand}" />
+                                        </Grid>
+
+                                        <StackPanel Grid.Row="1" Margin="0,18,0,0">
+                                            <TextBlock FontSize="20"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                                       Text="{loc:Loc Key=Teams_Add_Name}" />
+                                            <TextBox Margin="0,8,0,0"
+                                                     Style="{StaticResource PlayersFilterTextBoxStyle}"
+                                                     Text="{Binding Teams.NewTeamName, UpdateSourceTrigger=PropertyChanged}" />
+
+                                            <TextBlock Margin="0,14,0,0"
+                                                       FontSize="20"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                                       Text="{loc:Loc Key=Teams_Add_ShortName}" />
+                                            <TextBox Margin="0,8,0,0"
+                                                     Style="{StaticResource PlayersFilterTextBoxStyle}"
+                                                     Text="{Binding Teams.NewTeamShortName, UpdateSourceTrigger=PropertyChanged}" />
+
+                                            <TextBlock Margin="0,14,0,0"
+                                                       FontSize="20"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                                       Text="{loc:Loc Key=Teams_Add_League}" />
+                                            <ComboBox Margin="0,8,0,0"
+                                                      Style="{StaticResource PlayersFilterComboBoxStyle}"
+                                                      ItemsSource="{Binding Teams.Leagues}"
+                                                      SelectedItem="{Binding Teams.SelectedLeague, Mode=TwoWay}"
+                                                      TextSearch.TextPath="Name">
+                                                <ComboBox.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <TextBlock Text="{Binding Name}" />
+                                                    </DataTemplate>
+                                                </ComboBox.ItemTemplate>
+                                            </ComboBox>
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="2"
+                                                    Margin="0,20,0,0"
+                                                    Orientation="Horizontal"
+                                                    HorizontalAlignment="Right">
+                                            <Button Width="150"
+                                                    Margin="0,0,10,0"
+                                                    Content="{loc:Loc Key=Common_Action_Cancel}"
+                                                    Command="{Binding Teams.CloseAddTeamModalCommand}" />
+                                            <Button Width="190"
+                                                    Background="{DynamicResource SuccessForegroundBrush}"
+                                                    Foreground="White"
+                                                    Content="{loc:Loc Key=Teams_Add_Confirm}"
+                                                    Command="{Binding Teams.AddTeamCommand}" />
+                                        </StackPanel>
+                                    </Grid>
                                 </Border>
                             </Grid>
                         </Grid>
