@@ -81,6 +81,8 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         CreatePlayerCommand = new AsyncRelayCommand(CreatePlayerAsync, CommandExceptionHandler.Handle);
         UpdatePlayerCommand = new AsyncRelayCommand(UpdatePlayerAsync, CommandExceptionHandler.Handle, () => SelectedPlayer is not null);
         DeletePlayerCommand = new AsyncRelayCommand(DeletePlayerAsync, CommandExceptionHandler.Handle, () => SelectedPlayer is not null);
+        NextPageCommand = new AsyncRelayCommand(NextPageAsync, CommandExceptionHandler.Handle, () => HasNextPage);
+        PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, CommandExceptionHandler.Handle, () => HasPreviousPage);
     }
 
     public ObservableCollection<PlayerListEntryViewModel> Players { get; }
@@ -193,7 +195,14 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     public int Page
     {
         get => _page;
-        private set => SetProperty(ref _page, value);
+        private set
+        {
+            if (SetProperty(ref _page, value))
+            {
+                RaisePropertyChanged(nameof(HasPreviousPage));
+                RaisePropertyChanged(nameof(HasNextPage));
+            }
+        }
     }
 
     public int PageSize
@@ -203,6 +212,10 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         {
             if (SetProperty(ref _pageSize, value))
             {
+                RaisePropertyChanged(nameof(HasPreviousPage));
+                RaisePropertyChanged(nameof(HasNextPage));
+                NextPageCommand.RaiseCanExecuteChanged();
+                PreviousPageCommand.RaiseCanExecuteChanged();
                 _ = StartSearchSafeAsync();
             }
         }
@@ -211,8 +224,18 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     public int TotalCount
     {
         get => _totalCount;
-        private set => SetProperty(ref _totalCount, value);
+        private set
+        {
+            if (SetProperty(ref _totalCount, value))
+            {
+                RaisePropertyChanged(nameof(HasNextPage));
+            }
+        }
     }
+
+    public bool HasPreviousPage => Page > 1;
+
+    public bool HasNextPage => Page * PageSize < TotalCount;
 
     public string DetailsPlayerName => _selectedPlayerDetails?.Name ?? SelectedPlayer?.Name ?? "Select a player";
 
@@ -261,6 +284,10 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     public AsyncRelayCommand UpdatePlayerCommand { get; }
 
     public AsyncRelayCommand DeletePlayerCommand { get; }
+
+    public AsyncRelayCommand NextPageCommand { get; }
+
+    public AsyncRelayCommand PreviousPageCommand { get; }
 
     public string EditorName
     {
@@ -336,6 +363,9 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
             SelectedPlayer = selectedPlayerId.HasValue
                 ? Players.FirstOrDefault(item => item.PlayerApiId == selectedPlayerId.Value) ?? Players.FirstOrDefault()
                 : Players.FirstOrDefault();
+
+            NextPageCommand.RaiseCanExecuteChanged();
+            PreviousPageCommand.RaiseCanExecuteChanged();
         }
         catch (Exception exception)
         {
@@ -469,6 +499,28 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         }
 
         _openDetails(SelectedPlayer.PlayerApiId);
+    }
+
+    private async Task NextPageAsync()
+    {
+        if (!HasNextPage)
+        {
+            return;
+        }
+
+        Page++;
+        await SearchAsync();
+    }
+
+    private async Task PreviousPageAsync()
+    {
+        if (!HasPreviousPage)
+        {
+            return;
+        }
+
+        Page--;
+        await SearchAsync();
     }
 
     private async Task CreatePlayerAsync()

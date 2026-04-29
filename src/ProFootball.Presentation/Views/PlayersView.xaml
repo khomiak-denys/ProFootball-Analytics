@@ -106,6 +106,15 @@
                                         <Run Text="{Binding Path=Players.TotalCount, Mode=OneWay}" />
                                         <Run Text="{loc:Loc Key=Players_Info_PlayersSuffix}" />
                                     </TextBlock>
+                                    <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                                        <Button Width="96"
+                                                Margin="0,0,8,0"
+                                                Content="{loc:Loc Key=Common_Action_Prev}"
+                                                Command="{Binding Players.PreviousPageCommand}" />
+                                        <Button Width="96"
+                                                Content="{loc:Loc Key=Common_Action_Next}"
+                                                Command="{Binding Players.NextPageCommand}" />
+                                    </StackPanel>
                                 </StackPanel>
                             </Border>
 
@@ -125,6 +134,12 @@
                                                FontWeight="SemiBold"
                                                Foreground="{DynamicResource TitleForegroundBrush}"
                                                Text="{loc:Loc Key=Players_List_Title}" />
+                                    <TextBlock Margin="0,6,0,0"
+                                               FontSize="14"
+                                               Foreground="{DynamicResource MutedForegroundBrush}">
+                                        <Run Text="{loc:Loc Key=Common_Page}" />
+                                        <Run Text="{Binding Players.Page, Mode=OneWay}" />
+                                    </TextBlock>
                                     <DataGrid Grid.Row="1"
                                               Margin="0,16,0,0"
                                               ItemsSource="{Binding Players.Players}"
