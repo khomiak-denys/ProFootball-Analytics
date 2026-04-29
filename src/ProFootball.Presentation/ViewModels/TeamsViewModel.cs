@@ -3,6 +3,8 @@ using System.Globalization;
 using System.Windows.Threading;
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Common;
+using ProFootball.Application.League.Dtos;
+using ProFootball.Application.League.Queries;
 using ProFootball.Application.Team.Dtos;
 using ProFootball.Application.Team.Queries;
 using ProFootball.Presentation.Commands;
@@ -29,6 +31,11 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
     private string _teamTrendPolylinePoints = string.Empty;
     private long _searchVersion;
     private long _detailsVersion;
+    private bool _isAddTeamModalOpen;
+    private string _newTeamName = string.Empty;
+    private string _newTeamShortName = string.Empty;
+    private LeagueDto? _selectedLeague;
+    private int _localTeamIdSeed = -1;
 
     public TeamsViewModel(IQueryDispatcher queryDispatcher, Action<int> openDetails)
     {
@@ -43,12 +50,17 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
 
         Teams = new ObservableCollection<TeamListItemDto>();
         TacticalMetrics = new ObservableCollection<TeamMetricEntryViewModel>();
+        Leagues = new ObservableCollection<LeagueDto>();
 
         SearchCommand = new AsyncRelayCommand(StartSearchAsync, CommandExceptionHandler.Handle);
         OpenDetailsCommand = new RelayCommand(OpenDetails, () => SelectedTeam is not null);
+        OpenAddTeamModalCommand = new RelayCommand(OpenAddTeamModal);
+        CloseAddTeamModalCommand = new RelayCommand(CloseAddTeamModal);
+        AddTeamCommand = new AsyncRelayCommand(AddTeamAsync, CommandExceptionHandler.Handle);
     }
 
     public ObservableCollection<TeamListItemDto> Teams { get; }
+    public ObservableCollection<LeagueDto> Leagues { get; }
 
     public ObservableCollection<TeamMetricEntryViewModel> TacticalMetrics { get; }
 
@@ -156,6 +168,36 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
 
     public RelayCommand OpenDetailsCommand { get; }
 
+    public RelayCommand OpenAddTeamModalCommand { get; }
+
+    public RelayCommand CloseAddTeamModalCommand { get; }
+
+    public AsyncRelayCommand AddTeamCommand { get; }
+
+    public bool IsAddTeamModalOpen
+    {
+        get => _isAddTeamModalOpen;
+        private set => SetProperty(ref _isAddTeamModalOpen, value);
+    }
+
+    public string NewTeamName
+    {
+        get => _newTeamName;
+        set => SetProperty(ref _newTeamName, value);
+    }
+
+    public string NewTeamShortName
+    {
+        get => _newTeamShortName;
+        set => SetProperty(ref _newTeamShortName, value);
+    }
+
+    public LeagueDto? SelectedLeague
+    {
+        get => _selectedLeague;
+        set => SetProperty(ref _selectedLeague, value);
+    }
+
     public async Task SearchAsync()
     {
         var searchVersion = Interlocked.Increment(ref _searchVersion);
@@ -164,6 +206,8 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
 
         try
         {
+            await EnsureLeaguesLoadedAsync();
+
             var result = await _queryDispatcher.DispatchAsync<TeamSearchQuery, PagedResult<TeamListItemDto>>(new TeamSearchQuery(
                 Name: NormalizeText(NameFilter, null),
                 SortBy: null,
@@ -366,6 +410,68 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
         _openDetails(SelectedTeam.TeamApiId);
     }
 
+    private async Task EnsureLeaguesLoadedAsync()
+    {
+        if (Leagues.Count > 0)
+        {
+            return;
+        }
+
+        var leagues = await _queryDispatcher.DispatchAsync<GetLeaguesQuery, IReadOnlyList<LeagueDto>>(new GetLeaguesQuery());
+        foreach (var league in leagues)
+        {
+            Leagues.Add(league);
+        }
+    }
+
+    private void OpenAddTeamModal()
+    {
+        ErrorMessage = null;
+        NewTeamName = string.Empty;
+        NewTeamShortName = string.Empty;
+        SelectedLeague = Leagues.FirstOrDefault();
+        IsAddTeamModalOpen = true;
+    }
+
+    private void CloseAddTeamModal()
+    {
+        IsAddTeamModalOpen = false;
+    }
+
+    private async Task AddTeamAsync()
+    {
+        await EnsureLeaguesLoadedAsync();
+
+        if (string.IsNullOrWhiteSpace(NewTeamName))
+        {
+            ErrorMessage = "Team name is required.";
+            return;
+        }
+
+        if (SelectedLeague is null)
+        {
+            ErrorMessage = "League is required.";
+            return;
+        }
+
+        var normalizedShortName = NormalizeText(NewTeamShortName, null);
+        var shortName = string.IsNullOrWhiteSpace(normalizedShortName)
+            ? BuildShortCode(NewTeamName)
+            : normalizedShortName.ToUpperInvariant();
+
+        var team = new TeamListItemDto(
+            _localTeamIdSeed--,
+            NewTeamName.Trim(),
+            shortName,
+            null);
+
+        Teams.Insert(0, team);
+        TotalCount += 1;
+        SelectedTeam = team;
+        ErrorMessage = null;
+        IsAddTeamModalOpen = false;
+    }
+
     private void RaiseSelectedTeamPropertiesChanged()
     {
         RaisePropertyChanged(nameof(SelectedTeamName));
@@ -386,6 +492,17 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
         }
 
         return value.Trim();
+    }
+
+    private static string BuildShortCode(string name)
+    {
+        var letters = name.Where(char.IsLetter).Take(3).ToArray();
+        if (letters.Length == 0)
+        {
+            return "NEW";
+        }
+
+        return new string(letters).ToUpperInvariant();
     }
 
     public void Dispose()
