@@ -724,7 +724,16 @@
   </data>
   <data name="CountriesLeagues_Add_Confirm" xml:space="preserve">
     <value>Add league</value>
+  </data>  <data name="CountriesLeagues_Add_MaxTeams" xml:space="preserve">
+    <value>Max teams</value>
+  </data>
+  <data name="CountriesLeagues_Add_Description" xml:space="preserve">
+    <value>Description</value>
+  </data>  <data name="Common_Page" xml:space="preserve">
+    <value>Page: </value>
   </data></root>
+
+
 
 
 

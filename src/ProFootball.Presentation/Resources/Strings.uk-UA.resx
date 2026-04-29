@@ -91,16 +91,16 @@
     <value>ProFootball access</value>
   </data>
   <data name="Auth_Action_Register" xml:space="preserve">
-    <value>Register</value>
+    <value>Реєстрація</value>
   </data>
   <data name="Auth_Action_SignIn" xml:space="preserve">
-    <value>Sign in</value>
+    <value>Вхід</value>
   </data>
   <data name="Auth_Field_ConfirmPassword" xml:space="preserve">
     <value>Confirm password</value>
   </data>
   <data name="Auth_Field_FirstName" xml:space="preserve">
-    <value>First name</value>
+    <value>Ім'я</value>
   </data>
   <data name="Auth_Field_LastName" xml:space="preserve">
     <value>Last name</value>
@@ -724,7 +724,15 @@
   </data>
   <data name="CountriesLeagues_Add_Confirm" xml:space="preserve">
     <value>Додати лігу</value>
+  </data>  <data name="CountriesLeagues_Add_MaxTeams" xml:space="preserve">
+    <value>Максимум команд</value>
+  </data>
+  <data name="CountriesLeagues_Add_Description" xml:space="preserve">
+    <value>Опис</value>
+  </data>  <data name="Common_Page" xml:space="preserve">
+    <value>Сторінка: </value>
   </data></root>
+
 
 
 
