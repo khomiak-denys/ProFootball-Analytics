@@ -678,12 +678,54 @@
   <data name="Common_Action_Delete" xml:space="preserve">
     <value>Видалити</value>
   </data>
+  <data name="Common_Action_Cancel" xml:space="preserve">
+    <value>Скасувати</value>
+  </data>
+  <data name="Teams_Add_Button" xml:space="preserve">
+    <value>Додати команду</value>
+  </data>
+  <data name="Teams_Add_Title" xml:space="preserve">
+    <value>Додати нову команду</value>
+  </data>
+  <data name="Teams_Add_Subtitle" xml:space="preserve">
+    <value>Введіть дані про нову футбольну команду.</value>
+  </data>
+  <data name="Teams_Add_Name" xml:space="preserve">
+    <value>Назва команди</value>
+  </data>
+  <data name="Teams_Add_ShortName" xml:space="preserve">
+    <value>Коротка назва</value>
+  </data>
+  <data name="Teams_Add_League" xml:space="preserve">
+    <value>Ліга</value>
+  </data>
+  <data name="Teams_Add_Confirm" xml:space="preserve">
+    <value>Додати команду</value>
+  </data>
   <data name="Players_Write_Title" xml:space="preserve">
     <value>Керування гравцем</value>
   </data>
   <data name="Matches_Write_Title" xml:space="preserve">
     <value>Керування матчем</value>
+  </data>  <data name="CountriesLeagues_Add_Button" xml:space="preserve">
+    <value>Додати лігу</value>
+  </data>
+  <data name="CountriesLeagues_Add_Title" xml:space="preserve">
+    <value>Додати нову лігу</value>
+  </data>
+  <data name="CountriesLeagues_Add_Subtitle" xml:space="preserve">
+    <value>Введіть дані про нову футбольну лігу</value>
+  </data>
+  <data name="CountriesLeagues_Add_Name" xml:space="preserve">
+    <value>Назва ліги</value>
+  </data>
+  <data name="CountriesLeagues_Add_Country" xml:space="preserve">
+    <value>Країна</value>
+  </data>
+  <data name="CountriesLeagues_Add_Confirm" xml:space="preserve">
+    <value>Додати лігу</value>
   </data></root>
+
 
 
 
