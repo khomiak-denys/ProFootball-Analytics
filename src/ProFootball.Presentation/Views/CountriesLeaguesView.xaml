@@ -151,6 +151,14 @@
                                             <StackPanel Grid.Column="1"
                                                         Orientation="Horizontal"
                                                         VerticalAlignment="Top">
+                                                <Button Width="160"
+                                                        Height="44"
+                                                        Margin="0,0,12,0"
+                                                        Background="{DynamicResource SuccessForegroundBrush}"
+                                                        Foreground="White"
+                                                        FontSize="22"
+                                                        Content="{loc:Loc Key=CountriesLeagues_Add_Button}"
+                                                        Command="{Binding CountriesLeagues.OpenAddLeagueModalCommand}" />
                                                 <Border Padding="10,6"
                                                         Margin="0,0,0,0"
                                                         Background="{DynamicResource SuccessSoftBackgroundBrush}"
@@ -366,6 +374,91 @@
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
+
+                            <Grid Grid.ColumnSpan="3"
+                                  Background="#99000000"
+                                  Visibility="{Binding CountriesLeagues.IsAddLeagueModalOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Border Width="560"
+                                        Padding="22"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Background="{DynamicResource CardBackgroundBrush}"
+                                        BorderBrush="{DynamicResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="12">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock FontSize="36"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TitleForegroundBrush}"
+                                                           Text="{loc:Loc Key=CountriesLeagues_Add_Title}" />
+                                                <TextBlock Margin="0,6,0,0"
+                                                           FontSize="18"
+                                                           Foreground="{DynamicResource MutedForegroundBrush}"
+                                                           Text="{loc:Loc Key=CountriesLeagues_Add_Subtitle}" />
+                                            </StackPanel>
+                                            <Button Grid.Column="1"
+                                                    Width="32"
+                                                    Height="32"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    FontFamily="Segoe MDL2 Assets"
+                                                    FontSize="14"
+                                                    Foreground="{DynamicResource MutedForegroundBrush}"
+                                                    Content="&#xE711;"
+                                                    Command="{Binding CountriesLeagues.CloseAddLeagueModalCommand}" />
+                                        </Grid>
+
+                                        <StackPanel Grid.Row="1" Margin="0,18,0,0">
+                                            <TextBlock FontSize="20"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                                       Text="{loc:Loc Key=CountriesLeagues_Add_Name}" />
+                                            <TextBox Margin="0,8,0,0"
+                                                     Style="{StaticResource PlayersFilterTextBoxStyle}"
+                                                     Text="{Binding CountriesLeagues.NewLeagueName, UpdateSourceTrigger=PropertyChanged}" />
+
+                                            <TextBlock Margin="0,14,0,0"
+                                                       FontSize="20"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                                       Text="{loc:Loc Key=CountriesLeagues_Add_Country}" />
+                                            <ComboBox Margin="0,8,0,0"
+                                                      Style="{StaticResource PlayersFilterComboBoxStyle}"
+                                                      ItemsSource="{Binding CountriesLeagues.Countries}"
+                                                      SelectedItem="{Binding CountriesLeagues.SelectedCountryForNewLeague, Mode=TwoWay}"
+                                                      DisplayMemberPath="Name" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="2"
+                                                    Margin="0,20,0,0"
+                                                    Orientation="Horizontal"
+                                                    HorizontalAlignment="Right">
+                                            <Button Width="150"
+                                                    Margin="0,0,10,0"
+                                                    Content="{loc:Loc Key=Common_Action_Cancel}"
+                                                    Command="{Binding CountriesLeagues.CloseAddLeagueModalCommand}" />
+                                            <Button Width="190"
+                                                    Background="{DynamicResource SuccessForegroundBrush}"
+                                                    Foreground="White"
+                                                    Content="{loc:Loc Key=CountriesLeagues_Add_Confirm}"
+                                                    Command="{Binding CountriesLeagues.AddLeagueCommand}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </Grid>
                         </Grid>
                     
 </UserControl>

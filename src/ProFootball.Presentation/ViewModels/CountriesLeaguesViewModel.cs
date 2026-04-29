@@ -21,6 +21,10 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     private int _totalClubs;
     private int _activeLeagues;
     private int _divisions;
+    private bool _isAddLeagueModalOpen;
+    private string _newLeagueName = string.Empty;
+    private CountryLeagueListItemDto? _selectedCountryForNewLeague;
+    private int _localLeagueIdSeed = -1;
 
     public CountriesLeaguesViewModel(
         IQueryDispatcher queryDispatcher,
@@ -31,6 +35,9 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         Countries = new ObservableCollection<CountryLeagueListItemDto>();
         LeagueCards = new ObservableCollection<LeagueCountryCardDto>();
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, CommandExceptionHandler.Handle);
+        OpenAddLeagueModalCommand = new RelayCommand(OpenAddLeagueModal);
+        CloseAddLeagueModalCommand = new RelayCommand(CloseAddLeagueModal);
+        AddLeagueCommand = new RelayCommand(AddLeague);
     }
 
     public ObservableCollection<CountryLeagueListItemDto> Countries { get; }
@@ -57,6 +64,9 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     }
 
     public AsyncRelayCommand RefreshCommand { get; }
+    public RelayCommand OpenAddLeagueModalCommand { get; }
+    public RelayCommand CloseAddLeagueModalCommand { get; }
+    public RelayCommand AddLeagueCommand { get; }
 
     public bool IsLoading
     {
@@ -71,6 +81,24 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     }
 
     public string SelectedCountryName => SelectedCountry?.Name ?? "Select country";
+
+    public bool IsAddLeagueModalOpen
+    {
+        get => _isAddLeagueModalOpen;
+        private set => SetProperty(ref _isAddLeagueModalOpen, value);
+    }
+
+    public string NewLeagueName
+    {
+        get => _newLeagueName;
+        set => SetProperty(ref _newLeagueName, value);
+    }
+
+    public CountryLeagueListItemDto? SelectedCountryForNewLeague
+    {
+        get => _selectedCountryForNewLeague;
+        set => SetProperty(ref _selectedCountryForNewLeague, value);
+    }
 
     public string SelectedCountryAboutTitle => SelectedCountry is null
         ? "Country football overview"
@@ -130,6 +158,11 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
             else
             {
                 await ReloadCountrySnapshotSafeAsync();
+            }
+
+            if (SelectedCountryForNewLeague is null)
+            {
+                SelectedCountryForNewLeague = SelectedCountry ?? Countries.FirstOrDefault();
             }
         }
         catch (Exception exception)
@@ -279,6 +312,46 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
 
         return $"{countryName} has a competitive football ecosystem with multiple divisions. " +
                "League structure snapshots below summarize active competitions, club participation, and latest-season activity.";
+    }
+
+    private void OpenAddLeagueModal()
+    {
+        ErrorMessage = null;
+        NewLeagueName = string.Empty;
+        SelectedCountryForNewLeague = SelectedCountry ?? Countries.FirstOrDefault();
+        IsAddLeagueModalOpen = true;
+    }
+
+    private void CloseAddLeagueModal()
+    {
+        IsAddLeagueModalOpen = false;
+    }
+
+    private void AddLeague()
+    {
+        if (string.IsNullOrWhiteSpace(NewLeagueName))
+        {
+            ErrorMessage = "League name is required.";
+            return;
+        }
+
+        if (SelectedCountryForNewLeague is null)
+        {
+            ErrorMessage = "Country is required.";
+            return;
+        }
+
+        var normalizedLeagueName = NewLeagueName.Trim();
+        var season = LeagueCards.Select(card => card.Season).FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)) ?? "2025/26";
+        LeagueCards.Insert(0, new LeagueCountryCardDto(
+            _localLeagueIdSeed--,
+            normalizedLeagueName,
+            season,
+            0,
+            0));
+
+        ErrorMessage = null;
+        IsAddLeagueModalOpen = false;
     }
 
     public void Dispose()
