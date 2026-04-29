@@ -10,6 +10,20 @@ namespace ProFootball.Presentation.ViewModels;
 
 public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
 {
+    private static readonly string[] CountryFallbackPool =
+    [
+        "Albania", "Algeria", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahrain", "Bangladesh", "Belarus",
+        "Belgium", "Bolivia", "Bosnia and Herzegovina", "Brazil", "Bulgaria", "Cameroon", "Canada", "Chile", "China", "Colombia",
+        "Costa Rica", "Croatia", "Cyprus", "Czech Republic", "Denmark", "Ecuador", "Egypt", "England", "Estonia", "Finland",
+        "France", "Georgia", "Germany", "Ghana", "Greece", "Hungary", "Iceland", "India", "Indonesia", "Iran",
+        "Iraq", "Ireland", "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya",
+        "Kuwait", "Latvia", "Lebanon", "Lithuania", "Luxembourg", "Malaysia", "Mexico", "Moldova", "Montenegro", "Morocco",
+        "Netherlands", "New Zealand", "Nigeria", "North Macedonia", "Norway", "Oman", "Pakistan", "Panama", "Paraguay", "Peru",
+        "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Saudi Arabia", "Scotland", "Senegal", "Serbia", "Singapore",
+        "Slovakia", "Slovenia", "South Africa", "South Korea", "Spain", "Sweden", "Switzerland", "Syria", "Thailand", "Tunisia",
+        "Turkey", "Ukraine", "United Arab Emirates", "United States", "Uruguay", "Uzbekistan", "Venezuela", "Vietnam", "Wales", "Zimbabwe"
+    ];
+
     private readonly IQueryDispatcher _queryDispatcher;
     private readonly ILogger<CountriesLeaguesViewModel> _logger;
     private readonly SemaphoreSlim _reloadLock = new(1, 1);
@@ -21,6 +35,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     private int _totalClubs;
     private int _activeLeagues;
     private int _divisions;
+    private string? _snapshotAboutDescription;
     private bool _isAddLeagueModalOpen;
     private string _newLeagueName = string.Empty;
     private CountryLeagueListItemDto? _selectedCountryForNewLeague;
@@ -33,6 +48,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         _queryDispatcher = queryDispatcher;
         _logger = logger;
         Countries = new ObservableCollection<CountryLeagueListItemDto>();
+        CountryOptions = new ObservableCollection<CountryLeagueListItemDto>();
         LeagueCards = new ObservableCollection<LeagueCountryCardDto>();
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, CommandExceptionHandler.Handle);
         OpenAddLeagueModalCommand = new RelayCommand(OpenAddLeagueModal);
@@ -41,6 +57,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     }
 
     public ObservableCollection<CountryLeagueListItemDto> Countries { get; }
+    public ObservableCollection<CountryLeagueListItemDto> CountryOptions { get; }
 
     public ObservableCollection<LeagueCountryCardDto> LeagueCards { get; }
 
@@ -59,6 +76,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
             RaisePropertyChanged(nameof(SelectedCountryName));
             RaisePropertyChanged(nameof(SelectedCountryAboutTitle));
             RaisePropertyChanged(nameof(SelectedCountryDescription));
+            RaisePropertyChanged(nameof(EffectiveCountryDescription));
             _ = ReloadCountrySnapshotSafeAsync();
         }
     }
@@ -105,6 +123,10 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         : $"About {SelectedCountry.Name} Football";
 
     public string SelectedCountryDescription => BuildCountryDescription(SelectedCountry?.Name);
+    public string EffectiveCountryDescription =>
+        !string.IsNullOrWhiteSpace(_snapshotAboutDescription)
+            ? _snapshotAboutDescription
+            : BuildCountryDescription(SelectedCountry?.Name);
 
     public int TotalCountries => Countries.Count;
 
@@ -137,19 +159,24 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
 
             var countries = await _queryDispatcher.DispatchAsync<GetCountriesWithLeagueCountQuery, IReadOnlyList<CountryLeagueListItemDto>>(
                 new GetCountriesWithLeagueCountQuery());
+            var countriesWithLeagues = countries
+                .Where(country => country.LeagueCount > 0)
+                .ToList();
             Countries.Clear();
-            foreach (var country in countries)
+            foreach (var country in countriesWithLeagues)
             {
                 Countries.Add(country);
             }
+
+            RebuildCountryOptions(countriesWithLeagues);
 
             RaisePropertyChanged(nameof(TotalCountries));
             RaisePropertyChanged(nameof(TotalLeagues));
 
             var previouslySelectedCountryName = SelectedCountry?.Name;
-            var nextSelection = countries.FirstOrDefault(country =>
+            var nextSelection = countriesWithLeagues.FirstOrDefault(country =>
                     string.Equals(country.Name, previouslySelectedCountryName, StringComparison.Ordinal))
-                ?? countries.FirstOrDefault();
+                ?? countriesWithLeagues.FirstOrDefault();
 
             if (!ReferenceEquals(_selectedCountry, nextSelection))
             {
@@ -162,7 +189,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
 
             if (SelectedCountryForNewLeague is null)
             {
-                SelectedCountryForNewLeague = SelectedCountry ?? Countries.FirstOrDefault();
+                SelectedCountryForNewLeague = SelectedCountry ?? CountryOptions.FirstOrDefault();
             }
         }
         catch (Exception exception)
@@ -202,6 +229,8 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
                 reloadToken);
             var cards = snapshot.LeagueCards;
             var summary = snapshot.Summary;
+            _snapshotAboutDescription = snapshot.AboutDescription;
+            RaisePropertyChanged(nameof(EffectiveCountryDescription));
 
             LeagueCards.Clear();
             foreach (var card in cards)
@@ -246,6 +275,8 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         TotalClubs = 0;
         ActiveLeagues = 0;
         Divisions = 0;
+        _snapshotAboutDescription = null;
+        RaisePropertyChanged(nameof(EffectiveCountryDescription));
     }
 
     private long BeginLoading()
@@ -314,11 +345,37 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
                "League structure snapshots below summarize active competitions, club participation, and latest-season activity.";
     }
 
+    private void RebuildCountryOptions(IReadOnlyCollection<CountryLeagueListItemDto> sourceCountries)
+    {
+        CountryOptions.Clear();
+        foreach (var country in sourceCountries)
+        {
+            CountryOptions.Add(country);
+        }
+
+        var existing = CountryOptions
+            .Select(country => country.Name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var countryName in CountryFallbackPool)
+        {
+            if (CountryOptions.Count >= 100)
+            {
+                break;
+            }
+
+            if (existing.Add(countryName))
+            {
+                CountryOptions.Add(new CountryLeagueListItemDto(countryName, 0));
+            }
+        }
+    }
+
     private void OpenAddLeagueModal()
     {
         ErrorMessage = null;
         NewLeagueName = string.Empty;
-        SelectedCountryForNewLeague = SelectedCountry ?? Countries.FirstOrDefault();
+        SelectedCountryForNewLeague = SelectedCountry ?? CountryOptions.FirstOrDefault();
         IsAddLeagueModalOpen = true;
     }
 
@@ -343,15 +400,50 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
 
         var normalizedLeagueName = NewLeagueName.Trim();
         var season = LeagueCards.Select(card => card.Season).FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)) ?? "2025/26";
+        var countryName = SelectedCountryForNewLeague.Name;
         LeagueCards.Insert(0, new LeagueCountryCardDto(
             _localLeagueIdSeed--,
             normalizedLeagueName,
             season,
             0,
-            0));
+            0,
+            null,
+            null));
+
+        UpsertCountryAfterLeagueAdd(countryName);
 
         ErrorMessage = null;
         IsAddLeagueModalOpen = false;
+    }
+
+    private void UpsertCountryAfterLeagueAdd(string countryName)
+    {
+        var existingCountry = Countries.FirstOrDefault(country =>
+            string.Equals(country.Name, countryName, StringComparison.OrdinalIgnoreCase));
+
+        if (existingCountry is null)
+        {
+            var addedCountry = new CountryLeagueListItemDto(countryName, 1);
+            Countries.Add(addedCountry);
+            SelectedCountry = addedCountry;
+        }
+        else
+        {
+            var countryIndex = Countries.IndexOf(existingCountry);
+            Countries[countryIndex] = existingCountry with { LeagueCount = existingCountry.LeagueCount + 1 };
+        }
+
+        var optionCountry = CountryOptions.FirstOrDefault(country =>
+            string.Equals(country.Name, countryName, StringComparison.OrdinalIgnoreCase));
+        if (optionCountry is not null)
+        {
+            var optionIndex = CountryOptions.IndexOf(optionCountry);
+            CountryOptions[optionIndex] = optionCountry with { LeagueCount = optionCountry.LeagueCount + 1 };
+            SelectedCountryForNewLeague = CountryOptions[optionIndex];
+        }
+
+        RaisePropertyChanged(nameof(TotalCountries));
+        RaisePropertyChanged(nameof(TotalLeagues));
     }
 
     public void Dispose()

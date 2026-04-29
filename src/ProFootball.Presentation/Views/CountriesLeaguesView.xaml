@@ -315,7 +315,7 @@
                                                    FontSize="26"
                                                    Foreground="{DynamicResource TitleForegroundBrush}"
                                                    TextWrapping="Wrap"
-                                                   Text="{Binding CountriesLeagues.SelectedCountryDescription}" />
+                                                   Text="{Binding CountriesLeagues.EffectiveCountryDescription}" />
                                         <Separator Margin="0,14,0,14" />
                                         <Grid>
                                             <Grid.ColumnDefinitions>
@@ -438,7 +438,7 @@
                                                        Text="{loc:Loc Key=CountriesLeagues_Add_Country}" />
                                             <ComboBox Margin="0,8,0,0"
                                                       Style="{StaticResource PlayersFilterComboBoxStyle}"
-                                                      ItemsSource="{Binding CountriesLeagues.Countries}"
+                                                      ItemsSource="{Binding CountriesLeagues.CountryOptions}"
                                                       SelectedItem="{Binding CountriesLeagues.SelectedCountryForNewLeague, Mode=TwoWay}"
                                                       DisplayMemberPath="Name"
                                                       TextSearch.TextPath="Name" />
