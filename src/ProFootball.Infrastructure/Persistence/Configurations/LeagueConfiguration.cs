@@ -22,6 +22,11 @@ public sealed class LeagueConfiguration : IEntityTypeConfiguration<League>
             .HasMaxLength(120)
             .IsRequired();
 
+        builder.Property(league => league.MaxTeams);
+
+        builder.Property(league => league.Description)
+            .HasMaxLength(2000);
+
         builder.HasIndex(league => league.Name);
         builder.HasIndex(league => league.CountryName);
     }

@@ -82,7 +82,8 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
         {
             return Result<CountryLeagueSnapshotDto>.Success(new CountryLeagueSnapshotDto(
                 Array.Empty<LeagueCountryCardDto>(),
-                new CountryLeagueSummaryDto(0, 0, 0)));
+                new CountryLeagueSummaryDto(0, 0, 0),
+                string.Empty));
         }
 
         var countryName = query.CountryName.Trim();
@@ -93,8 +94,12 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             TotalClubs: cards.Sum(card => card.TeamsCount),
             ActiveLeagues: activeLeagues,
             Divisions: CalculateDivisions(cards));
+        var aboutDescription = cards
+            .Select(card => card.Description)
+            .FirstOrDefault(description => !string.IsNullOrWhiteSpace(description))
+            ?? string.Empty;
 
-        return Result<CountryLeagueSnapshotDto>.Success(new CountryLeagueSnapshotDto(cards, summary));
+        return Result<CountryLeagueSnapshotDto>.Success(new CountryLeagueSnapshotDto(cards, summary, aboutDescription));
     }
 
     private static int CalculateDivisions(IReadOnlyList<LeagueCountryCardDto> cards)
@@ -169,6 +174,8 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             {
                 league.Id,
                 league.Name,
+                league.MaxTeams,
+                league.Description,
             })
             .ToListAsync(cancellationToken);
 
@@ -218,7 +225,9 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
                         league.Name,
                         "--",
                         0,
-                        0);
+                        0,
+                        league.MaxTeams,
+                        league.Description);
                 }
 
                 return new LeagueCountryCardDto(
@@ -226,7 +235,9 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
                     league.Name,
                     latestAggregate.Season,
                     latestAggregate.TeamsCount,
-                    latestAggregate.MatchCount);
+                    latestAggregate.MatchCount,
+                    league.MaxTeams,
+                    league.Description);
             })
             .ToList();
     }
