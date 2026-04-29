@@ -428,7 +428,7 @@
                                                        Foreground="{DynamicResource TitleForegroundBrush}"
                                                        Text="{loc:Loc Key=CountriesLeagues_Add_Name}" />
                                             <TextBox Margin="0,8,0,0"
-                                                     Style="{StaticResource PlayersFilterTextBoxStyle}"
+                                                     Style="{StaticResource AuthInputTextBoxStyle}"
                                                      Text="{Binding CountriesLeagues.NewLeagueName, UpdateSourceTrigger=PropertyChanged}" />
 
                                             <TextBlock Margin="0,14,0,0"
@@ -440,6 +440,7 @@
                                                       Style="{StaticResource PlayersFilterComboBoxStyle}"
                                                       ItemsSource="{Binding CountriesLeagues.Countries}"
                                                       SelectedItem="{Binding CountriesLeagues.SelectedCountryForNewLeague, Mode=TwoWay}"
+                                                      DisplayMemberPath="Name"
                                                       TextSearch.TextPath="Name">
                                                 <ComboBox.ItemTemplate>
                                                     <DataTemplate>

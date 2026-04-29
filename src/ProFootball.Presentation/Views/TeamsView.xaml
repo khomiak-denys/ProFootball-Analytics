@@ -332,7 +332,7 @@
                                                        Foreground="{DynamicResource TitleForegroundBrush}"
                                                        Text="{loc:Loc Key=Teams_Add_Name}" />
                                             <TextBox Margin="0,8,0,0"
-                                                     Style="{StaticResource PlayersFilterTextBoxStyle}"
+                                                     Style="{StaticResource AuthInputTextBoxStyle}"
                                                      Text="{Binding Teams.NewTeamName, UpdateSourceTrigger=PropertyChanged}" />
 
                                             <TextBlock Margin="0,14,0,0"
@@ -341,7 +341,7 @@
                                                        Foreground="{DynamicResource TitleForegroundBrush}"
                                                        Text="{loc:Loc Key=Teams_Add_ShortName}" />
                                             <TextBox Margin="0,8,0,0"
-                                                     Style="{StaticResource PlayersFilterTextBoxStyle}"
+                                                     Style="{StaticResource AuthInputTextBoxStyle}"
                                                      Text="{Binding Teams.NewTeamShortName, UpdateSourceTrigger=PropertyChanged}" />
 
                                             <TextBlock Margin="0,14,0,0"
