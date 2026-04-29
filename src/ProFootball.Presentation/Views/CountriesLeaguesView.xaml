@@ -441,13 +441,7 @@
                                                       ItemsSource="{Binding CountriesLeagues.Countries}"
                                                       SelectedItem="{Binding CountriesLeagues.SelectedCountryForNewLeague, Mode=TwoWay}"
                                                       DisplayMemberPath="Name"
-                                                      TextSearch.TextPath="Name">
-                                                <ComboBox.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding Name}" />
-                                                    </DataTemplate>
-                                                </ComboBox.ItemTemplate>
-                                            </ComboBox>
+                                                      TextSearch.TextPath="Name" />
                                         </StackPanel>
 
                                         <StackPanel Grid.Row="2"
