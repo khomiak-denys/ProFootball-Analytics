@@ -62,7 +62,7 @@
                     <Button Grid.Column="6" Content="{loc:Loc Key=Common_Action_Refresh}" Command="{Binding Dashboard.RefreshCommand}" />
                     <TextBlock Grid.Column="8" VerticalAlignment="Center" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}">
                         <Run Text="{loc:Loc Key=Dashboard_AsOf}" />
-                        <Run Text="{Binding Dashboard.CurrentDateLabel}" />
+                        <Run Text="{Binding Dashboard.CurrentDateLabel, Mode=OneWay}" />
                     </TextBlock>
                 </Grid>
             </Border>
