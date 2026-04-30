@@ -37,6 +37,16 @@ public sealed class MatchesViewModel : ObservableObject
     private int _editorAwayTeamId;
     private int? _editorHomeGoals;
     private int? _editorAwayGoals;
+    private bool _isAddMatchModalOpen;
+    private string _newMatchCountryName = string.Empty;
+    private string _newMatchSeason = string.Empty;
+    private int _newMatchLeagueId;
+    private int _newMatchHomeTeamId;
+    private int _newMatchAwayTeamId;
+    private int? _newMatchHomeGoals;
+    private int? _newMatchAwayGoals;
+    private DateTime? _newMatchDate;
+    private bool _isEditMatchModalOpen;
 
     public MatchesViewModel(
         IQueryDispatcher queryDispatcher,
@@ -61,6 +71,12 @@ public sealed class MatchesViewModel : ObservableObject
         CreateMatchCommand = new AsyncRelayCommand(CreateMatchAsync, CommandExceptionHandler.Handle);
         UpdateMatchCommand = new AsyncRelayCommand(UpdateMatchAsync, CommandExceptionHandler.Handle, () => SelectedMatch is not null);
         DeleteMatchCommand = new AsyncRelayCommand(DeleteMatchAsync, CommandExceptionHandler.Handle, () => SelectedMatch is not null);
+        OpenAddMatchModalCommand = new RelayCommand(OpenAddMatchModal);
+        CloseAddMatchModalCommand = new RelayCommand(CloseAddMatchModal);
+        AddMatchCommand = new AsyncRelayCommand(AddMatchAsync, CommandExceptionHandler.Handle);
+        OpenEditMatchModalCommand = new RelayCommand(OpenEditMatchModal, () => SelectedMatch is not null);
+        CloseEditMatchModalCommand = new RelayCommand(CloseEditMatchModal);
+        SaveEditMatchCommand = new AsyncRelayCommand(SaveEditMatchAsync, CommandExceptionHandler.Handle, () => SelectedMatch is not null);
     }
 
     public ObservableCollection<MatchListItemDto> Matches { get; }
@@ -84,6 +100,8 @@ public sealed class MatchesViewModel : ObservableObject
             OpenDetailsCommand.RaiseCanExecuteChanged();
             UpdateMatchCommand.RaiseCanExecuteChanged();
             DeleteMatchCommand.RaiseCanExecuteChanged();
+            OpenEditMatchModalCommand.RaiseCanExecuteChanged();
+            SaveEditMatchCommand.RaiseCanExecuteChanged();
             RaiseSelectedMatchPropertiesChanged();
             RaisePropertyChanged(nameof(HasSelectedMatch));
             SyncEditorWithSelection();
@@ -271,6 +289,78 @@ public sealed class MatchesViewModel : ObservableObject
     public AsyncRelayCommand UpdateMatchCommand { get; }
 
     public AsyncRelayCommand DeleteMatchCommand { get; }
+
+    public RelayCommand OpenAddMatchModalCommand { get; }
+
+    public RelayCommand CloseAddMatchModalCommand { get; }
+
+    public AsyncRelayCommand AddMatchCommand { get; }
+
+    public RelayCommand OpenEditMatchModalCommand { get; }
+
+    public RelayCommand CloseEditMatchModalCommand { get; }
+
+    public AsyncRelayCommand SaveEditMatchCommand { get; }
+
+    public bool IsAddMatchModalOpen
+    {
+        get => _isAddMatchModalOpen;
+        private set => SetProperty(ref _isAddMatchModalOpen, value);
+    }
+
+    public string NewMatchCountryName
+    {
+        get => _newMatchCountryName;
+        set => SetProperty(ref _newMatchCountryName, value);
+    }
+
+    public string NewMatchSeason
+    {
+        get => _newMatchSeason;
+        set => SetProperty(ref _newMatchSeason, value);
+    }
+
+    public int NewMatchLeagueId
+    {
+        get => _newMatchLeagueId;
+        set => SetProperty(ref _newMatchLeagueId, value);
+    }
+
+    public int NewMatchHomeTeamId
+    {
+        get => _newMatchHomeTeamId;
+        set => SetProperty(ref _newMatchHomeTeamId, value);
+    }
+
+    public int NewMatchAwayTeamId
+    {
+        get => _newMatchAwayTeamId;
+        set => SetProperty(ref _newMatchAwayTeamId, value);
+    }
+
+    public int? NewMatchHomeGoals
+    {
+        get => _newMatchHomeGoals;
+        set => SetProperty(ref _newMatchHomeGoals, value);
+    }
+
+    public int? NewMatchAwayGoals
+    {
+        get => _newMatchAwayGoals;
+        set => SetProperty(ref _newMatchAwayGoals, value);
+    }
+
+    public DateTime? NewMatchDate
+    {
+        get => _newMatchDate;
+        set => SetProperty(ref _newMatchDate, value);
+    }
+
+    public bool IsEditMatchModalOpen
+    {
+        get => _isEditMatchModalOpen;
+        private set => SetProperty(ref _isEditMatchModalOpen, value);
+    }
 
     public string EditorCountryName
     {
@@ -499,6 +589,88 @@ public sealed class MatchesViewModel : ObservableObject
         }
 
         await StartSearchAsync();
+    }
+
+    private void OpenAddMatchModal()
+    {
+        NewMatchCountryName = SelectedMatch?.CountryName ?? SelectedLeague?.CountryName ?? string.Empty;
+        NewMatchSeason = NormalizeSeasonFilter(Season) ?? SelectedMatch?.Season ?? "2015/2016";
+        NewMatchLeagueId = SelectedLeague?.Id ?? 0;
+        NewMatchHomeTeamId = 0;
+        NewMatchAwayTeamId = 0;
+        NewMatchHomeGoals = null;
+        NewMatchAwayGoals = null;
+        NewMatchDate = DateTime.UtcNow.Date;
+        IsAddMatchModalOpen = true;
+    }
+
+    private void CloseAddMatchModal()
+    {
+        IsAddMatchModalOpen = false;
+    }
+
+    private async Task AddMatchAsync()
+    {
+        var result = await _commandDispatcher.DispatchAsync<CreateMatchCommand, Result>(new CreateMatchCommand(
+            NewMatchCountryName,
+            NewMatchLeagueId,
+            NewMatchSeason,
+            NormalizeUtcDate(NewMatchDate) ?? DateTime.UtcNow.Date,
+            NewMatchHomeTeamId,
+            NewMatchAwayTeamId,
+            NewMatchHomeGoals,
+            NewMatchAwayGoals));
+
+        if (result.IsFailure)
+        {
+            return;
+        }
+
+        IsAddMatchModalOpen = false;
+        await StartSearchAsync();
+    }
+
+    private void OpenEditMatchModal()
+    {
+        if (SelectedMatch is null)
+        {
+            return;
+        }
+
+        SyncEditorWithSelection();
+        IsEditMatchModalOpen = true;
+    }
+
+    private void CloseEditMatchModal()
+    {
+        IsEditMatchModalOpen = false;
+    }
+
+    private async Task SaveEditMatchAsync()
+    {
+        if (SelectedMatch is null)
+        {
+            return;
+        }
+
+        var result = await _commandDispatcher.DispatchAsync<UpdateMatchCommand, Result>(new UpdateMatchCommand(
+            SelectedMatch.MatchApiId,
+            EditorCountryName,
+            EditorLeagueId,
+            EditorSeason,
+            NormalizeUtcDate(SelectedMatch.Date) ?? SelectedMatch.Date,
+            EditorHomeTeamId,
+            EditorAwayTeamId,
+            EditorHomeGoals,
+            EditorAwayGoals));
+
+        if (result.IsFailure)
+        {
+            return;
+        }
+
+        IsEditMatchModalOpen = false;
+        await SearchAsync();
     }
 
     private async Task UpdateMatchAsync()

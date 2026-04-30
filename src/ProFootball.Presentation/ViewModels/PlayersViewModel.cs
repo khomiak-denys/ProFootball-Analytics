@@ -52,6 +52,11 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     private DateTime? _editorBirthday;
     private int? _editorHeight;
     private int? _editorWeight;
+    private bool _isAddPlayerModalOpen;
+    private string _newPlayerName = string.Empty;
+    private DateTime? _newPlayerBirthday;
+    private int? _newPlayerHeight;
+    private int? _newPlayerWeight;
 
     public PlayersViewModel(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher, Action<int> openDetails)
     {
@@ -83,6 +88,9 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         DeletePlayerCommand = new AsyncRelayCommand(DeletePlayerAsync, CommandExceptionHandler.Handle, () => SelectedPlayer is not null);
         NextPageCommand = new AsyncRelayCommand(NextPageAsync, CommandExceptionHandler.Handle, () => HasNextPage);
         PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, CommandExceptionHandler.Handle, () => HasPreviousPage);
+        OpenAddPlayerModalCommand = new RelayCommand(OpenAddPlayerModal);
+        CloseAddPlayerModalCommand = new RelayCommand(CloseAddPlayerModal);
+        AddPlayerCommand = new AsyncRelayCommand(AddPlayerAsync, CommandExceptionHandler.Handle);
     }
 
     public ObservableCollection<PlayerListEntryViewModel> Players { get; }
@@ -288,6 +296,42 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     public AsyncRelayCommand NextPageCommand { get; }
 
     public AsyncRelayCommand PreviousPageCommand { get; }
+
+    public RelayCommand OpenAddPlayerModalCommand { get; }
+
+    public RelayCommand CloseAddPlayerModalCommand { get; }
+
+    public AsyncRelayCommand AddPlayerCommand { get; }
+
+    public bool IsAddPlayerModalOpen
+    {
+        get => _isAddPlayerModalOpen;
+        private set => SetProperty(ref _isAddPlayerModalOpen, value);
+    }
+
+    public string NewPlayerName
+    {
+        get => _newPlayerName;
+        set => SetProperty(ref _newPlayerName, value);
+    }
+
+    public DateTime? NewPlayerBirthday
+    {
+        get => _newPlayerBirthday;
+        set => SetProperty(ref _newPlayerBirthday, value);
+    }
+
+    public int? NewPlayerHeight
+    {
+        get => _newPlayerHeight;
+        set => SetProperty(ref _newPlayerHeight, value);
+    }
+
+    public int? NewPlayerWeight
+    {
+        get => _newPlayerWeight;
+        set => SetProperty(ref _newPlayerWeight, value);
+    }
 
     public string EditorName
     {
@@ -534,6 +578,36 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         }
 
         ErrorMessage = null;
+        await StartSearchAsync();
+    }
+
+    private void OpenAddPlayerModal()
+    {
+        ErrorMessage = null;
+        NewPlayerName = string.Empty;
+        NewPlayerBirthday = null;
+        NewPlayerHeight = null;
+        NewPlayerWeight = null;
+        IsAddPlayerModalOpen = true;
+    }
+
+    private void CloseAddPlayerModal()
+    {
+        IsAddPlayerModalOpen = false;
+    }
+
+    private async Task AddPlayerAsync()
+    {
+        var result = await _commandDispatcher.DispatchAsync<CreatePlayerCommand, Result>(
+            new CreatePlayerCommand(NewPlayerName, NewPlayerBirthday, NewPlayerHeight, NewPlayerWeight));
+        if (result.IsFailure)
+        {
+            ErrorMessage = result.Error.Message;
+            return;
+        }
+
+        ErrorMessage = null;
+        IsAddPlayerModalOpen = false;
         await StartSearchAsync();
     }
 
