@@ -1,53 +1,192 @@
-﻿<UserControl x:Class="ProFootball.Presentation.Views.MatchDetailsView"
+<UserControl x:Class="ProFootball.Presentation.Views.MatchDetailsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:loc="clr-namespace:ProFootball.Presentation.Localization"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:viewModels="clr-namespace:ProFootball.Presentation.ViewModels"
              mc:Ignorable="d">
-                        <Grid Margin="24">
-                            <Border Style="{StaticResource SectionPanelStyle}">
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                                        <TextBlock Margin="0,10,10,0" Style="{StaticResource TypographyLabel}" Text="{loc:Loc Key=MatchDetails_Field_MatchApiId}" />
-                                        <TextBox Width="160"
-                                                 Margin="0,0,12,0"
-                                                 Text="{Binding MatchDetails.SelectedMatchApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
-                                        <Button Width="120" Content="{loc:Loc Key=Common_Action_Load}" Command="{Binding MatchDetails.LoadCommand}" />
-                                    </StackPanel>
-                                    <TextBlock Style="{StaticResource TypographyH2}" Text="{Binding MatchDetails.Details.LeagueName}" />
-                                    <TextBlock Margin="0,8,0,0" Style="{StaticResource TypographyBody}" Text="{Binding MatchDetails.Details.CountryName}" />
-                                    <TextBlock Margin="0,4,0,0" Style="{StaticResource TypographyBody}" Text="{Binding MatchDetails.Details.Season}" />
-                                    <Grid Margin="0,20,0,0">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="24" />
-                                            <ColumnDefinition Width="*" />
-                                        </Grid.ColumnDefinitions>
-                                        <Border Grid.Column="0" Padding="16" CornerRadius="8" Background="{DynamicResource PanelMutedBackgroundBrush}">
-                                            <StackPanel>
-                                                <TextBlock Style="{StaticResource TypographyH2}" Text="{Binding MatchDetails.Details.HomeTeamName}" />
-                                                <TextBlock Margin="0,8,0,0" Style="{StaticResource TypographyLabel}">
-                                                    <Run Text="{loc:Loc Key=Matches_Info_Goals}" />
-                                                    <Run Text="{Binding Path=MatchDetails.Details.HomeTeamGoal, Mode=OneWay}" />
-                                                </TextBlock>
-                                            </StackPanel>
-                                        </Border>
-                                        <Border Grid.Column="2" Padding="16" CornerRadius="8" Background="{DynamicResource PanelMutedBackgroundBrush}">
-                                            <StackPanel>
-                                                <TextBlock Style="{StaticResource TypographyH2}" Text="{Binding MatchDetails.Details.AwayTeamName}" />
-                                                <TextBlock Margin="0,8,0,0" Style="{StaticResource TypographyLabel}">
-                                                    <Run Text="{loc:Loc Key=Matches_Info_Goals}" />
-                                                    <Run Text="{Binding Path=MatchDetails.Details.AwayTeamGoal, Mode=OneWay}" />
-                                                </TextBlock>
-                                            </StackPanel>
-                                        </Border>
-                                    </Grid>
-                                </StackPanel>
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="12">
+            <Button Padding="8,4"
+                    HorizontalAlignment="Left"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Foreground="{DynamicResource TitleForegroundBrush}"
+                    Command="{Binding BackToMatchesCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="14" Text="&#xE72B;" />
+                    <TextBlock Margin="8,0,0,0" FontSize="24" FontWeight="SemiBold" Text="Повернутися до списку матчів" />
+                </StackPanel>
+            </Button>
+
+            <Border Margin="0,12,0,0"
+                    Padding="18"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                <StackPanel>
+                    <TextBlock FontSize="16" Foreground="{DynamicResource MutedForegroundBrush}" Text="{Binding MatchDetails.Details.LeagueName}" />
+                    <TextBlock Margin="0,4,0,0" FontSize="14" Foreground="{DynamicResource MutedForegroundBrush}" Text="{Binding MatchDetails.Details.CountryName}" />
+                    <Grid Margin="0,20,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                            <TextBlock FontSize="44" FontWeight="SemiBold" Text="{Binding MatchDetails.Details.HomeTeamName}" TextAlignment="Center" />
+                            <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="{Binding MatchDetails.HomeTeamShort}" HorizontalAlignment="Center" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock FontSize="64" FontWeight="Bold" Foreground="{DynamicResource SuccessForegroundBrush}" TextAlignment="Center">
+                                <Run Text="{Binding MatchDetails.Details.HomeTeamGoal}" />
+                                <Run Text=" : " />
+                                <Run Text="{Binding MatchDetails.Details.AwayTeamGoal}" />
+                            </TextBlock>
+                            <TextBlock HorizontalAlignment="Center" FontSize="16" Foreground="{DynamicResource MutedForegroundBrush}" Text="{Binding MatchDetails.Details.Season}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                            <TextBlock FontSize="44" FontWeight="SemiBold" Text="{Binding MatchDetails.Details.AwayTeamName}" TextAlignment="Center" />
+                            <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="{Binding MatchDetails.AwayTeamShort}" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <Border Margin="0,14,0,0"
+                    Padding="22"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Border Width="4" Height="28" Background="{DynamicResource SuccessForegroundBrush}" CornerRadius="2" />
+                        <TextBlock Margin="12,0,0,0" FontSize="40" FontWeight="SemiBold" Text="Статистика матчу" />
+                    </StackPanel>
+
+                    <Grid Margin="0,18,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="220" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock Grid.Column="0" FontSize="28" FontWeight="SemiBold" Text="{Binding MatchDetails.HomeTeamShort}" />
+                        <TextBlock Grid.Column="1" HorizontalAlignment="Center" FontSize="24" Foreground="{DynamicResource MutedForegroundBrush}" Text="Володіння м'ячем" />
+                        <TextBlock Grid.Column="2" HorizontalAlignment="Right" FontSize="28" FontWeight="SemiBold" Text="{Binding MatchDetails.AwayTeamShort}" />
+                    </Grid>
+
+                    <Grid Margin="0,8,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="240" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Height="12" Background="{DynamicResource SuccessForegroundBrush}" CornerRadius="6" />
+                        <TextBlock Grid.Column="1" HorizontalAlignment="Center" FontSize="28" FontWeight="SemiBold">
+                            <Run Text="{Binding MatchDetails.HomePossession, Mode=OneWay}" />
+                            <Run Text="% - " />
+                            <Run Text="{Binding MatchDetails.AwayPossession, Mode=OneWay}" />
+                            <Run Text="%" />
+                        </TextBlock>
+                        <Border Grid.Column="2" Height="12" Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="6" />
+                    </Grid>
+
+                    <Border Margin="0,16,0,0" Height="1" Background="{DynamicResource SubtleBorderBrush}" />
+
+                    <Grid Margin="0,18,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="1" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="1" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" HorizontalAlignment="Center">
+                            <TextBlock FontSize="56" FontWeight="SemiBold" Text="{Binding MatchDetails.HomeShots}" />
+                            <TextBlock FontSize="24" Foreground="{DynamicResource MutedForegroundBrush}" Text="Удари" />
+                        </StackPanel>
+
+                        <Border Grid.Column="1" Width="1" Background="{DynamicResource SubtleBorderBrush}" />
+
+                        <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                            <TextBlock FontSize="56" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding MatchDetails.ShotsOnTargetText}" />
+                            <TextBlock FontSize="24" Foreground="{DynamicResource MutedForegroundBrush}" Text="Удари в створ" />
+                        </StackPanel>
+
+                        <Border Grid.Column="3" Width="1" Background="{DynamicResource SubtleBorderBrush}" />
+
+                        <StackPanel Grid.Column="4" HorizontalAlignment="Center">
+                            <TextBlock FontSize="56" FontWeight="SemiBold" Text="{Binding MatchDetails.AwayShots}" />
+                            <TextBlock FontSize="24" Foreground="{DynamicResource MutedForegroundBrush}" Text="Удари" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Border Margin="0,16,0,0" Height="1" Background="{DynamicResource SubtleBorderBrush}" />
+
+                    <Grid Margin="0,16,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="16" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <Border Margin="0,0,0,10" Padding="10" Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="Кутові" />
+                                    <TextBlock Grid.Column="1" FontSize="34" FontWeight="SemiBold" Text="{Binding MatchDetails.CornersText}" />
+                                </Grid>
                             </Border>
-                        </Grid>
-                    
+                            <Border Margin="0,0,0,10" Padding="10" Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="Фоли" />
+                                    <TextBlock Grid.Column="1" FontSize="34" FontWeight="SemiBold" Text="{Binding MatchDetails.FoulsText}" />
+                                </Grid>
+                            </Border>
+                            <Border Padding="10" Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="Офсайди" />
+                                    <TextBlock Grid.Column="1" FontSize="34" FontWeight="SemiBold" Text="{Binding MatchDetails.OffsidesText}" />
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2">
+                            <Border Margin="0,0,0,10" Padding="10" Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="Жовті картки" />
+                                    <TextBlock Grid.Column="1" FontSize="34" FontWeight="SemiBold" Foreground="#d97706" Text="{Binding MatchDetails.YellowCardsText}" />
+                                </Grid>
+                            </Border>
+                            <Border Margin="0,0,0,10" Padding="10" Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="Червоні картки" />
+                                    <TextBlock Grid.Column="1" FontSize="34" FontWeight="SemiBold" Foreground="#ef4444" Text="{Binding MatchDetails.RedCardsText}" />
+                                </Grid>
+                            </Border>
+                            <Border Padding="10" Background="{DynamicResource SurfaceMutedBrush}" CornerRadius="8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                                    <TextBlock FontSize="22" Foreground="{DynamicResource MutedForegroundBrush}" Text="Точність пасів" />
+                                    <TextBlock Grid.Column="1" FontSize="34" FontWeight="SemiBold" Text="{Binding MatchDetails.PassAccuracyText}" />
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>
-
-
