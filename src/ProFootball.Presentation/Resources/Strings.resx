@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -819,4 +819,32 @@
   <data name="Common_Page" xml:space="preserve">
     <value>Page: </value>
   </data>
-</root>
+  <data name="Dashboard_Stat_HomeWins" xml:space="preserve">
+    <value>Home wins</value>
+  </data>
+  <data name="Dashboard_Stat_Draws" xml:space="preserve">
+    <value>Draws</value>
+  </data>
+  <data name="Dashboard_Stat_AwayWins" xml:space="preserve">
+    <value>Away wins</value>
+  </data>
+  <data name="Dashboard_Stat_AvgGoals" xml:space="preserve">
+    <value>Avg goals / match</value>
+  </data>
+  <data name="Analytics_LeagueCompetitiveness_Title" xml:space="preserve">
+    <value>League Competitiveness</value>
+  </data>
+  <data name="Analytics_RatingDelta_Title" xml:space="preserve">
+    <value>Top Rating Delta Players</value>
+  </data>  <data name="Analytics_Competitiveness_Matches" xml:space="preserve">
+    <value>matches</value>
+  </data>
+  <data name="Analytics_Competitiveness_DrawRate" xml:space="preserve">
+    <value>draw rate</value>
+  </data>
+  <data name="Analytics_Competitiveness_AvgDiff" xml:space="preserve">
+    <value>avg goal diff</value>
+  </data></root>
+
+
+
