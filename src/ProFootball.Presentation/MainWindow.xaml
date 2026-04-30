@@ -108,41 +108,14 @@
                     <Grid Margin="22,0,14,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <TextBlock VerticalAlignment="Center"
                                    FontSize="24"
                                    FontWeight="Medium"
                                    Foreground="{DynamicResource TitleForegroundBrush}"
                                    Text="{Binding CurrentSectionTitle}" />
-                        <Border Grid.Column="1"
-                                Width="430"
-                                Height="40"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Background="{DynamicResource SurfaceMutedBrush}"
-                                BorderBrush="{DynamicResource SubtleBorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="8">
-                            <Grid Margin="14,0,14,0">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock VerticalAlignment="Center"
-                                           FontFamily="Segoe MDL2 Assets"
-                                           FontSize="14"
-                                           Foreground="{DynamicResource ChartAxisBrush}"
-                                           Text="&#xE721;" />
-                                <TextBlock Grid.Column="1"
-                                           Margin="10,0,0,0"
-                                           VerticalAlignment="Center"
-                                           FontSize="16"
-                                           Foreground="{DynamicResource MutedForegroundBrush}"
-                                           Text="{loc:Loc Key=Main_Header_SearchPlaceholder}" />
-                            </Grid>
-                        </Border>
                         <StackPanel Grid.Column="2"
                                     Orientation="Horizontal"
                                     HorizontalAlignment="Right"
