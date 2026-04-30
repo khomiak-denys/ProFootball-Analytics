@@ -55,12 +55,6 @@
                                                FontSize="16"
                                                Foreground="{DynamicResource DangerForegroundBrush}"
                                                Text="{Binding Players.ErrorMessage}" />
-                                    <TextBlock Margin="0,6,0,0"
-                                               FontSize="16"
-                                               Foreground="{DynamicResource MutedForegroundBrush}">
-                                        <Run Text="{loc:Loc Key=Players_Info_Loading}" />
-                                        <Run Text="{Binding Path=Players.IsLoadingList, Mode=OneWay}" />
-                                    </TextBlock>
                                     <TextBlock Margin="0,20,0,0"
                                                FontSize="28"
                                                Foreground="{DynamicResource MutedForegroundBrush}">
