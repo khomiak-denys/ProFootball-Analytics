@@ -61,6 +61,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ToggleUserMenuCommand = new RelayCommand(ToggleUserMenu, () => IsAuthenticated);
         OpenSettingsCommand = new RelayCommand(OpenSettings, () => IsAuthenticated);
         LogoutCommand = new AsyncRelayCommand(LogoutAsync, OnBackgroundCommandException, () => IsAuthenticated);
+        BackToMatchesCommand = new RelayCommand(BackToMatches);
         _localizationService.PropertyChanged += OnLocalizationPropertyChanged;
     }
 
@@ -143,6 +144,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public RelayCommand OpenSettingsCommand { get; }
 
     public AsyncRelayCommand LogoutCommand { get; }
+    
+    public RelayCommand BackToMatchesCommand { get; }
 
     public bool IsDarkTheme => _themeService.CurrentTheme == AppThemeMode.Dark;
 
@@ -278,6 +281,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         MatchDetails.SelectedMatchApiId = matchApiId;
         MatchDetails.LoadCommand.Execute(null);
         SelectedTab = AppTab.MatchDetails;
+    }
+
+    private void BackToMatches()
+    {
+        SelectedTab = AppTab.Matches;
     }
 
     private void OnBackgroundCommandException(Exception exception)

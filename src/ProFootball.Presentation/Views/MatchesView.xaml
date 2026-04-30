@@ -141,18 +141,7 @@
                                 FontSize="18"
                                 Content="&#xE710;"
                                 ToolTip="{loc:Loc Key=Matches_Add_Button}"
-                                Command="{Binding Matches.OpenAddMatchModalCommand}">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding CanManageData}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
+                                Command="{Binding Matches.OpenAddMatchModalCommand}" />
                         <Button Grid.Column="2"
                                 Width="42"
                                 Height="42"
