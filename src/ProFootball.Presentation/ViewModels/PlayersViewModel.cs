@@ -57,6 +57,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     private DateTime? _newPlayerBirthday;
     private int? _newPlayerHeight;
     private int? _newPlayerWeight;
+    private bool _isEditPlayerModalOpen;
 
     public PlayersViewModel(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher, Action<int> openDetails)
     {
@@ -91,6 +92,9 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         OpenAddPlayerModalCommand = new RelayCommand(OpenAddPlayerModal);
         CloseAddPlayerModalCommand = new RelayCommand(CloseAddPlayerModal);
         AddPlayerCommand = new AsyncRelayCommand(AddPlayerAsync, CommandExceptionHandler.Handle);
+        OpenEditPlayerModalCommand = new RelayCommand(OpenEditPlayerModal, () => SelectedPlayer is not null);
+        CloseEditPlayerModalCommand = new RelayCommand(CloseEditPlayerModal);
+        SaveEditPlayerCommand = new AsyncRelayCommand(SaveEditPlayerAsync, CommandExceptionHandler.Handle, () => SelectedPlayer is not null);
     }
 
     public ObservableCollection<PlayerListEntryViewModel> Players { get; }
@@ -120,11 +124,16 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
             OpenDetailsCommand.RaiseCanExecuteChanged();
             UpdatePlayerCommand.RaiseCanExecuteChanged();
             DeletePlayerCommand.RaiseCanExecuteChanged();
+            OpenEditPlayerModalCommand.RaiseCanExecuteChanged();
+            SaveEditPlayerCommand.RaiseCanExecuteChanged();
+            RaisePropertyChanged(nameof(HasSelectedPlayer));
             RaiseSelectedPlayerPropertiesChanged();
             SyncEditorWithSelection();
             _ = LoadSelectedPlayerDetailsSafeAsync();
         }
     }
+
+    public bool HasSelectedPlayer => SelectedPlayer is not null;
 
     public string? NameFilter
     {
@@ -303,6 +312,12 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
 
     public AsyncRelayCommand AddPlayerCommand { get; }
 
+    public RelayCommand OpenEditPlayerModalCommand { get; }
+
+    public RelayCommand CloseEditPlayerModalCommand { get; }
+
+    public AsyncRelayCommand SaveEditPlayerCommand { get; }
+
     public bool IsAddPlayerModalOpen
     {
         get => _isAddPlayerModalOpen;
@@ -331,6 +346,12 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     {
         get => _newPlayerWeight;
         set => SetProperty(ref _newPlayerWeight, value);
+    }
+
+    public bool IsEditPlayerModalOpen
+    {
+        get => _isEditPlayerModalOpen;
+        private set => SetProperty(ref _isEditPlayerModalOpen, value);
     }
 
     public string EditorName
@@ -399,9 +420,9 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
                     item.OverallRating,
                     item.Potential,
                     NormalizeText(item.PreferredFoot, "--") ?? "--",
-                    item.Height,
                     item.Weight,
-                    FormatMeasure(item.Height, "cm")));
+                    item.Height,
+                    FormatMeasure(item.Weight, "cm")));
             }
 
             SelectedPlayer = selectedPlayerId.HasValue
@@ -609,6 +630,42 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         ErrorMessage = null;
         IsAddPlayerModalOpen = false;
         await StartSearchAsync();
+    }
+
+    private void OpenEditPlayerModal()
+    {
+        if (SelectedPlayer is null)
+        {
+            return;
+        }
+
+        SyncEditorWithSelection();
+        IsEditPlayerModalOpen = true;
+    }
+
+    private void CloseEditPlayerModal()
+    {
+        IsEditPlayerModalOpen = false;
+    }
+
+    private async Task SaveEditPlayerAsync()
+    {
+        if (SelectedPlayer is null)
+        {
+            return;
+        }
+
+        var result = await _commandDispatcher.DispatchAsync<UpdatePlayerCommand, Result>(
+            new UpdatePlayerCommand(SelectedPlayer.PlayerApiId, EditorName, EditorBirthday, EditorHeight, EditorWeight));
+        if (result.IsFailure)
+        {
+            ErrorMessage = result.Error.Message;
+            return;
+        }
+
+        ErrorMessage = null;
+        IsEditPlayerModalOpen = false;
+        await SearchAsync();
     }
 
     private async Task UpdatePlayerAsync()
