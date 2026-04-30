@@ -248,8 +248,7 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
             return Result<IReadOnlyList<SeasonRatingTrendPointDto>>.Success(Array.Empty<SeasonRatingTrendPointDto>());
         }
 
-        var monthSet = activeMonths.ToHashSet();
-        var trend = await dbContext.PlayerAttributes
+        var trendRows = await dbContext.PlayerAttributes
             .AsNoTracking()
             .Where(attribute => attribute.OverallRating.HasValue)
             .Select(attribute => new
@@ -257,13 +256,17 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
                 Month = new DateTime(attribute.Date.Year, attribute.Date.Month, 1),
                 attribute.OverallRating,
             })
+            .ToListAsync(cancellationToken);
+
+        var monthSet = activeMonths.ToHashSet();
+        var trend = trendRows
             .Where(item => monthSet.Contains(item.Month))
             .GroupBy(item => item.Month)
             .Select(group => new SeasonRatingTrendPointDto(
                 group.Key,
                 Math.Round(group.Average(item => item.OverallRating!.Value), 2)))
             .OrderBy(item => item.Month)
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         return Result<IReadOnlyList<SeasonRatingTrendPointDto>>.Success(trend);
     }

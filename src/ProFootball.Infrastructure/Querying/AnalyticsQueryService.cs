@@ -130,6 +130,7 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
         var latestIdPerPlayer = from attribute in dbContext.PlayerAttributes.AsNoTracking()
                                 join latestDate in latestDatePerPlayer
                                     on new { attribute.PlayerId, attribute.Date } equals new { latestDate.PlayerId, Date = latestDate.MaxDate }
+                                where attribute.OverallRating.HasValue && attribute.Potential.HasValue
                                 group attribute by attribute.PlayerId
             into grouped
                                 select new
@@ -140,6 +141,7 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
 
         var latestAttributes = from attribute in dbContext.PlayerAttributes.AsNoTracking()
                                join latestId in latestIdPerPlayer on attribute.Id equals latestId.MaxId
+                               where attribute.OverallRating.HasValue && attribute.Potential.HasValue
                                select new
                                {
                                    attribute.PlayerId,
