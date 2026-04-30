@@ -774,6 +774,12 @@
   <data name="Players_Add_Name" xml:space="preserve">
     <value>Player name</value>
   </data>
+  <data name="Players_Add_FirstName" xml:space="preserve">
+    <value>First name</value>
+  </data>
+  <data name="Players_Add_LastName" xml:space="preserve">
+    <value>Last name</value>
+  </data>
   <data name="Players_Add_Birthday" xml:space="preserve">
     <value>Birthday</value>
   </data>
@@ -851,5 +857,4 @@
   <data name="Analytics_Competitiveness_AvgDiff" xml:space="preserve">
     <value>avg goal diff</value>
   </data></root>
-
 

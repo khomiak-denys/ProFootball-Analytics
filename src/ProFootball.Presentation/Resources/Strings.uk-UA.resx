@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -773,6 +773,12 @@
   </data>
   <data name="Players_Add_Name" xml:space="preserve">
     <value>��'� ������</value>
+  </data>
+  <data name="Players_Add_FirstName" xml:space="preserve">
+    <value>First name</value>
+  </data>
+  <data name="Players_Add_LastName" xml:space="preserve">
+    <value>Last name</value>
   </data>
   <data name="Players_Add_Birthday" xml:space="preserve">
     <value>���� ����������</value>

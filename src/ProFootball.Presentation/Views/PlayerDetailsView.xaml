@@ -21,7 +21,11 @@
                                                  Text="{Binding PlayerDetails.SelectedPlayerApiId, Converter={StaticResource NullableIntTextConverter}, UpdateSourceTrigger=PropertyChanged}" />
                                         <Button Width="120" Content="{loc:Loc Key=Common_Action_Load}" Command="{Binding PlayerDetails.LoadCommand}" />
                                     </StackPanel>
-                                    <TextBlock Style="{StaticResource TypographyH2}" Text="{Binding PlayerDetails.Details.Name}" />
+                                    <TextBlock Style="{StaticResource TypographyH2}">
+                                        <Run Text="{Binding PlayerDetails.Details.FirstName}" />
+                                        <Run Text=" " />
+                                        <Run Text="{Binding PlayerDetails.Details.LastName}" />
+                                    </TextBlock>
                                     <Grid Margin="0,20,0,0">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="420" />

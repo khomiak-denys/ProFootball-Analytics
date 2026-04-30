@@ -175,7 +175,7 @@
                                             <StaticResource ResourceKey="PlayersTableRowStyle" />
                                         </DataGrid.RowStyle>
                                         <DataGrid.Columns>
-                                            <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Name}" Binding="{Binding Name}" Width="*" />
+                                            <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Name}" Binding="{Binding FullName}" Width="*" />
                                             <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Pos}" Binding="{Binding Position}" Width="65" />
                                             <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Age}" Binding="{Binding Age}" Width="52" />
                                             <DataGridTextColumn Header="{loc:Loc Key=Players_Column_Rating}" Binding="{Binding OverallRating}" Width="58" />
@@ -499,10 +499,19 @@
                                             <TextBlock FontSize="20"
                                                        FontWeight="SemiBold"
                                                        Foreground="{DynamicResource TitleForegroundBrush}"
-                                                       Text="{loc:Loc Key=Players_Add_Name}" />
+                                                       Text="{loc:Loc Key=Players_Add_FirstName}" />
                                             <TextBox Margin="0,8,0,0"
                                                      Style="{StaticResource AuthInputTextBoxStyle}"
-                                                     Text="{Binding Players.NewPlayerName, UpdateSourceTrigger=PropertyChanged}" />
+                                                     Text="{Binding Players.NewPlayerFirstName, UpdateSourceTrigger=PropertyChanged}" />
+
+                                            <TextBlock Margin="0,14,0,0"
+                                                       FontSize="20"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                                       Text="{loc:Loc Key=Players_Add_LastName}" />
+                                            <TextBox Margin="0,8,0,0"
+                                                     Style="{StaticResource AuthInputTextBoxStyle}"
+                                                     Text="{Binding Players.NewPlayerLastName, UpdateSourceTrigger=PropertyChanged}" />
 
                                             <TextBlock Margin="0,14,0,0"
                                                        FontSize="20"
@@ -598,8 +607,10 @@
                                         </Grid>
 
                                         <StackPanel Grid.Row="1" Margin="0,18,0,0">
-                                            <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Players_Add_Name}" />
-                                            <TextBox Margin="0,8,0,0" Style="{StaticResource AuthInputTextBoxStyle}" Text="{Binding Players.EditorName, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Players_Add_FirstName}" />
+                                            <TextBox Margin="0,8,0,0" Style="{StaticResource AuthInputTextBoxStyle}" Text="{Binding Players.EditorFirstName, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBlock Margin="0,14,0,0" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Players_Add_LastName}" />
+                                            <TextBox Margin="0,8,0,0" Style="{StaticResource AuthInputTextBoxStyle}" Text="{Binding Players.EditorLastName, UpdateSourceTrigger=PropertyChanged}" />
                                             <TextBlock Margin="0,14,0,0" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Players_Add_Birthday}" />
                                             <DatePicker Margin="0,8,0,0" Style="{StaticResource MatchesFilterDatePickerStyle}" SelectedDate="{Binding Players.EditorBirthday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                             <TextBlock Margin="0,14,0,0" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Players_Add_Height}" />
