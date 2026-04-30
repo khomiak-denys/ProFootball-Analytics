@@ -1,5 +1,6 @@
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Auth.Abstractions;
+using ProFootball.Application.Auth.Authorization;
 using ProFootball.Application.Common;
 using ProFootball.Application.Player.Commands;
 using ProFootball.Domain.Entities;
@@ -12,7 +13,7 @@ public sealed class CreatePlayerCommandHandler(
 {
     public async Task<Result> HandleAsync(CreatePlayerCommand command, CancellationToken cancellationToken = default)
     {
-        if (!CanManage(sessionStore))
+        if (!WriteAccessPolicy.CanManageData(sessionStore))
         {
             return Result.Failure("auth.forbidden", "You do not have permission to manage players.");
         }
@@ -32,13 +33,6 @@ public sealed class CreatePlayerCommandHandler(
         await playerRepository.AddAsync(player, cancellationToken);
         return Result.Success();
     }
-
-    private static bool CanManage(IUserSessionStore sessionStore)
-    {
-        var role = sessionStore.CurrentState.Role ?? string.Empty;
-        return role.Equals("Admin", StringComparison.OrdinalIgnoreCase)
-               || role.Equals("Manager", StringComparison.OrdinalIgnoreCase);
-    }
 }
 
 public sealed class UpdatePlayerCommandHandler(
@@ -47,7 +41,7 @@ public sealed class UpdatePlayerCommandHandler(
 {
     public async Task<Result> HandleAsync(UpdatePlayerCommand command, CancellationToken cancellationToken = default)
     {
-        if (!CanManage(sessionStore))
+        if (!WriteAccessPolicy.CanManageData(sessionStore))
         {
             return Result.Failure("auth.forbidden", "You do not have permission to manage players.");
         }
@@ -67,13 +61,6 @@ public sealed class UpdatePlayerCommandHandler(
         await playerRepository.UpdateAsync(player, cancellationToken);
         return Result.Success();
     }
-
-    private static bool CanManage(IUserSessionStore sessionStore)
-    {
-        var role = sessionStore.CurrentState.Role ?? string.Empty;
-        return role.Equals("Admin", StringComparison.OrdinalIgnoreCase)
-               || role.Equals("Manager", StringComparison.OrdinalIgnoreCase);
-    }
 }
 
 public sealed class DeletePlayerCommandHandler(
@@ -82,7 +69,7 @@ public sealed class DeletePlayerCommandHandler(
 {
     public async Task<Result> HandleAsync(DeletePlayerCommand command, CancellationToken cancellationToken = default)
     {
-        if (!CanManage(sessionStore))
+        if (!WriteAccessPolicy.CanManageData(sessionStore))
         {
             return Result.Failure("auth.forbidden", "You do not have permission to manage players.");
         }
@@ -95,12 +82,5 @@ public sealed class DeletePlayerCommandHandler(
 
         await playerRepository.DeleteAsync(command.PlayerId, cancellationToken);
         return Result.Success();
-    }
-
-    private static bool CanManage(IUserSessionStore sessionStore)
-    {
-        var role = sessionStore.CurrentState.Role ?? string.Empty;
-        return role.Equals("Admin", StringComparison.OrdinalIgnoreCase)
-               || role.Equals("Manager", StringComparison.OrdinalIgnoreCase);
     }
 }

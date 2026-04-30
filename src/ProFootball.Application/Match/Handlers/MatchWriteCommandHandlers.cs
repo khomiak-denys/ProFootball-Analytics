@@ -1,5 +1,6 @@
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Auth.Abstractions;
+using ProFootball.Application.Auth.Authorization;
 using ProFootball.Application.Common;
 using ProFootball.Application.Match.Commands;
 using ProFootball.Domain.Entities;
@@ -12,7 +13,7 @@ public sealed class CreateMatchCommandHandler(
 {
     public async Task<Result> HandleAsync(CreateMatchCommand command, CancellationToken cancellationToken = default)
     {
-        if (!CanManage(sessionStore))
+        if (!WriteAccessPolicy.CanManageData(sessionStore))
         {
             return Result.Failure("auth.forbidden", "You do not have permission to manage matches.");
         }
@@ -44,12 +45,6 @@ public sealed class CreateMatchCommandHandler(
         && homeTeamId > 0
         && awayTeamId > 0;
 
-    private static bool CanManage(IUserSessionStore sessionStore)
-    {
-        var role = sessionStore.CurrentState.Role ?? string.Empty;
-        return role.Equals("Admin", StringComparison.OrdinalIgnoreCase)
-               || role.Equals("Manager", StringComparison.OrdinalIgnoreCase);
-    }
 }
 
 public sealed class UpdateMatchCommandHandler(
@@ -58,7 +53,7 @@ public sealed class UpdateMatchCommandHandler(
 {
     public async Task<Result> HandleAsync(UpdateMatchCommand command, CancellationToken cancellationToken = default)
     {
-        if (!CanManage(sessionStore))
+        if (!WriteAccessPolicy.CanManageData(sessionStore))
         {
             return Result.Failure("auth.forbidden", "You do not have permission to manage matches.");
         }
@@ -95,12 +90,6 @@ public sealed class UpdateMatchCommandHandler(
         && homeTeamId > 0
         && awayTeamId > 0;
 
-    private static bool CanManage(IUserSessionStore sessionStore)
-    {
-        var role = sessionStore.CurrentState.Role ?? string.Empty;
-        return role.Equals("Admin", StringComparison.OrdinalIgnoreCase)
-               || role.Equals("Manager", StringComparison.OrdinalIgnoreCase);
-    }
 }
 
 public sealed class DeleteMatchCommandHandler(
@@ -109,7 +98,7 @@ public sealed class DeleteMatchCommandHandler(
 {
     public async Task<Result> HandleAsync(DeleteMatchCommand command, CancellationToken cancellationToken = default)
     {
-        if (!CanManage(sessionStore))
+        if (!WriteAccessPolicy.CanManageData(sessionStore))
         {
             return Result.Failure("auth.forbidden", "You do not have permission to manage matches.");
         }
@@ -124,10 +113,4 @@ public sealed class DeleteMatchCommandHandler(
         return Result.Success();
     }
 
-    private static bool CanManage(IUserSessionStore sessionStore)
-    {
-        var role = sessionStore.CurrentState.Role ?? string.Empty;
-        return role.Equals("Admin", StringComparison.OrdinalIgnoreCase)
-               || role.Equals("Manager", StringComparison.OrdinalIgnoreCase);
-    }
 }
