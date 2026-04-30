@@ -13,7 +13,6 @@ public class AppUserTests
         var user = new AppUser(
             "  Denys ",
             "  Test ",
-            "  manager ",
             "  MANAGER ",
             "  hash-value ",
             AppUserRole.Manager,
@@ -23,7 +22,6 @@ public class AppUserTests
         Assert.Equal("Denys", user.FirstName);
         Assert.Equal("Test", user.LastName);
         Assert.Equal("manager", user.Login);
-        Assert.Equal("MANAGER", user.NormalizedLogin);
         Assert.Equal("hash-value", user.PasswordHash);
         Assert.Equal(AppUserRole.Manager, user.Role);
         Assert.True(user.IsActive);
@@ -32,21 +30,18 @@ public class AppUserTests
     }
 
     [Theory]
-    [InlineData(null, "Test", "manager", "MANAGER", "hash")]
-    [InlineData("", "Test", "manager", "MANAGER", "hash")]
-    [InlineData("Denys", null, "manager", "MANAGER", "hash")]
-    [InlineData("Denys", "", "manager", "MANAGER", "hash")]
-    [InlineData("Denys", "Test", null, "MANAGER", "hash")]
-    [InlineData("Denys", "Test", "", "MANAGER", "hash")]
-    [InlineData("Denys", "Test", "manager", null, "hash")]
-    [InlineData("Denys", "Test", "manager", "", "hash")]
-    [InlineData("Denys", "Test", "manager", "MANAGER", null)]
-    [InlineData("Denys", "Test", "manager", "MANAGER", "")]
+    [InlineData(null, "Test", "manager", "hash")]
+    [InlineData("", "Test", "manager", "hash")]
+    [InlineData("Denys", null, "manager", "hash")]
+    [InlineData("Denys", "", "manager", "hash")]
+    [InlineData("Denys", "Test", null, "hash")]
+    [InlineData("Denys", "Test", "", "hash")]
+    [InlineData("Denys", "Test", "manager", null)]
+    [InlineData("Denys", "Test", "manager", "")]
     public void Constructor_ShouldThrow_WhenRequiredInputMissing(
         string? firstName,
         string? lastName,
         string? login,
-        string? normalizedLogin,
         string? passwordHash)
     {
         Assert.ThrowsAny<ArgumentException>(() =>
@@ -54,7 +49,6 @@ public class AppUserTests
                 firstName!,
                 lastName!,
                 login!,
-                normalizedLogin!,
                 passwordHash!,
                 AppUserRole.Analyst,
                 isActive: true,

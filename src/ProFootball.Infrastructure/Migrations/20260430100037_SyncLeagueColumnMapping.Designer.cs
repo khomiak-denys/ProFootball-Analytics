@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProFootball.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using ProFootball.Infrastructure.Persistence;
 namespace ProFootball.Infrastructure.Migrations
 {
     [DbContext(typeof(ProFootballDbContext))]
-    partial class ProFootballDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260430100037_SyncLeagueColumnMapping")]
+    partial class SyncLeagueColumnMapping
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -51,6 +54,11 @@ namespace ProFootball.Infrastructure.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
+                    b.Property<string>("NormalizedLogin")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasMaxLength(256)
@@ -63,13 +71,10 @@ namespace ProFootball.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Login")
+                    b.HasIndex("NormalizedLogin")
                         .IsUnique();
 
-                    b.ToTable("app_users", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_app_users_login_lowercase", "\"Login\" = lower(\"Login\")");
-                        });
+                    b.ToTable("app_users", (string)null);
                 });
 
             modelBuilder.Entity("ProFootball.Domain.Entities.FootballMatch", b =>
@@ -232,10 +237,6 @@ namespace ProFootball.Infrastructure.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("LeagueId")
-                        .HasColumnType("integer")
-                        .HasColumnName("league_id");
-
                     b.Property<string>("LongName")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -246,8 +247,6 @@ namespace ProFootball.Infrastructure.Migrations
                         .HasColumnType("character varying(20)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LeagueId");
 
                     b.HasIndex("LongName");
 

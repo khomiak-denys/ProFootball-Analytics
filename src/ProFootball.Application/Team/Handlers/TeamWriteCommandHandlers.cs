@@ -26,7 +26,8 @@ public sealed class CreateTeamCommandHandler(
         var team = new global::ProFootball.Domain.Entities.Team(
             await teamRepository.GetNextIdAsync(cancellationToken),
             command.Name,
-            command.ShortName);
+            command.ShortName,
+            command.LeagueId);
 
         await teamRepository.AddAsync(team, cancellationToken);
         return Result.Success();

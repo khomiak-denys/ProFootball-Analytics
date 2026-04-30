@@ -22,8 +22,8 @@ public sealed class SignInCommandHandler(
             return Result.Failure("auth.validation", "Login and password are required.");
         }
 
-        var normalizedLogin = command.Login.Trim().ToUpperInvariant();
-        var user = await userRepository.FindByNormalizedLoginAsync(normalizedLogin, cancellationToken);
+        var login = command.Login.Trim().ToLowerInvariant();
+        var user = await userRepository.FindByLoginAsync(login, cancellationToken);
         if (user is null || !user.IsActive)
         {
             return Result.Failure("auth.invalid_credentials", "Invalid login or password.");

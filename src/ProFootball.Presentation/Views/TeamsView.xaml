@@ -77,12 +77,6 @@
                                             <Run Text="{loc:Loc Key=Teams_Info_Total}" />
                                             <Run Text="{Binding Path=Teams.TotalCount, Mode=OneWay}" />
                                         </TextBlock>
-                                        <TextBlock Margin="14,0,0,0"
-                                                   FontSize="16"
-                                                   Foreground="{DynamicResource MutedForegroundBrush}">
-                                            <Run Text="{loc:Loc Key=Teams_Info_Loading}" />
-                                            <Run Text="{Binding Path=Teams.IsLoadingList, Mode=OneWay}" />
-                                        </TextBlock>
                                     </StackPanel>
 
                                     <ListBox Grid.Row="2"

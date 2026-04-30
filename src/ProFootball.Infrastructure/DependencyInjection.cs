@@ -97,12 +97,16 @@ public static class DependencyInjection
         services.AddScoped<IQueryHandler<GetPlayerDetailsQuery, PlayerDetailsDto?>, PlayersQueryService>();
         services.AddScoped<IQueryHandler<GetPlayerTrendQuery, IReadOnlyList<PlayerTrendPointDto>>, AnalyticsQueryService>();
         services.AddScoped<IQueryHandler<TopPlayersQuery, IReadOnlyList<TopPlayerDto>>, AnalyticsQueryService>();
+        services.AddScoped<IQueryHandler<GetTopRatingDeltaPlayersQuery, IReadOnlyList<PlayerRatingDeltaDto>>, AnalyticsQueryService>();
 
         services.AddScoped<IQueryHandler<MatchSearchQuery, PagedResult<MatchListItemDto>>, MatchesQueryService>();
         services.AddScoped<IQueryHandler<GetMatchTeamsQuery, IReadOnlyList<TeamListItemDto>>, MatchesQueryService>();
         services.AddScoped<IQueryHandler<GetMatchDetailsQuery, MatchDetailsDto?>, MatchesQueryService>();
         services.AddScoped<IQueryHandler<GetMatchesBySeasonQuery, IReadOnlyList<MatchesBySeasonDto>>, MatchesQueryService>();
         services.AddScoped<IQueryHandler<GetDashboardKpiQuery, DashboardKpiDto>, MatchesQueryService>();
+        services.AddScoped<IQueryHandler<GetSeasonRatingTrendQuery, IReadOnlyList<SeasonRatingTrendPointDto>>, MatchesQueryService>();
+        services.AddScoped<IQueryHandler<GetMatchOutcomeDistributionQuery, MatchOutcomeDistributionDto>, MatchesQueryService>();
+        services.AddScoped<IQueryHandler<GetLeagueCompetitivenessQuery, IReadOnlyList<LeagueCompetitivenessDto>>, MatchesQueryService>();
 
         return services;
     }

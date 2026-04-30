@@ -9,7 +9,8 @@ namespace ProFootball.Infrastructure.Querying;
 
 public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext> dbContextFactory) :
     IQueryHandler<GetPlayerTrendQuery, IReadOnlyList<PlayerTrendPointDto>>,
-    IQueryHandler<TopPlayersQuery, IReadOnlyList<TopPlayerDto>>
+    IQueryHandler<TopPlayersQuery, IReadOnlyList<TopPlayerDto>>,
+    IQueryHandler<GetTopRatingDeltaPlayersQuery, IReadOnlyList<PlayerRatingDeltaDto>>
 {
     public async Task<Result<IReadOnlyList<PlayerTrendPointDto>>> HandleAsync(
         GetPlayerTrendQuery query,
@@ -97,5 +98,74 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
 
         var topPlayers = await queryResult.ToListAsync(cancellationToken);
         return Result<IReadOnlyList<TopPlayerDto>>.Success(topPlayers);
+    }
+
+    public async Task<Result<IReadOnlyList<PlayerRatingDeltaDto>>> HandleAsync(
+        GetTopRatingDeltaPlayersQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        var limit = query.Limit < 1 ? 10 : Math.Min(query.Limit, 50);
+        var minimumSamples = query.MinimumSamples < 1 ? 1 : query.MinimumSamples;
+
+        var sampleCounts = from attribute in dbContext.PlayerAttributes.AsNoTracking()
+                           group attribute by attribute.PlayerId
+            into grouped
+                           select new
+                           {
+                               PlayerId = grouped.Key,
+                               Samples = grouped.Count(),
+                           };
+
+        var latestDatePerPlayer = from attribute in dbContext.PlayerAttributes.AsNoTracking()
+                                  where attribute.OverallRating.HasValue && attribute.Potential.HasValue
+                                  group attribute by attribute.PlayerId
+            into grouped
+                                  select new
+                                  {
+                                      PlayerId = grouped.Key,
+                                      MaxDate = grouped.Max(item => item.Date),
+                                  };
+
+        var latestIdPerPlayer = from attribute in dbContext.PlayerAttributes.AsNoTracking()
+                                join latestDate in latestDatePerPlayer
+                                    on new { attribute.PlayerId, attribute.Date } equals new { latestDate.PlayerId, Date = latestDate.MaxDate }
+                                where attribute.OverallRating.HasValue && attribute.Potential.HasValue
+                                group attribute by attribute.PlayerId
+            into grouped
+                                select new
+                                {
+                                    PlayerId = grouped.Key,
+                                    MaxId = grouped.Max(item => item.Id),
+                                };
+
+        var latestAttributes = from attribute in dbContext.PlayerAttributes.AsNoTracking()
+                               join latestId in latestIdPerPlayer on attribute.Id equals latestId.MaxId
+                               where attribute.OverallRating.HasValue && attribute.Potential.HasValue
+                               select new
+                               {
+                                   attribute.PlayerId,
+                                   attribute.Date,
+                                   Overall = attribute.OverallRating!.Value,
+                                   Potential = attribute.Potential!.Value,
+                               };
+
+        var result = await (from latest in latestAttributes
+                            join player in dbContext.Players.AsNoTracking() on latest.PlayerId equals player.Id
+                            join sample in sampleCounts on latest.PlayerId equals sample.PlayerId
+                            where sample.Samples >= minimumSamples
+                            let delta = latest.Potential - latest.Overall
+                            orderby delta descending, latest.Potential descending, player.Name
+                            select new PlayerRatingDeltaDto(
+                                player.Id,
+                                player.Name,
+                                latest.Overall,
+                                latest.Potential,
+                                delta,
+                                latest.Date))
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+
+        return Result<IReadOnlyList<PlayerRatingDeltaDto>>.Success(result);
     }
 }

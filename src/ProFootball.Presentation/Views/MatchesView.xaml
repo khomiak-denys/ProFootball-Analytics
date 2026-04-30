@@ -102,12 +102,6 @@
                         </TextBlock>
                         <TextBlock Margin="0,6,0,0"
                                    FontSize="13"
-                                   Foreground="{DynamicResource MutedForegroundBrush}">
-                            <Run Text="{loc:Loc Key=Matches_Info_HasNextPage}" />
-                            <Run Text="{Binding Path=Matches.HasNextPage, Mode=OneWay}" />
-                        </TextBlock>
-                        <TextBlock Margin="0,6,0,0"
-                                   FontSize="13"
                                    Foreground="{DynamicResource DangerForegroundBrush}">
                             <Run Text="{loc:Loc Key=Matches_Info_SelectedDate}" />
                             <Run Text="{Binding Path=Matches.SelectedMatchDate, Mode=OneWay}" />

@@ -418,7 +418,13 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
             return;
         }
 
+        await ReloadLeaguesAsync();
+    }
+
+    private async Task ReloadLeaguesAsync()
+    {
         var leagues = await _queryDispatcher.DispatchAsync<GetLeaguesQuery, IReadOnlyList<LeagueDto>>(new GetLeaguesQuery());
+        Leagues.Clear();
         foreach (var league in leagues)
         {
             Leagues.Add(league);
@@ -427,11 +433,25 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
 
     private void OpenAddTeamModal()
     {
-        ErrorMessage = null;
-        NewTeamName = string.Empty;
-        NewTeamShortName = string.Empty;
-        SelectedLeague = Leagues.FirstOrDefault();
-        IsAddTeamModalOpen = true;
+        _ = OpenAddTeamModalSafeAsync();
+    }
+
+    private async Task OpenAddTeamModalSafeAsync()
+    {
+        try
+        {
+            await ReloadLeaguesAsync();
+            ErrorMessage = null;
+            NewTeamName = string.Empty;
+            NewTeamShortName = string.Empty;
+            SelectedLeague = Leagues.FirstOrDefault();
+            IsAddTeamModalOpen = true;
+        }
+        catch (Exception exception)
+        {
+            ErrorMessage = "Failed to load leagues.";
+            CommandExceptionHandler.Handle(exception);
+        }
     }
 
     private void CloseAddTeamModal()
@@ -460,7 +480,7 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
             ? BuildShortCode(NewTeamName)
             : normalizedShortName.ToUpperInvariant();
         var result = await _commandDispatcher.DispatchAsync<CreateTeamCommand, Result>(
-            new CreateTeamCommand(NewTeamName.Trim(), shortName));
+            new CreateTeamCommand(NewTeamName.Trim(), shortName, SelectedLeague.Id));
         if (result.IsFailure)
         {
             ErrorMessage = result.Error.Message;
