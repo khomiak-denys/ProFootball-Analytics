@@ -93,9 +93,7 @@ public sealed class DataImportService(
             var matchEvents = await GenerateMatchEventsAsync(dbContext, profile, mode, random, cancellationToken);
             var playerMatchStats = await GeneratePlayerMatchStatsAsync(dbContext, profile, mode, random, cancellationToken);
             var teamSeasonStats = await RebuildTeamSeasonStatsAsync(dbContext, cancellationToken);
-            var analyticsFacts = await RebuildAnalyticsFactDailyAsync(dbContext, cancellationToken);
             var validationErrors = await ValidateGeneratedDataAsync(dbContext, cancellationToken);
-            await RegisterGenerationRunAsync(dbContext, seed, profile, mode, validationErrors, cancellationToken);
 
             if (validationErrors > 0)
             {
@@ -117,7 +115,6 @@ public sealed class DataImportService(
                 matchEvents,
                 playerMatchStats,
                 teamSeasonStats,
-                analyticsFacts,
                 validationErrors,
                 skipped,
                 stopwatch.Elapsed);
@@ -179,7 +176,6 @@ public sealed class DataImportService(
 
     private static async Task ClearExistingDataAsync(ProFootballDbContext dbContext, CancellationToken cancellationToken)
     {
-        await dbContext.AnalyticsFactDaily.ExecuteDeleteAsync(cancellationToken);
         await dbContext.TeamSeasonStats.ExecuteDeleteAsync(cancellationToken);
         await dbContext.PlayerMatchStats.ExecuteDeleteAsync(cancellationToken);
         await dbContext.MatchEvents.ExecuteDeleteAsync(cancellationToken);
@@ -189,7 +185,6 @@ public sealed class DataImportService(
         await dbContext.Players.ExecuteDeleteAsync(cancellationToken);
         await dbContext.Teams.ExecuteDeleteAsync(cancellationToken);
         await dbContext.Leagues.ExecuteDeleteAsync(cancellationToken);
-        await dbContext.GenerationRuns.ExecuteDeleteAsync(cancellationToken);
     }
 
     private static async Task PrepareDatabaseAsync(ProFootballDbContext dbContext, CancellationToken cancellationToken)
@@ -921,72 +916,6 @@ public sealed class DataImportService(
         return stats.Count;
     }
 
-    private async Task<int> RebuildAnalyticsFactDailyAsync(ProFootballDbContext dbContext, CancellationToken cancellationToken)
-    {
-        if (IsNpgsql(dbContext))
-        {
-            var minDate = await dbContext.Matches.MinAsync(x => (DateTime?)x.Date, cancellationToken);
-            var maxDate = await dbContext.Matches.MaxAsync(x => (DateTime?)x.Date, cancellationToken);
-            if (minDate is null || maxDate is null)
-            {
-                await dbContext.AnalyticsFactDaily.ExecuteDeleteAsync(cancellationToken);
-                return 0;
-            }
-
-            await dbContext.Database.ExecuteSqlRawAsync(
-                "call public.sp_rebuild_analytics_fact_daily({0}, {1}, null, null);",
-                [minDate.Value.Date, maxDate.Value.Date],
-                cancellationToken);
-            return await dbContext.AnalyticsFactDaily.CountAsync(cancellationToken);
-        }
-
-        await dbContext.AnalyticsFactDaily.ExecuteDeleteAsync(cancellationToken);
-        var matches = await dbContext.Matches.AsNoTracking().ToListAsync(cancellationToken);
-        if (matches.Count == 0)
-        {
-            return 0;
-        }
-
-        var latestPlayerRating = await dbContext.PlayerAttributes
-            .AsNoTracking()
-            .GroupBy(pa => pa.PlayerId)
-            .Select(group => group.OrderByDescending(pa => pa.Date).Select(pa => pa.OverallRating).FirstOrDefault())
-            .ToListAsync(cancellationToken);
-        var avgRating = latestPlayerRating.Where(x => x.HasValue).Select(x => x!.Value).DefaultIfEmpty(0).Average();
-
-        var facts = new List<AnalyticsFactDaily>();
-        foreach (var group in matches.GroupBy(m => new { Date = DateOnly.FromDateTime(m.Date.Date), m.Season, m.LeagueId }))
-        {
-            var total = group.Count();
-            var homeWins = group.Count(x => (x.HomeTeamGoal ?? 0) > (x.AwayTeamGoal ?? 0));
-            var draws = group.Count(x => (x.HomeTeamGoal ?? 0) == (x.AwayTeamGoal ?? 0));
-            var awayWins = group.Count(x => (x.HomeTeamGoal ?? 0) < (x.AwayTeamGoal ?? 0));
-            var avgGoals = group.Average(x => (x.HomeTeamGoal ?? 0) + (x.AwayTeamGoal ?? 0));
-
-            facts.AddRange([
-                BuildFact(group.Key.Date, group.Key.Season, group.Key.LeagueId, "matches_count", total),
-                BuildFact(group.Key.Date, group.Key.Season, group.Key.LeagueId, "avg_goals", (decimal)avgGoals),
-                BuildFact(group.Key.Date, group.Key.Season, group.Key.LeagueId, "home_win_rate", total == 0 ? 0 : (decimal)homeWins / total),
-                BuildFact(group.Key.Date, group.Key.Season, group.Key.LeagueId, "draw_rate", total == 0 ? 0 : (decimal)draws / total),
-                BuildFact(group.Key.Date, group.Key.Season, group.Key.LeagueId, "away_win_rate", total == 0 ? 0 : (decimal)awayWins / total),
-                BuildFact(group.Key.Date, group.Key.Season, group.Key.LeagueId, "avg_rating", (decimal)avgRating),
-            ]);
-        }
-
-        await dbContext.AnalyticsFactDaily.AddRangeAsync(facts, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        return facts.Count;
-    }
-
-    private static AnalyticsFactDaily BuildFact(DateOnly date, string season, int leagueId, string key, decimal value)
-        => new(
-            id: 0,
-            dateKey: date,
-            season: season,
-            leagueId: leagueId,
-            metricKey: key,
-            metricValue: Math.Round(value, 6),
-            updatedAtUtc: DateTime.UtcNow);
 
     private async Task<int> ValidateGeneratedDataAsync(ProFootballDbContext dbContext, CancellationToken cancellationToken)
     {
@@ -1027,30 +956,6 @@ public sealed class DataImportService(
         errors += badTeamSeasonStats;
 
         return errors;
-    }
-
-    private async Task RegisterGenerationRunAsync(
-        ProFootballDbContext dbContext,
-        string seed,
-        string profile,
-        string mode,
-        int validationErrors,
-        CancellationToken cancellationToken)
-    {
-        var now = DateTime.UtcNow;
-        var run = new GenerationRun(
-            id: 0,
-            generatorVersion: GeneratorVersion,
-            seed: seed,
-            profile: profile,
-            mode: mode,
-            startedAtUtc: now,
-            finishedAtUtc: now,
-            status: validationErrors == 0 ? "success" : "failed",
-            message: validationErrors == 0 ? null : $"Validation errors: {validationErrors}");
-
-        await dbContext.GenerationRuns.AddAsync(run, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private static MatchEvent CreateGoalEvent(int matchId, int teamId, IReadOnlyList<int> playerPool, Random random, DateTime now)

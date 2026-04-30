@@ -97,7 +97,7 @@ public class CqrsDispatcherAndContractsTests
         var countriesWithCountQuery = new GetCountriesWithLeagueCountQuery();
         var snapshotQuery = new GetCountrySnapshotQuery("England");
         var importCommand = new ImportDataCommand("db.sqlite", 1000);
-        var importResult = new DataImportResult(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 0, 12, TimeSpan.FromSeconds(1));
+        var importResult = new DataImportResult(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 12, TimeSpan.FromSeconds(1));
 
         Assert.Equal("England", country.Name);
         Assert.Equal(2, countryListItem.LeagueCount);
@@ -232,7 +232,6 @@ public class CqrsDispatcherAndContractsTests
         Assert.Equal(8, importResult.MatchEventsGenerated);
         Assert.Equal(9, importResult.PlayerMatchStatsGenerated);
         Assert.Equal(10, importResult.TeamSeasonStatsRebuilt);
-        Assert.Equal(11, importResult.AnalyticsFactsRebuilt);
         Assert.Equal(0, importResult.ValidationErrors);
         Assert.Equal(12, importResult.SkippedRows);
         Assert.Equal(TimeSpan.FromSeconds(1), importResult.Duration);

@@ -75,7 +75,6 @@ public class DataImportServiceTests
             Assert.True(result.MatchEventsGenerated > 0);
             Assert.True(result.PlayerMatchStatsGenerated > 0);
             Assert.True(result.TeamSeasonStatsRebuilt > 0);
-            Assert.True(result.AnalyticsFactsRebuilt > 0);
             Assert.Equal(0, result.ValidationErrors);
             Assert.Equal(7, result.SkippedRows);
 
@@ -148,7 +147,6 @@ public class DataImportServiceTests
             Assert.True(result.MatchEventsGenerated > 0);
             Assert.True(result.PlayerMatchStatsGenerated > 0);
             Assert.True(result.TeamSeasonStatsRebuilt > 0);
-            Assert.True(result.AnalyticsFactsRebuilt > 0);
             Assert.Equal(0, result.ValidationErrors);
         }
         finally

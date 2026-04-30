@@ -90,7 +90,6 @@ try
         Console.WriteLine($"MatchEvents: {result.MatchEventsGenerated}");
         Console.WriteLine($"PlayerMatchStats: {result.PlayerMatchStatsGenerated}");
         Console.WriteLine($"TeamSeasonStats: {result.TeamSeasonStatsRebuilt}");
-        Console.WriteLine($"AnalyticsFactDaily: {result.AnalyticsFactsRebuilt}");
         Console.WriteLine($"ValidationErrors: {result.ValidationErrors}");
         Console.WriteLine($"SkippedRows: {result.SkippedRows}");
         Console.WriteLine($"Duration: {result.Duration}");
