@@ -288,9 +288,9 @@
                                                                Margin="0,2,0,10"
                                                                FontSize="18"
                                                                Foreground="{DynamicResource MutedForegroundBrush}">
-                                                        <Run Text="{Binding CountriesLeagues.FeaturedLeagueName}" />
+                                                        <Run Text="{Binding CountriesLeagues.FeaturedLeagueName, Mode=OneWay}" />
                                                         <Run Text=" · " />
-                                                        <Run Text="{Binding CountriesLeagues.FeaturedLeagueSeason}" />
+                                                        <Run Text="{Binding CountriesLeagues.FeaturedLeagueSeason, Mode=OneWay}" />
                                                     </TextBlock>
 
                                                     <DataGrid Grid.Row="2"

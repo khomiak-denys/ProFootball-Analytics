@@ -159,13 +159,13 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     public string FeaturedLeagueName
     {
         get => _featuredLeagueName ?? "--";
-        private set => SetProperty(ref _featuredLeagueName, value);
+        set => SetProperty(ref _featuredLeagueName, value);
     }
 
     public string FeaturedLeagueSeason
     {
         get => _featuredLeagueSeason ?? "--";
-        private set => SetProperty(ref _featuredLeagueSeason, value);
+        set => SetProperty(ref _featuredLeagueSeason, value);
     }
 
     public int TotalCountries => Countries.Count;
