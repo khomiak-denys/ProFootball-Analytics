@@ -55,7 +55,18 @@
                                                 FontSize="18"
                                                 Content="&#xE710;"
                                                 ToolTip="{loc:Loc Key=Teams_Add_Button}"
-                                                Command="{Binding Teams.OpenAddTeamModalCommand}" />
+                                                Command="{Binding Teams.OpenAddTeamModalCommand}">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding CanManageData}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
                                     </Grid>
 
                                     <StackPanel Grid.Row="1"

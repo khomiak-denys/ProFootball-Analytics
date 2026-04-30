@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows.Threading;
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Common;
+using ProFootball.Application.Team.Commands;
 using ProFootball.Application.League.Dtos;
 using ProFootball.Application.League.Queries;
 using ProFootball.Application.Team.Dtos;
@@ -14,6 +15,7 @@ namespace ProFootball.Presentation.ViewModels;
 public sealed class TeamsViewModel : ObservableObject, IDisposable
 {
     private readonly IQueryDispatcher _queryDispatcher;
+    private readonly ICommandDispatcher _commandDispatcher;
     private readonly Action<int> _openDetails;
     private readonly DispatcherTimer _nameSearchDebounceTimer;
     private TeamListItemDto? _selectedTeam;
@@ -35,11 +37,10 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
     private string _newTeamName = string.Empty;
     private string _newTeamShortName = string.Empty;
     private LeagueDto? _selectedLeague;
-    private int _localTeamIdSeed = -1;
-
-    public TeamsViewModel(IQueryDispatcher queryDispatcher, Action<int> openDetails)
+    public TeamsViewModel(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher, Action<int> openDetails)
     {
         _queryDispatcher = queryDispatcher;
+        _commandDispatcher = commandDispatcher;
         _openDetails = openDetails;
 
         _nameSearchDebounceTimer = new DispatcherTimer
@@ -458,16 +459,15 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
         var shortName = string.IsNullOrWhiteSpace(normalizedShortName)
             ? BuildShortCode(NewTeamName)
             : normalizedShortName.ToUpperInvariant();
+        var result = await _commandDispatcher.DispatchAsync<CreateTeamCommand, Result>(
+            new CreateTeamCommand(NewTeamName.Trim(), shortName));
+        if (result.IsFailure)
+        {
+            ErrorMessage = result.Error.Message;
+            return;
+        }
 
-        var team = new TeamListItemDto(
-            _localTeamIdSeed--,
-            NewTeamName.Trim(),
-            shortName,
-            null);
-
-        Teams.Insert(0, team);
-        TotalCount += 1;
-        SelectedTeam = team;
+        await StartSearchAsync();
         ErrorMessage = null;
         IsAddTeamModalOpen = false;
     }

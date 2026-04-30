@@ -3,6 +3,8 @@ using Microsoft.Extensions.Logging;
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Country.Dtos;
 using ProFootball.Application.Country.Queries;
+using ProFootball.Application.Common;
+using ProFootball.Application.League.Commands;
 using ProFootball.Application.League.Dtos;
 using ProFootball.Presentation.Commands;
 
@@ -25,6 +27,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     ];
 
     private readonly IQueryDispatcher _queryDispatcher;
+    private readonly ICommandDispatcher _commandDispatcher;
     private readonly ILogger<CountriesLeaguesViewModel> _logger;
     private readonly SemaphoreSlim _reloadLock = new(1, 1);
     private CancellationTokenSource? _reloadCts;
@@ -41,13 +44,14 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     private int? _newLeagueMaxTeams;
     private string? _newLeagueDescription;
     private CountryLeagueListItemDto? _selectedCountryForNewLeague;
-    private int _localLeagueIdSeed = -1;
 
     public CountriesLeaguesViewModel(
         IQueryDispatcher queryDispatcher,
+        ICommandDispatcher commandDispatcher,
         ILogger<CountriesLeaguesViewModel> logger)
     {
         _queryDispatcher = queryDispatcher;
+        _commandDispatcher = commandDispatcher;
         _logger = logger;
         Countries = new ObservableCollection<CountryLeagueListItemDto>();
         CountryOptions = new ObservableCollection<CountryLeagueListItemDto>();
@@ -55,7 +59,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, CommandExceptionHandler.Handle);
         OpenAddLeagueModalCommand = new RelayCommand(OpenAddLeagueModal);
         CloseAddLeagueModalCommand = new RelayCommand(CloseAddLeagueModal);
-        AddLeagueCommand = new RelayCommand(AddLeague);
+        AddLeagueCommand = new AsyncRelayCommand(AddLeagueAsync, CommandExceptionHandler.Handle);
     }
 
     public ObservableCollection<CountryLeagueListItemDto> Countries { get; }
@@ -87,7 +91,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     public AsyncRelayCommand RefreshCommand { get; }
     public RelayCommand OpenAddLeagueModalCommand { get; }
     public RelayCommand CloseAddLeagueModalCommand { get; }
-    public RelayCommand AddLeagueCommand { get; }
+    public AsyncRelayCommand AddLeagueCommand { get; }
 
     public bool IsLoading
     {
@@ -408,7 +412,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         IsAddLeagueModalOpen = false;
     }
 
-    private void AddLeague()
+    private async Task AddLeagueAsync()
     {
         if (string.IsNullOrWhiteSpace(NewLeagueName))
         {
@@ -422,62 +426,24 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var normalizedLeagueName = NewLeagueName.Trim();
-        var normalizedDescription = string.IsNullOrWhiteSpace(NewLeagueDescription) ? null : NewLeagueDescription.Trim();
-        var season = LeagueCards.Select(card => card.Season).FirstOrDefault(value => !string.IsNullOrWhiteSpace(value)) ?? "2025/26";
-        var countryName = SelectedCountryForNewLeague.Name;
-        LeagueCards.Insert(0, new LeagueCountryCardDto(
-            _localLeagueIdSeed--,
-            normalizedLeagueName,
-            season,
-            NewLeagueMaxTeams ?? 0,
-            0,
-            NewLeagueMaxTeams,
-            normalizedDescription));
-        RaisePropertyChanged(nameof(LeagueNamesLine));
-        ActiveLeagues = LeagueCards.Count;
-        TotalClubs = LeagueCards.Sum(card => card.TeamsCount);
-
-        UpsertCountryAfterLeagueAdd(countryName);
-        if (string.Equals(SelectedCountry?.Name, countryName, StringComparison.OrdinalIgnoreCase)
-            && !string.IsNullOrWhiteSpace(normalizedDescription))
+        var result = await _commandDispatcher.DispatchAsync<CreateLeagueCommand, Result>(
+            new CreateLeagueCommand(
+                SelectedCountryForNewLeague.Name,
+                NewLeagueName.Trim(),
+                NewLeagueMaxTeams,
+                string.IsNullOrWhiteSpace(NewLeagueDescription) ? null : NewLeagueDescription.Trim()));
+        if (result.IsFailure)
         {
-            _snapshotAboutDescription = normalizedDescription;
-            RaisePropertyChanged(nameof(EffectiveCountryDescription));
+            ErrorMessage = result.Error.Message;
+            return;
         }
 
+        var createdCountry = SelectedCountryForNewLeague.Name;
+        await RefreshAsync();
+        SelectedCountry = Countries.FirstOrDefault(country =>
+            string.Equals(country.Name, createdCountry, StringComparison.OrdinalIgnoreCase));
         ErrorMessage = null;
         IsAddLeagueModalOpen = false;
-    }
-
-    private void UpsertCountryAfterLeagueAdd(string countryName)
-    {
-        var existingCountry = Countries.FirstOrDefault(country =>
-            string.Equals(country.Name, countryName, StringComparison.OrdinalIgnoreCase));
-
-        if (existingCountry is null)
-        {
-            var addedCountry = new CountryLeagueListItemDto(countryName, 1);
-            Countries.Add(addedCountry);
-            SelectedCountry = addedCountry;
-        }
-        else
-        {
-            var countryIndex = Countries.IndexOf(existingCountry);
-            Countries[countryIndex] = existingCountry with { LeagueCount = existingCountry.LeagueCount + 1 };
-        }
-
-        var optionCountry = CountryOptions.FirstOrDefault(country =>
-            string.Equals(country.Name, countryName, StringComparison.OrdinalIgnoreCase));
-        if (optionCountry is not null)
-        {
-            var optionIndex = CountryOptions.IndexOf(optionCountry);
-            CountryOptions[optionIndex] = optionCountry with { LeagueCount = optionCountry.LeagueCount + 1 };
-            SelectedCountryForNewLeague = CountryOptions[optionIndex];
-        }
-
-        RaisePropertyChanged(nameof(TotalCountries));
-        RaisePropertyChanged(nameof(TotalLeagues));
     }
 
     private static string ResolveCountryFlag(string? countryName)
