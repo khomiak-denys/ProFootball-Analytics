@@ -411,6 +411,12 @@
   <data name="Matches_Column_League" xml:space="preserve">
     <value>League</value>
   </data>
+  <data name="Matches_Column_Country" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="Matches_Column_Season" xml:space="preserve">
+    <value>Season</value>
+  </data>
   <data name="Matches_Column_Stage" xml:space="preserve">
     <value>Stage</value>
   </data>
@@ -845,6 +851,5 @@
   <data name="Analytics_Competitiveness_AvgDiff" xml:space="preserve">
     <value>avg goal diff</value>
   </data></root>
-
 
 
