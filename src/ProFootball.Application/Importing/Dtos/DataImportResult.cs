@@ -8,5 +8,10 @@ public sealed record DataImportResult(
     int MatchesImported,
     int TeamAttributesImported,
     int PlayerAttributesImported,
+    int MatchEventsGenerated,
+    int PlayerMatchStatsGenerated,
+    int TeamSeasonStatsRebuilt,
+    int AnalyticsFactsRebuilt,
+    int ValidationErrors,
     int SkippedRows,
     TimeSpan Duration);
