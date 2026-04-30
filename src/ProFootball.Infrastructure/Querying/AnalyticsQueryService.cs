@@ -91,7 +91,7 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
                           join player in dbContext.Players.AsNoTracking() on grouped.PlayerId equals player.Id
                           select new TopPlayerDto(
                               grouped.PlayerId,
-                              player.Name,
+                              (player.FirstName + " " + player.LastName).Trim(),
                               Math.Round(grouped.AverageOverallRating, 2),
                               Math.Round(grouped.AveragePotential, 2),
                               grouped.Samples);
@@ -155,10 +155,10 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
                             join sample in sampleCounts on latest.PlayerId equals sample.PlayerId
                             where sample.Samples >= minimumSamples
                             let delta = latest.Potential - latest.Overall
-                            orderby delta descending, latest.Potential descending, player.Name
+                            orderby delta descending, latest.Potential descending, player.LastName, player.FirstName
                             select new PlayerRatingDeltaDto(
                                 player.Id,
-                                player.Name,
+                                (player.FirstName + " " + player.LastName).Trim(),
                                 latest.Overall,
                                 latest.Potential,
                                 delta,

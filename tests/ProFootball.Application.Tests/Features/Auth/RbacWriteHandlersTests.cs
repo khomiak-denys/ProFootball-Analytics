@@ -30,7 +30,7 @@ public class RbacWriteHandlersTests
         var repo = new InMemoryPlayerRepository();
         var handler = new CreatePlayerCommandHandler(repo, store);
 
-        var result = await handler.HandleAsync(new CreatePlayerCommand("Test Player", null, 180, 75));
+        var result = await handler.HandleAsync(new CreatePlayerCommand("Test", "Player", null, 180, 75));
 
         Assert.Equal(shouldSucceed, result.IsSuccess);
         Assert.Equal(shouldSucceed ? 1 : 0, repo.Players.Count);
@@ -40,7 +40,7 @@ public class RbacWriteHandlersTests
     public async Task PlayerUpdate_ShouldReturnNotFound_WhenMissing()
     {
         var handler = new UpdatePlayerCommandHandler(new InMemoryPlayerRepository(), BuildStore("Admin"));
-        var result = await handler.HandleAsync(new UpdatePlayerCommand(999, "Name", null, null, null));
+        var result = await handler.HandleAsync(new UpdatePlayerCommand(999, "First", "Last", null, null, null));
 
         Assert.True(result.IsFailure);
         Assert.Equal("player.not_found", result.Error.Code);
@@ -50,7 +50,7 @@ public class RbacWriteHandlersTests
     public async Task PlayerDelete_ShouldReturnForbidden_ForAnalyst()
     {
         var repo = new InMemoryPlayerRepository();
-        await repo.AddAsync(new PlayerEntity(1, "P", null, null, null));
+        await repo.AddAsync(new PlayerEntity(1, "P", "Q", null, null, null));
         var handler = new DeletePlayerCommandHandler(repo, BuildStore("Analyst"));
 
         var result = await handler.HandleAsync(new DeletePlayerCommand(1));

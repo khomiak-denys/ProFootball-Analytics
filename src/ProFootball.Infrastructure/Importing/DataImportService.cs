@@ -358,7 +358,8 @@ public sealed class DataImportService(
 
             _ = playerFifaApiId;
             playerIdMap[playerApiId.Value] = id.Value;
-            batch.Add(new Player(id.Value, name, birthday, height, weight));
+            var (firstName, lastName) = SplitPlayerName(name);
+            batch.Add(new Player(id.Value, firstName, lastName, birthday, height, weight));
             if (batch.Count >= batchSize)
             {
                 imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
@@ -1092,6 +1093,25 @@ public sealed class DataImportService(
 
     private static bool IsNpgsql(ProFootballDbContext dbContext)
         => (dbContext.Database.ProviderName ?? string.Empty).Contains("Npgsql", StringComparison.OrdinalIgnoreCase);
+
+    private static (string FirstName, string LastName) SplitPlayerName(string name)
+    {
+        var normalized = name.Trim();
+        var separatorIndex = normalized.LastIndexOf(' ');
+        if (separatorIndex <= 0 || separatorIndex >= normalized.Length - 1)
+        {
+            return (normalized, normalized);
+        }
+
+        var firstName = normalized[..separatorIndex].Trim();
+        var lastName = normalized[(separatorIndex + 1)..].Trim();
+        if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
+        {
+            return (normalized, normalized);
+        }
+
+        return (firstName, lastName);
+    }
 
     private static async Task<int> PersistBatchAsync<TEntity>(
         ProFootballDbContext dbContext,

@@ -73,9 +73,9 @@ public class CqrsDispatcherAndContractsTests
         var teamSearch = new TeamSearchQuery("ars", "shortname", false, 2, 15);
         var teamDetailsQuery = new GetTeamDetailsQuery(100);
 
-        var player = new PlayerListItemDto(9001, "Kevin", today.AddYears(-30), 181, 76, 91, 92, "Right");
+        var player = new PlayerListItemDto(9001, "Kevin", "De Bruyne", today.AddYears(-30), 181, 76, 91, 92, "Right");
         var playerAttribute = new PlayerAttributeDto(today, 91, 92, "Right", "high", "medium");
-        var playerDetails = new PlayerDetailsDto(9001, 5001, "Kevin", today.AddYears(-30), 181, 76, [playerAttribute]);
+        var playerDetails = new PlayerDetailsDto(9001, 5001, "Kevin", "De Bruyne", today.AddYears(-30), 181, 76, [playerAttribute]);
         var trendPoint = new PlayerTrendPointDto(today, 91, 92);
         var topPlayer = new TopPlayerDto(9001, "Kevin", 90.5, 91.3, 25);
         var playerSearch = new PlayerSearchQuery("kev", 80, null, null, null, null, null, null, "overallrating", true, 1, 20);
@@ -84,7 +84,7 @@ public class CqrsDispatcherAndContractsTests
         var topPlayersQuery = new TopPlayersQuery(10, 85, 88, "Right", "overall", true);
 
         var match = new MatchListItemDto(5001, today, "2025/26", "Premier League", "England", 100, "Arsenal", 200, "Chelsea", 2, 1);
-        var matchDetails = new MatchDetailsDto(5001, today, "2025/26", "Premier League", "England", 100, "Arsenal", 200, "Chelsea", 2, 1);
+        var matchDetails = new MatchDetailsDto(5001, today, "2025/26", "Premier League", "England", 100, "Arsenal", 200, "Chelsea", 2, 1, 18, 3, 0, 6, 17, 2, 13, 87);
         var bySeason = new MatchesBySeasonDto("2025/26", "Premier League", 380);
         var kpi = new DashboardKpiDto(5, 10, 20, 500, 3800);
         var matchSearch = new MatchSearchQuery(1, "2025/26", 100, null, null, "date", true, 1, 25);
@@ -126,7 +126,8 @@ public class CqrsDispatcherAndContractsTests
         Assert.Equal(100, teamDetailsQuery.TeamApiId);
 
         Assert.Equal(9001, player.PlayerApiId);
-        Assert.Equal("Kevin", player.Name);
+        Assert.Equal("Kevin", player.FirstName);
+        Assert.Equal("De Bruyne", player.LastName);
         Assert.Equal(181, player.Height);
         Assert.Equal(76, player.Weight);
         Assert.Equal(91, player.OverallRating);
@@ -139,7 +140,8 @@ public class CqrsDispatcherAndContractsTests
         Assert.Equal("high", playerAttribute.AttackingWorkRate);
         Assert.Equal("medium", playerAttribute.DefensiveWorkRate);
         Assert.Equal(5001, playerDetails.PlayerFifaApiId);
-        Assert.Equal("Kevin", playerDetails.Name);
+        Assert.Equal("Kevin", playerDetails.FirstName);
+        Assert.Equal("De Bruyne", playerDetails.LastName);
         Assert.Equal(181, playerDetails.Height);
         Assert.Equal(76, playerDetails.Weight);
         Assert.Single(playerDetails.Attributes);
