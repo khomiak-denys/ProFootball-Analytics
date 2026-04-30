@@ -13,7 +13,10 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
     IQueryHandler<GetMatchTeamsQuery, IReadOnlyList<TeamListItemDto>>,
     IQueryHandler<GetMatchDetailsQuery, MatchDetailsDto?>,
     IQueryHandler<GetMatchesBySeasonQuery, IReadOnlyList<MatchesBySeasonDto>>,
-    IQueryHandler<GetDashboardKpiQuery, DashboardKpiDto>
+    IQueryHandler<GetDashboardKpiQuery, DashboardKpiDto>,
+    IQueryHandler<GetSeasonRatingTrendQuery, IReadOnlyList<SeasonRatingTrendPointDto>>,
+    IQueryHandler<GetMatchOutcomeDistributionQuery, MatchOutcomeDistributionDto>,
+    IQueryHandler<GetLeagueCompetitivenessQuery, IReadOnlyList<LeagueCompetitivenessDto>>
 {
     public async Task<Result<PagedResult<MatchListItemDto>>> HandleAsync(
         MatchSearchQuery query,
@@ -213,5 +216,140 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
         var matches = await dbContext.Matches.CountAsync(cancellationToken);
 
         return Result<DashboardKpiDto>.Success(new DashboardKpiDto(countries, leagues, teams, players, matches));
+    }
+
+    public async Task<Result<IReadOnlyList<SeasonRatingTrendPointDto>>> HandleAsync(
+        GetSeasonRatingTrendQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var matchesQuery = dbContext.Matches.AsNoTracking();
+        if (!string.IsNullOrWhiteSpace(query.Season))
+        {
+            var season = query.Season.Trim();
+            matchesQuery = matchesQuery.Where(match => match.Season == season);
+        }
+
+        if (query.LeagueId.HasValue && query.LeagueId.Value > 0)
+        {
+            matchesQuery = matchesQuery.Where(match => match.LeagueId == query.LeagueId.Value);
+        }
+
+        var activeMonths = await matchesQuery
+            .Where(match => match.Date != default)
+            .Select(match => new DateTime(match.Date.Year, match.Date.Month, 1))
+            .Distinct()
+            .OrderBy(month => month)
+            .ToListAsync(cancellationToken);
+
+        if (activeMonths.Count == 0)
+        {
+            return Result<IReadOnlyList<SeasonRatingTrendPointDto>>.Success(Array.Empty<SeasonRatingTrendPointDto>());
+        }
+
+        var monthSet = activeMonths.ToHashSet();
+        var trend = await dbContext.PlayerAttributes
+            .AsNoTracking()
+            .Where(attribute => attribute.OverallRating.HasValue)
+            .Select(attribute => new
+            {
+                Month = new DateTime(attribute.Date.Year, attribute.Date.Month, 1),
+                attribute.OverallRating,
+            })
+            .Where(item => monthSet.Contains(item.Month))
+            .GroupBy(item => item.Month)
+            .Select(group => new SeasonRatingTrendPointDto(
+                group.Key,
+                Math.Round(group.Average(item => item.OverallRating!.Value), 2)))
+            .OrderBy(item => item.Month)
+            .ToListAsync(cancellationToken);
+
+        return Result<IReadOnlyList<SeasonRatingTrendPointDto>>.Success(trend);
+    }
+
+    public async Task<Result<MatchOutcomeDistributionDto>> HandleAsync(
+        GetMatchOutcomeDistributionQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+
+        var matchesQuery = dbContext.Matches.AsNoTracking()
+            .Where(match => match.HomeTeamGoal.HasValue && match.AwayTeamGoal.HasValue);
+
+        if (!string.IsNullOrWhiteSpace(query.Season))
+        {
+            var season = query.Season.Trim();
+            matchesQuery = matchesQuery.Where(match => match.Season == season);
+        }
+
+        if (query.LeagueId.HasValue && query.LeagueId.Value > 0)
+        {
+            matchesQuery = matchesQuery.Where(match => match.LeagueId == query.LeagueId.Value);
+        }
+
+        var rows = await matchesQuery
+            .Select(match => new
+            {
+                Home = match.HomeTeamGoal!.Value,
+                Away = match.AwayTeamGoal!.Value,
+            })
+            .ToListAsync(cancellationToken);
+
+        if (rows.Count == 0)
+        {
+            return Result<MatchOutcomeDistributionDto>.Success(new MatchOutcomeDistributionDto(0, 0, 0, 0, 0));
+        }
+
+        var homeWins = rows.Count(row => row.Home > row.Away);
+        var draws = rows.Count(row => row.Home == row.Away);
+        var awayWins = rows.Count(row => row.Away > row.Home);
+        var avgGoals = Math.Round(rows.Average(row => row.Home + row.Away), 2);
+
+        return Result<MatchOutcomeDistributionDto>.Success(
+            new MatchOutcomeDistributionDto(homeWins, draws, awayWins, avgGoals, rows.Count));
+    }
+
+    public async Task<Result<IReadOnlyList<LeagueCompetitivenessDto>>> HandleAsync(
+        GetLeagueCompetitivenessQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
+        var limit = query.Limit < 1 ? 8 : Math.Min(query.Limit, 30);
+
+        var matchesQuery = dbContext.Matches.AsNoTracking()
+            .Where(match => match.HomeTeamGoal.HasValue && match.AwayTeamGoal.HasValue);
+
+        if (!string.IsNullOrWhiteSpace(query.Season))
+        {
+            var season = query.Season.Trim();
+            matchesQuery = matchesQuery.Where(match => match.Season == season);
+        }
+
+        var grouped = from match in matchesQuery
+                      group match by match.LeagueId
+            into byLeague
+                      select new
+                      {
+                          LeagueId = byLeague.Key,
+                          MatchCount = byLeague.Count(),
+                          DrawCount = byLeague.Count(item => item.HomeTeamGoal == item.AwayTeamGoal),
+                          AvgGoalDiff = byLeague.Average(item => Math.Abs(item.HomeTeamGoal!.Value - item.AwayTeamGoal!.Value)),
+                      };
+
+        var result = await (from groupRow in grouped
+                            join league in dbContext.Leagues.AsNoTracking() on groupRow.LeagueId equals league.Id
+                            orderby (double)groupRow.DrawCount / Math.Max(groupRow.MatchCount, 1) descending, groupRow.AvgGoalDiff
+                            select new LeagueCompetitivenessDto(
+                                league.Id,
+                                league.Name,
+                                league.CountryName,
+                                groupRow.MatchCount,
+                                Math.Round((double)groupRow.DrawCount / Math.Max(groupRow.MatchCount, 1), 4),
+                                Math.Round(groupRow.AvgGoalDiff, 2)))
+            .Take(limit)
+            .ToListAsync(cancellationToken);
+
+        return Result<IReadOnlyList<LeagueCompetitivenessDto>>.Success(result);
     }
 }
