@@ -184,6 +184,17 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             return Array.Empty<LeagueCountryCardDto>();
         }
 
+        var teamCountsByLeague = await dbContext.Teams
+            .AsNoTracking()
+            .Where(team => team.LeagueId.HasValue)
+            .GroupBy(team => team.LeagueId!.Value)
+            .Select(grouped => new
+            {
+                LeagueId = grouped.Key,
+                TeamCount = grouped.Count(),
+            })
+            .ToDictionaryAsync(item => item.LeagueId, item => item.TeamCount, cancellationToken);
+
         var seasonalAggregates = await dbContext.Matches
             .AsNoTracking()
             .Where(match => match.CountryName == countryName)
@@ -224,17 +235,19 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
                         league.Id,
                         league.Name,
                         "--",
-                        0,
+                        teamCountsByLeague.TryGetValue(league.Id, out var teamsWithoutMatches) ? teamsWithoutMatches : 0,
                         0,
                         league.MaxTeams,
                         league.Description);
                 }
 
+                var directTeamCount = teamCountsByLeague.TryGetValue(league.Id, out var directTeams) ? directTeams : 0;
+
                 return new LeagueCountryCardDto(
                     league.Id,
                     league.Name,
                     latestAggregate.Season,
-                    latestAggregate.TeamsCount,
+                    Math.Max(latestAggregate.TeamsCount, directTeamCount),
                     latestAggregate.MatchCount,
                     league.MaxTeams,
                     league.Description);
