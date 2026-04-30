@@ -13,6 +13,11 @@ public sealed class ProFootballDbContext(DbContextOptions<ProFootballDbContext> 
     public DbSet<Player> Players => Set<Player>();
     public DbSet<PlayerAttribute> PlayerAttributes => Set<PlayerAttribute>();
     public DbSet<FootballMatch> Matches => Set<FootballMatch>();
+    public DbSet<MatchEvent> MatchEvents => Set<MatchEvent>();
+    public DbSet<PlayerMatchStat> PlayerMatchStats => Set<PlayerMatchStat>();
+    public DbSet<TeamSeasonStat> TeamSeasonStats => Set<TeamSeasonStat>();
+    public DbSet<AnalyticsFactDaily> AnalyticsFactDaily => Set<AnalyticsFactDaily>();
+    public DbSet<GenerationRun> GenerationRuns => Set<GenerationRun>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
