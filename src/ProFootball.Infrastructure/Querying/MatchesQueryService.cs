@@ -163,7 +163,21 @@ public sealed class MatchesQueryService(IDbContextFactory<ProFootballDbContext> 
                                item.AwayTeamId,
                                awayTeam == null ? item.AwayTeamId.ToString() : awayTeam.LongName,
                                item.HomeTeamGoal,
-                               item.AwayTeamGoal))
+                               item.AwayTeamGoal,
+                               dbContext.MatchEvents.Count(e => e.MatchId == item.Id),
+                               dbContext.MatchEvents.Count(e => e.MatchId == item.Id && e.EventType == "yellow_card"),
+                               dbContext.MatchEvents.Count(e => e.MatchId == item.Id && e.EventType == "red_card"),
+                               dbContext.MatchEvents.Count(e => e.MatchId == item.Id && e.EventType == "substitution"),
+                               dbContext.MatchEvents.Count(e => e.MatchId == item.Id && e.EventType == "shot"),
+                               dbContext.MatchEvents.Count(e => e.MatchId == item.Id && e.AssistPlayerId != null),
+                               dbContext.MatchEvents
+                                   .Where(e => e.MatchId == item.Id && e.EventType == "goal")
+                                   .Select(e => (int?)e.Minute)
+                                   .Min(),
+                               dbContext.MatchEvents
+                                   .Where(e => e.MatchId == item.Id && e.EventType == "goal")
+                                   .Select(e => (int?)e.Minute)
+                                   .Max()))
             .SingleOrDefaultAsync(cancellationToken);
 
         return Result<MatchDetailsDto?>.Success(match);
