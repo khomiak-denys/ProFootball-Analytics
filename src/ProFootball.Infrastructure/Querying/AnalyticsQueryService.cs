@@ -108,22 +108,6 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
         var limit = query.Limit < 1 ? 10 : Math.Min(query.Limit, 50);
         var minimumSamples = query.MinimumSamples < 1 ? 1 : query.MinimumSamples;
 
-        var latestAttributesByPlayer = from attribute in dbContext.PlayerAttributes.AsNoTracking()
-                                       where attribute.OverallRating.HasValue && attribute.Potential.HasValue
-                                       group attribute by attribute.PlayerId
-            into grouped
-                                       select grouped
-                                           .OrderByDescending(item => item.Date)
-                                           .ThenByDescending(item => item.Id)
-                                           .Select(item => new
-                                           {
-                                               item.PlayerId,
-                                               item.Date,
-                                               Overall = item.OverallRating!.Value,
-                                               Potential = item.Potential!.Value,
-                                           })
-                                           .FirstOrDefault();
-
         var sampleCounts = from attribute in dbContext.PlayerAttributes.AsNoTracking()
                            group attribute by attribute.PlayerId
             into grouped
@@ -133,7 +117,38 @@ public sealed class AnalyticsQueryService(IDbContextFactory<ProFootballDbContext
                                Samples = grouped.Count(),
                            };
 
-        var result = await (from latest in latestAttributesByPlayer
+        var latestDatePerPlayer = from attribute in dbContext.PlayerAttributes.AsNoTracking()
+                                  where attribute.OverallRating.HasValue && attribute.Potential.HasValue
+                                  group attribute by attribute.PlayerId
+            into grouped
+                                  select new
+                                  {
+                                      PlayerId = grouped.Key,
+                                      MaxDate = grouped.Max(item => item.Date),
+                                  };
+
+        var latestIdPerPlayer = from attribute in dbContext.PlayerAttributes.AsNoTracking()
+                                join latestDate in latestDatePerPlayer
+                                    on new { attribute.PlayerId, attribute.Date } equals new { latestDate.PlayerId, Date = latestDate.MaxDate }
+                                group attribute by attribute.PlayerId
+            into grouped
+                                select new
+                                {
+                                    PlayerId = grouped.Key,
+                                    MaxId = grouped.Max(item => item.Id),
+                                };
+
+        var latestAttributes = from attribute in dbContext.PlayerAttributes.AsNoTracking()
+                               join latestId in latestIdPerPlayer on attribute.Id equals latestId.MaxId
+                               select new
+                               {
+                                   attribute.PlayerId,
+                                   attribute.Date,
+                                   Overall = attribute.OverallRating!.Value,
+                                   Potential = attribute.Potential!.Value,
+                               };
+
+        var result = await (from latest in latestAttributes
                             join player in dbContext.Players.AsNoTracking() on latest.PlayerId equals player.Id
                             join sample in sampleCounts on latest.PlayerId equals sample.PlayerId
                             where sample.Samples >= minimumSamples
