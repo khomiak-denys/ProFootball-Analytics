@@ -44,14 +44,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Dashboard = new DashboardViewModel(queryDispatcher);
         CountriesLeagues = new CountriesLeaguesViewModel(
             queryDispatcher,
+            commandDispatcher,
             loggerFactory.CreateLogger<CountriesLeaguesViewModel>());
         TeamDetails = new TeamDetailsViewModel(queryDispatcher);
         PlayerDetails = new PlayerDetailsViewModel(queryDispatcher);
         MatchDetails = new MatchDetailsViewModel(queryDispatcher);
 
-        Teams = new TeamsViewModel(queryDispatcher, OpenTeamDetails);
-        Players = new PlayersViewModel(queryDispatcher, OpenPlayerDetails);
-        Matches = new MatchesViewModel(queryDispatcher, OpenMatchDetails);
+        Teams = new TeamsViewModel(queryDispatcher, commandDispatcher, OpenTeamDetails);
+        Players = new PlayersViewModel(queryDispatcher, commandDispatcher, OpenPlayerDetails);
+        Matches = new MatchesViewModel(queryDispatcher, commandDispatcher, OpenMatchDetails);
         Analytics = new AnalyticsViewModel(queryDispatcher);
         Settings = new SettingsViewModel(themeService, appSettingsService, localizationService);
 

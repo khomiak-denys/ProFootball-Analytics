@@ -135,10 +135,65 @@
                 </Grid.RowDefinitions>
 
                 <StackPanel>
-                    <TextBlock FontSize="24"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource TitleForegroundBrush}"
-                               Text="{loc:Loc Key=Matches_List_Title}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock FontSize="24"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                   Text="{loc:Loc Key=Matches_List_Title}" />
+                        <Button Grid.Column="1"
+                                Width="42"
+                                Height="42"
+                                Margin="10,0,0,0"
+                                Background="{DynamicResource SuccessForegroundBrush}"
+                                Foreground="White"
+                                FontFamily="Segoe MDL2 Assets"
+                                FontSize="18"
+                                Content="&#xE710;"
+                                ToolTip="{loc:Loc Key=Matches_Add_Button}"
+                                Command="{Binding Matches.OpenAddMatchModalCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding CanManageData}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        <Button Grid.Column="2"
+                                Width="42"
+                                Height="42"
+                                Margin="10,0,0,0"
+                                Background="{DynamicResource SelectionSurfaceBrush}"
+                                Foreground="{DynamicResource TitleForegroundBrush}"
+                                FontFamily="Segoe MDL2 Assets"
+                                FontSize="16"
+                                Content="&#xE70F;"
+                                ToolTip="{loc:Loc Key=Matches_Edit_Button}"
+                                Command="{Binding Matches.OpenEditMatchModalCommand}">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding CanManageData}" Value="True" />
+                                                <Condition Binding="{Binding Matches.HasSelectedMatch}" Value="True" />
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </Grid>
                     <TextBlock Margin="0,6,0,0"
                                FontSize="13"
                                Foreground="{DynamicResource MutedForegroundBrush}"
@@ -387,6 +442,216 @@
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                 </StackPanel>
+            </Border>
+        </Grid>
+
+        <Grid Grid.ColumnSpan="5"
+              Panel.ZIndex="1000"
+              Background="#99000000"
+              Visibility="{Binding Matches.IsAddMatchModalOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Width="560"
+                    Padding="22"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock FontSize="36"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                       Text="{loc:Loc Key=Matches_Add_Title}" />
+                            <TextBlock Margin="0,6,0,0"
+                                       FontSize="18"
+                                       Foreground="{DynamicResource MutedForegroundBrush}"
+                                       Text="{loc:Loc Key=Matches_Add_Subtitle}" />
+                        </StackPanel>
+                        <Button Grid.Column="1"
+                                Width="32"
+                                Height="32"
+                                Padding="0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                FontFamily="Segoe MDL2 Assets"
+                                FontSize="14"
+                                Foreground="{DynamicResource MutedForegroundBrush}"
+                                Content="&#xE711;"
+                                Command="{Binding Matches.CloseAddMatchModalCommand}" />
+                    </Grid>
+
+                    <StackPanel Grid.Row="1" Margin="0,18,0,0">
+                        <TextBlock FontSize="20"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                   Text="{loc:Loc Key=Matches_Add_Country}" />
+                        <TextBox Margin="0,8,0,0"
+                                 Style="{StaticResource AuthInputTextBoxStyle}"
+                                 Text="{Binding Matches.NewMatchCountryName, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Margin="0,14,0,0"
+                                   FontSize="20"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                   Text="{loc:Loc Key=Matches_Add_Season}" />
+                        <TextBox Margin="0,8,0,0"
+                                 Style="{StaticResource AuthInputTextBoxStyle}"
+                                 Text="{Binding Matches.NewMatchSeason, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Margin="0,14,0,0"
+                                   FontSize="20"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                   Text="{loc:Loc Key=Matches_Add_LeagueId}" />
+                        <TextBox Margin="0,8,0,0"
+                                 Style="{StaticResource AuthInputTextBoxStyle}"
+                                 Text="{Binding Matches.NewMatchLeagueId, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Margin="0,14,0,0"
+                                   FontSize="20"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                   Text="{loc:Loc Key=Matches_Add_Date}" />
+                        <DatePicker Margin="0,8,0,0"
+                                    Style="{StaticResource MatchesFilterDatePickerStyle}"
+                                    SelectedDate="{Binding Matches.NewMatchDate, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Margin="0,14,0,0"
+                                   FontSize="20"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                   Text="{loc:Loc Key=Matches_Add_HomeTeamId}" />
+                        <TextBox Margin="0,8,0,0"
+                                 Style="{StaticResource AuthInputTextBoxStyle}"
+                                 Text="{Binding Matches.NewMatchHomeTeamId, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Margin="0,14,0,0"
+                                   FontSize="20"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                   Text="{loc:Loc Key=Matches_Add_AwayTeamId}" />
+                        <TextBox Margin="0,8,0,0"
+                                 Style="{StaticResource AuthInputTextBoxStyle}"
+                                 Text="{Binding Matches.NewMatchAwayTeamId, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Margin="0,14,0,0"
+                                   FontSize="20"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                   Text="{loc:Loc Key=Matches_Add_HomeGoals}" />
+                        <TextBox Margin="0,8,0,0"
+                                 Style="{StaticResource AuthInputTextBoxStyle}"
+                                 Text="{Binding Matches.NewMatchHomeGoals, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <TextBlock Margin="0,14,0,0"
+                                   FontSize="20"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                   Text="{loc:Loc Key=Matches_Add_AwayGoals}" />
+                        <TextBox Margin="0,8,0,0"
+                                 Style="{StaticResource AuthInputTextBoxStyle}"
+                                 Text="{Binding Matches.NewMatchAwayGoals, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2"
+                                Margin="0,20,0,0"
+                                Orientation="Horizontal"
+                                HorizontalAlignment="Right">
+                        <Button Width="150"
+                                Margin="0,0,10,0"
+                                Content="{loc:Loc Key=Common_Action_Cancel}"
+                                Command="{Binding Matches.CloseAddMatchModalCommand}" />
+                        <Button Width="190"
+                                Background="{DynamicResource SuccessForegroundBrush}"
+                                Foreground="White"
+                                Content="{loc:Loc Key=Matches_Add_Confirm}"
+                                Command="{Binding Matches.AddMatchCommand}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.ColumnSpan="5"
+              Panel.ZIndex="1001"
+              Background="#99000000"
+              Visibility="{Binding Matches.IsEditMatchModalOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border Width="560"
+                    Padding="22"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="{DynamicResource CardBackgroundBrush}"
+                    BorderBrush="{DynamicResource CardBorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock FontSize="36"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                       Text="{loc:Loc Key=Matches_Edit_Title}" />
+                            <TextBlock Margin="0,6,0,0"
+                                       FontSize="18"
+                                       Foreground="{DynamicResource MutedForegroundBrush}"
+                                       Text="{loc:Loc Key=Matches_Edit_Subtitle}" />
+                        </StackPanel>
+                        <Button Grid.Column="1"
+                                Width="32"
+                                Height="32"
+                                Padding="0"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                FontFamily="Segoe MDL2 Assets"
+                                FontSize="14"
+                                Foreground="{DynamicResource MutedForegroundBrush}"
+                                Content="&#xE711;"
+                                Command="{Binding Matches.CloseEditMatchModalCommand}" />
+                    </Grid>
+
+                    <StackPanel Grid.Row="1" Margin="0,18,0,0">
+                        <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Matches_Add_Country}" />
+                        <TextBox Margin="0,8,0,0" Style="{StaticResource AuthInputTextBoxStyle}" Text="{Binding Matches.EditorCountryName, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Margin="0,14,0,0" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Matches_Add_Season}" />
+                        <TextBox Margin="0,8,0,0" Style="{StaticResource AuthInputTextBoxStyle}" Text="{Binding Matches.EditorSeason, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Margin="0,14,0,0" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Matches_Add_LeagueId}" />
+                        <TextBox Margin="0,8,0,0" Style="{StaticResource AuthInputTextBoxStyle}" Text="{Binding Matches.EditorLeagueId, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Margin="0,14,0,0" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Matches_Add_HomeTeamId}" />
+                        <TextBox Margin="0,8,0,0" Style="{StaticResource AuthInputTextBoxStyle}" Text="{Binding Matches.EditorHomeTeamId, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Margin="0,14,0,0" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Matches_Add_AwayTeamId}" />
+                        <TextBox Margin="0,8,0,0" Style="{StaticResource AuthInputTextBoxStyle}" Text="{Binding Matches.EditorAwayTeamId, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Margin="0,14,0,0" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Matches_Add_HomeGoals}" />
+                        <TextBox Margin="0,8,0,0" Style="{StaticResource AuthInputTextBoxStyle}" Text="{Binding Matches.EditorHomeGoals, UpdateSourceTrigger=PropertyChanged}" />
+                        <TextBlock Margin="0,14,0,0" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Matches_Add_AwayGoals}" />
+                        <TextBox Margin="0,8,0,0" Style="{StaticResource AuthInputTextBoxStyle}" Text="{Binding Matches.EditorAwayGoals, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Margin="0,20,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Width="150" Margin="0,0,10,0" Content="{loc:Loc Key=Common_Action_Cancel}" Command="{Binding Matches.CloseEditMatchModalCommand}" />
+                        <Button Width="190" Background="{DynamicResource SuccessForegroundBrush}" Foreground="White" Content="{loc:Loc Key=Matches_Edit_Confirm}" Command="{Binding Matches.SaveEditMatchCommand}" />
+                    </StackPanel>
+                </Grid>
             </Border>
         </Grid>
     </Grid>

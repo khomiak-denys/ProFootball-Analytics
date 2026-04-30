@@ -50,4 +50,27 @@ public sealed class FootballMatch
     public int? AwayTeamGoal { get; private set; }
 
     public League? League { get; private set; }
+
+    public void Update(
+        string countryName,
+        int leagueId,
+        string season,
+        DateTime date,
+        int homeTeamId,
+        int awayTeamId,
+        int? homeTeamGoal,
+        int? awayTeamGoal)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(countryName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(season);
+
+        CountryName = countryName.Trim();
+        LeagueId = leagueId;
+        Season = season.Trim();
+        Date = date;
+        HomeTeamId = homeTeamId;
+        AwayTeamId = awayTeamId;
+        HomeTeamGoal = homeTeamGoal;
+        AwayTeamGoal = awayTeamGoal;
+    }
 }

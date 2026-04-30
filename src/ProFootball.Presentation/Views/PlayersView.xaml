@@ -50,6 +50,7 @@
                                                                                             Style="{StaticResource PlayersFilterComboBoxStyle}"
                                               ItemsSource="{Binding Players.PreferredFootOptions}"
                                               SelectedItem="{Binding Players.SelectedPreferredFootOption, Mode=TwoWay}" />
+
                                     <TextBlock Margin="0,12,0,0"
                                                FontSize="16"
                                                Foreground="{DynamicResource DangerForegroundBrush}"
@@ -67,6 +68,15 @@
                                         <Run Text="{Binding Path=Players.TotalCount, Mode=OneWay}" />
                                         <Run Text="{loc:Loc Key=Players_Info_PlayersSuffix}" />
                                     </TextBlock>
+                                    <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                                        <Button Width="96"
+                                                Margin="0,0,8,0"
+                                                Content="{loc:Loc Key=Common_Action_Prev}"
+                                                Command="{Binding Players.PreviousPageCommand}" />
+                                        <Button Width="96"
+                                                Content="{loc:Loc Key=Common_Action_Next}"
+                                                Command="{Binding Players.NextPageCommand}" />
+                                    </StackPanel>
                                 </StackPanel>
                             </Border>
 
@@ -80,13 +90,83 @@
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
                                         <RowDefinition Height="*" />
                                     </Grid.RowDefinitions>
-                                    <TextBlock FontSize="36"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource TitleForegroundBrush}"
-                                               Text="{loc:Loc Key=Players_List_Title}" />
-                                    <DataGrid Grid.Row="1"
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock FontSize="36"
+                                                   FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TitleForegroundBrush}"
+                                                   Text="{loc:Loc Key=Players_List_Title}" />
+                                        <Button Grid.Column="1"
+                                                Width="42"
+                                                Height="42"
+                                                Margin="10,0,0,0"
+                                                Background="{DynamicResource SuccessForegroundBrush}"
+                                                Foreground="White"
+                                                FontFamily="Segoe MDL2 Assets"
+                                                FontSize="18"
+                                                Content="&#xE710;"
+                                                ToolTip="{loc:Loc Key=Players_Add_Button}"
+                                                Command="{Binding Players.OpenAddPlayerModalCommand}">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding CanManageData}" Value="True">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                        <Button Grid.Column="2"
+                                                Width="42"
+                                                Height="42"
+                                                Margin="10,0,0,0"
+                                                Background="{DynamicResource SelectionSurfaceBrush}"
+                                                Foreground="{DynamicResource TitleForegroundBrush}"
+                                                FontFamily="Segoe MDL2 Assets"
+                                                FontSize="16"
+                                                Content="&#xE70F;"
+                                                ToolTip="{loc:Loc Key=Players_Edit_Button}"
+                                                Command="{Binding Players.OpenEditPlayerModalCommand}">
+                                            <Button.Style>
+                                                <Style TargetType="Button">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding CanManageData}" Value="True" />
+                                                                <Condition Binding="{Binding Players.HasSelectedPlayer}" Value="False" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Visibility" Value="Collapsed" />
+                                                        </MultiDataTrigger>
+                                                        <MultiDataTrigger>
+                                                            <MultiDataTrigger.Conditions>
+                                                                <Condition Binding="{Binding CanManageData}" Value="True" />
+                                                                <Condition Binding="{Binding Players.HasSelectedPlayer}" Value="True" />
+                                                            </MultiDataTrigger.Conditions>
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </MultiDataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </Grid>
+                                    <TextBlock Margin="0,6,0,0"
+                                               Grid.Row="1"
+                                               FontSize="14"
+                                               Foreground="{DynamicResource MutedForegroundBrush}">
+                                        <Run Text="{loc:Loc Key=Common_Page}" />
+                                        <Run Text="{Binding Players.Page, Mode=OneWay}" />
+                                    </TextBlock>
+                                    <DataGrid Grid.Row="2"
                                               Margin="0,16,0,0"
                                               ItemsSource="{Binding Players.Players}"
                                               SelectedItem="{Binding Players.SelectedPlayer, Mode=TwoWay}"
@@ -371,6 +451,174 @@
                                             </Grid>
                                         </Border>
                                     </StackPanel>
+                                </Border>
+                            </Grid>
+
+                            <Grid Grid.ColumnSpan="3"
+                                  Panel.ZIndex="1000"
+                                  Background="#99000000"
+                                  Visibility="{Binding Players.IsAddPlayerModalOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Border Width="560"
+                                        Padding="22"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Background="{DynamicResource CardBackgroundBrush}"
+                                        BorderBrush="{DynamicResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="12">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock FontSize="36"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TitleForegroundBrush}"
+                                                           Text="{loc:Loc Key=Players_Add_Title}" />
+                                                <TextBlock Margin="0,6,0,0"
+                                                           FontSize="18"
+                                                           Foreground="{DynamicResource MutedForegroundBrush}"
+                                                           Text="{loc:Loc Key=Players_Add_Subtitle}" />
+                                            </StackPanel>
+                                            <Button Grid.Column="1"
+                                                    Width="32"
+                                                    Height="32"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    FontFamily="Segoe MDL2 Assets"
+                                                    FontSize="14"
+                                                    Foreground="{DynamicResource MutedForegroundBrush}"
+                                                    Content="&#xE711;"
+                                                    Command="{Binding Players.CloseAddPlayerModalCommand}" />
+                                        </Grid>
+
+                                        <StackPanel Grid.Row="1" Margin="0,18,0,0">
+                                            <TextBlock FontSize="20"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                                       Text="{loc:Loc Key=Players_Add_Name}" />
+                                            <TextBox Margin="0,8,0,0"
+                                                     Style="{StaticResource AuthInputTextBoxStyle}"
+                                                     Text="{Binding Players.NewPlayerName, UpdateSourceTrigger=PropertyChanged}" />
+
+                                            <TextBlock Margin="0,14,0,0"
+                                                       FontSize="20"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                                       Text="{loc:Loc Key=Players_Add_Birthday}" />
+                                            <DatePicker Margin="0,8,0,0"
+                                                        Style="{StaticResource MatchesFilterDatePickerStyle}"
+                                                        SelectedDate="{Binding Players.NewPlayerBirthday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                                            <TextBlock Margin="0,14,0,0"
+                                                       FontSize="20"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                                       Text="{loc:Loc Key=Players_Add_Height}" />
+                                            <TextBox Margin="0,8,0,0"
+                                                     Style="{StaticResource AuthInputTextBoxStyle}"
+                                                     Text="{Binding Players.NewPlayerHeight, UpdateSourceTrigger=PropertyChanged}" />
+
+                                            <TextBlock Margin="0,14,0,0"
+                                                       FontSize="20"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                                       Text="{loc:Loc Key=Players_Add_Weight}" />
+                                            <TextBox Margin="0,8,0,0"
+                                                     Style="{StaticResource AuthInputTextBoxStyle}"
+                                                     Text="{Binding Players.NewPlayerWeight, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="2"
+                                                    Margin="0,20,0,0"
+                                                    Orientation="Horizontal"
+                                                    HorizontalAlignment="Right">
+                                            <Button Width="150"
+                                                    Margin="0,0,10,0"
+                                                    Content="{loc:Loc Key=Common_Action_Cancel}"
+                                                    Command="{Binding Players.CloseAddPlayerModalCommand}" />
+                                            <Button Width="190"
+                                                    Background="{DynamicResource SuccessForegroundBrush}"
+                                                    Foreground="White"
+                                                    Content="{loc:Loc Key=Players_Add_Confirm}"
+                                                    Command="{Binding Players.AddPlayerCommand}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+
+                            <Grid Grid.ColumnSpan="3"
+                                  Panel.ZIndex="1001"
+                                  Background="#99000000"
+                                  Visibility="{Binding Players.IsEditPlayerModalOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <Border Width="560"
+                                        Padding="22"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Background="{DynamicResource CardBackgroundBrush}"
+                                        BorderBrush="{DynamicResource CardBorderBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="12">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <StackPanel>
+                                                <TextBlock FontSize="36"
+                                                           FontWeight="SemiBold"
+                                                           Foreground="{DynamicResource TitleForegroundBrush}"
+                                                           Text="{loc:Loc Key=Players_Edit_Title}" />
+                                                <TextBlock Margin="0,6,0,0"
+                                                           FontSize="18"
+                                                           Foreground="{DynamicResource MutedForegroundBrush}"
+                                                           Text="{loc:Loc Key=Players_Edit_Subtitle}" />
+                                            </StackPanel>
+                                            <Button Grid.Column="1"
+                                                    Width="32"
+                                                    Height="32"
+                                                    Padding="0"
+                                                    Background="Transparent"
+                                                    BorderThickness="0"
+                                                    FontFamily="Segoe MDL2 Assets"
+                                                    FontSize="14"
+                                                    Foreground="{DynamicResource MutedForegroundBrush}"
+                                                    Content="&#xE711;"
+                                                    Command="{Binding Players.CloseEditPlayerModalCommand}" />
+                                        </Grid>
+
+                                        <StackPanel Grid.Row="1" Margin="0,18,0,0">
+                                            <TextBlock FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Players_Add_Name}" />
+                                            <TextBox Margin="0,8,0,0" Style="{StaticResource AuthInputTextBoxStyle}" Text="{Binding Players.EditorName, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBlock Margin="0,14,0,0" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Players_Add_Birthday}" />
+                                            <DatePicker Margin="0,8,0,0" Style="{StaticResource MatchesFilterDatePickerStyle}" SelectedDate="{Binding Players.EditorBirthday, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBlock Margin="0,14,0,0" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Players_Add_Height}" />
+                                            <TextBox Margin="0,8,0,0" Style="{StaticResource AuthInputTextBoxStyle}" Text="{Binding Players.EditorHeight, UpdateSourceTrigger=PropertyChanged}" />
+                                            <TextBlock Margin="0,14,0,0" FontSize="20" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{loc:Loc Key=Players_Add_Weight}" />
+                                            <TextBox Margin="0,8,0,0" Style="{StaticResource AuthInputTextBoxStyle}" Text="{Binding Players.EditorWeight, UpdateSourceTrigger=PropertyChanged}" />
+                                        </StackPanel>
+
+                                        <StackPanel Grid.Row="2" Margin="0,20,0,0" Orientation="Horizontal" HorizontalAlignment="Right">
+                                            <Button Width="150" Margin="0,0,10,0" Content="{loc:Loc Key=Common_Action_Cancel}" Command="{Binding Players.CloseEditPlayerModalCommand}" />
+                                            <Button Width="190" Background="{DynamicResource SuccessForegroundBrush}" Foreground="White" Content="{loc:Loc Key=Players_Edit_Confirm}" Command="{Binding Players.SaveEditPlayerCommand}" />
+                                        </StackPanel>
+                                    </Grid>
                                 </Border>
                             </Grid>
                         </Grid>

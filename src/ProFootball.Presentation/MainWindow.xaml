@@ -419,11 +419,14 @@
                                                 Foreground="White"
                                                 Click="OnAuthSignInClick" />
 
-                                        <StackPanel Margin="0,12,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <TextBlock Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Auth_NoAccount}" />
+                                        <StackPanel Margin="0,12,0,0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource MutedForegroundBrush}"
+                                                       Text="{loc:Loc Key=Auth_NoAccount}" />
                                             <Button Margin="6,0,0,0"
                                                     Padding="6,0"
                                                     Height="24"
+                                                    VerticalAlignment="Center"
                                                     Background="Transparent"
                                                     BorderThickness="0"
                                                     Foreground="{DynamicResource SuccessForegroundBrush}"
@@ -443,10 +446,12 @@
                                                    Text="{loc:Loc Key=Auth_Register_Description}" />
 
                                         <TextBlock Margin="0,16,0,6" FontWeight="SemiBold" Text="{loc:Loc Key=Auth_Field_FirstName}" />
-                                        <TextBox Text="{Binding RegistrationForm.FirstName, UpdateSourceTrigger=PropertyChanged}" />
+                                        <TextBox Style="{StaticResource AuthInputTextBoxStyle}"
+                                                 Text="{Binding RegistrationForm.FirstName, UpdateSourceTrigger=PropertyChanged}" />
 
                                         <TextBlock Margin="0,12,0,6" FontWeight="SemiBold" Text="{loc:Loc Key=Auth_Field_LastName}" />
-                                        <TextBox Text="{Binding RegistrationForm.LastName, UpdateSourceTrigger=PropertyChanged}" />
+                                        <TextBox Style="{StaticResource AuthInputTextBoxStyle}"
+                                                 Text="{Binding RegistrationForm.LastName, UpdateSourceTrigger=PropertyChanged}" />
 
                                         <TextBlock Margin="0,12,0,6" FontWeight="SemiBold" Text="{loc:Loc Key=Auth_Field_Login}" />
                                         <TextBox Style="{StaticResource AuthInputTextBoxStyle}"
@@ -502,11 +507,14 @@
                                                 Foreground="White"
                                                 Click="OnAuthRegisterClick" />
 
-                                        <StackPanel Margin="0,12,0,0" Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <TextBlock Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Auth_HaveAccount}" />
+                                        <StackPanel Margin="0,12,0,0" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock VerticalAlignment="Center"
+                                                       Foreground="{DynamicResource MutedForegroundBrush}"
+                                                       Text="{loc:Loc Key=Auth_HaveAccount}" />
                                             <Button Margin="6,0,0,0"
                                                     Padding="6,0"
                                                     Height="24"
+                                                    VerticalAlignment="Center"
                                                     Background="Transparent"
                                                     BorderThickness="0"
                                                     Foreground="{DynamicResource SuccessForegroundBrush}"
