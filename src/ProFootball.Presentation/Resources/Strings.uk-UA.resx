@@ -707,7 +707,80 @@
   </data>
   <data name="Matches_Write_Title" xml:space="preserve">
     <value>Керування матчем</value>
-  </data>  <data name="CountriesLeagues_Add_Button" xml:space="preserve">
+  </data>
+  <data name="Matches_Add_Button" xml:space="preserve">
+    <value>Додати матч</value>
+  </data>
+  <data name="Matches_Add_Title" xml:space="preserve">
+    <value>Додати новий матч</value>
+  </data>
+  <data name="Matches_Add_Subtitle" xml:space="preserve">
+    <value>Введіть дані про новий футбольний матч.</value>
+  </data>
+  <data name="Matches_Add_Country" xml:space="preserve">
+    <value>Країна</value>
+  </data>
+  <data name="Matches_Add_Season" xml:space="preserve">
+    <value>Сезон</value>
+  </data>
+  <data name="Matches_Add_LeagueId" xml:space="preserve">
+    <value>ID ліги</value>
+  </data>
+  <data name="Matches_Add_Date" xml:space="preserve">
+    <value>Дата</value>
+  </data>
+  <data name="Matches_Add_HomeTeamId" xml:space="preserve">
+    <value>ID домашньої команди</value>
+  </data>
+  <data name="Matches_Add_AwayTeamId" xml:space="preserve">
+    <value>ID гостьової команди</value>
+  </data>
+  <data name="Matches_Add_HomeGoals" xml:space="preserve">
+    <value>Голи домашньої</value>
+  </data>
+  <data name="Matches_Add_AwayGoals" xml:space="preserve">
+    <value>Голи гостьової</value>
+  </data>
+  <data name="Matches_Add_Confirm" xml:space="preserve">
+    <value>Додати матч</value>
+  </data>
+  <data name="Matches_Edit_Button" xml:space="preserve">
+    <value>Редагувати матч</value>
+  </data>
+  <data name="Matches_Edit_Title" xml:space="preserve">
+    <value>Редагування матчу</value>
+  </data>
+  <data name="Matches_Edit_Subtitle" xml:space="preserve">
+    <value>Оновіть дані вибраного матчу.</value>
+  </data>
+  <data name="Matches_Edit_Confirm" xml:space="preserve">
+    <value>Зберегти зміни</value>
+  </data>
+  <data name="Players_Add_Button" xml:space="preserve">
+    <value>Додати гравця</value>
+  </data>
+  <data name="Players_Add_Title" xml:space="preserve">
+    <value>Додати нового гравця</value>
+  </data>
+  <data name="Players_Add_Subtitle" xml:space="preserve">
+    <value>Введіть дані про нового гравця.</value>
+  </data>
+  <data name="Players_Add_Name" xml:space="preserve">
+    <value>Ім'я гравця</value>
+  </data>
+  <data name="Players_Add_Birthday" xml:space="preserve">
+    <value>Дата народження</value>
+  </data>
+  <data name="Players_Add_Height" xml:space="preserve">
+    <value>Зріст (см)</value>
+  </data>
+  <data name="Players_Add_Weight" xml:space="preserve">
+    <value>Вага (кг)</value>
+  </data>
+  <data name="Players_Add_Confirm" xml:space="preserve">
+    <value>Додати гравця</value>
+  </data>
+  <data name="CountriesLeagues_Add_Button" xml:space="preserve">
     <value>Додати лігу</value>
   </data>
   <data name="CountriesLeagues_Add_Title" xml:space="preserve">
@@ -724,16 +797,14 @@
   </data>
   <data name="CountriesLeagues_Add_Confirm" xml:space="preserve">
     <value>Додати лігу</value>
-  </data>  <data name="CountriesLeagues_Add_MaxTeams" xml:space="preserve">
+  </data>
+  <data name="CountriesLeagues_Add_MaxTeams" xml:space="preserve">
     <value>Максимум команд</value>
   </data>
   <data name="CountriesLeagues_Add_Description" xml:space="preserve">
     <value>Опис</value>
-  </data>  <data name="Common_Page" xml:space="preserve">
+  </data>
+  <data name="Common_Page" xml:space="preserve">
     <value>Сторінка: </value>
-  </data></root>
-
-
-
-
-
+  </data>
+</root>

@@ -707,7 +707,80 @@
   </data>
   <data name="Matches_Write_Title" xml:space="preserve">
     <value>Manage match</value>
-  </data>  <data name="CountriesLeagues_Add_Button" xml:space="preserve">
+  </data>
+  <data name="Matches_Add_Button" xml:space="preserve">
+    <value>Add match</value>
+  </data>
+  <data name="Matches_Add_Title" xml:space="preserve">
+    <value>Add new match</value>
+  </data>
+  <data name="Matches_Add_Subtitle" xml:space="preserve">
+    <value>Enter details for the new football match.</value>
+  </data>
+  <data name="Matches_Add_Country" xml:space="preserve">
+    <value>Country</value>
+  </data>
+  <data name="Matches_Add_Season" xml:space="preserve">
+    <value>Season</value>
+  </data>
+  <data name="Matches_Add_LeagueId" xml:space="preserve">
+    <value>League ID</value>
+  </data>
+  <data name="Matches_Add_Date" xml:space="preserve">
+    <value>Date</value>
+  </data>
+  <data name="Matches_Add_HomeTeamId" xml:space="preserve">
+    <value>Home Team ID</value>
+  </data>
+  <data name="Matches_Add_AwayTeamId" xml:space="preserve">
+    <value>Away Team ID</value>
+  </data>
+  <data name="Matches_Add_HomeGoals" xml:space="preserve">
+    <value>Home goals</value>
+  </data>
+  <data name="Matches_Add_AwayGoals" xml:space="preserve">
+    <value>Away goals</value>
+  </data>
+  <data name="Matches_Add_Confirm" xml:space="preserve">
+    <value>Add match</value>
+  </data>
+  <data name="Matches_Edit_Button" xml:space="preserve">
+    <value>Edit match</value>
+  </data>
+  <data name="Matches_Edit_Title" xml:space="preserve">
+    <value>Edit match</value>
+  </data>
+  <data name="Matches_Edit_Subtitle" xml:space="preserve">
+    <value>Update selected match details.</value>
+  </data>
+  <data name="Matches_Edit_Confirm" xml:space="preserve">
+    <value>Save changes</value>
+  </data>
+  <data name="Players_Add_Button" xml:space="preserve">
+    <value>Add player</value>
+  </data>
+  <data name="Players_Add_Title" xml:space="preserve">
+    <value>Add new player</value>
+  </data>
+  <data name="Players_Add_Subtitle" xml:space="preserve">
+    <value>Enter details for the new player.</value>
+  </data>
+  <data name="Players_Add_Name" xml:space="preserve">
+    <value>Player name</value>
+  </data>
+  <data name="Players_Add_Birthday" xml:space="preserve">
+    <value>Birthday</value>
+  </data>
+  <data name="Players_Add_Height" xml:space="preserve">
+    <value>Height (cm)</value>
+  </data>
+  <data name="Players_Add_Weight" xml:space="preserve">
+    <value>Weight (kg)</value>
+  </data>
+  <data name="Players_Add_Confirm" xml:space="preserve">
+    <value>Add player</value>
+  </data>
+  <data name="CountriesLeagues_Add_Button" xml:space="preserve">
     <value>Add league</value>
   </data>
   <data name="CountriesLeagues_Add_Title" xml:space="preserve">
@@ -724,17 +797,14 @@
   </data>
   <data name="CountriesLeagues_Add_Confirm" xml:space="preserve">
     <value>Add league</value>
-  </data>  <data name="CountriesLeagues_Add_MaxTeams" xml:space="preserve">
+  </data>
+  <data name="CountriesLeagues_Add_MaxTeams" xml:space="preserve">
     <value>Max teams</value>
   </data>
   <data name="CountriesLeagues_Add_Description" xml:space="preserve">
     <value>Description</value>
-  </data>  <data name="Common_Page" xml:space="preserve">
+  </data>
+  <data name="Common_Page" xml:space="preserve">
     <value>Page: </value>
-  </data></root>
-
-
-
-
-
-
+  </data>
+</root>
