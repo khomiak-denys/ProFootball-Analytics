@@ -33,10 +33,9 @@ public sealed class RegisterUserCommandHandler(
             return Result.Failure("auth.password_policy", "Password must be at least 8 characters and contain at least one letter and one digit.");
         }
 
-        var login = command.Login.Trim();
-        var normalizedLogin = login.ToUpperInvariant();
+        var login = command.Login.Trim().ToLowerInvariant();
 
-        if (await userRepository.ExistsByNormalizedLoginAsync(normalizedLogin, cancellationToken))
+        if (await userRepository.ExistsByLoginAsync(login, cancellationToken))
         {
             return Result.Failure("auth.login_exists", "A user with this login already exists.");
         }
@@ -49,7 +48,6 @@ public sealed class RegisterUserCommandHandler(
             command.FirstName,
             command.LastName,
             login,
-            normalizedLogin,
             passwordHash,
             role,
             isActive: true,

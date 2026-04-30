@@ -29,8 +29,8 @@ public sealed class RestoreSessionCommandHandler(
             return Result.Success();
         }
 
-        var normalizedLogin = persisted.Login.Trim().ToUpperInvariant();
-        var user = await userRepository.FindByNormalizedLoginAsync(normalizedLogin, cancellationToken);
+        var login = persisted.Login.Trim().ToLowerInvariant();
+        var user = await userRepository.FindByLoginAsync(login, cancellationToken);
         if (user is null || !user.IsActive)
         {
             await sessionPersistence.ClearAsync(cancellationToken);
