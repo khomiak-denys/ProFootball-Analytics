@@ -24,10 +24,6 @@ public sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
             .HasMaxLength(64)
             .IsRequired();
 
-        builder.Property(user => user.NormalizedLogin)
-            .HasMaxLength(64)
-            .IsRequired();
-
         builder.Property(user => user.PasswordHash)
             .HasMaxLength(256)
             .IsRequired();
@@ -43,7 +39,12 @@ public sealed class AppUserConfiguration : IEntityTypeConfiguration<AppUser>
         builder.Property(user => user.CreatedAtUtc)
             .IsRequired();
 
-        builder.HasIndex(user => user.NormalizedLogin)
+        builder.HasIndex(user => user.Login)
             .IsUnique();
+
+        builder.ToTable(tableBuilder =>
+        {
+            tableBuilder.HasCheckConstraint("CK_app_users_login_lowercase", "\"Login\" = lower(\"Login\")");
+        });
     }
 }
