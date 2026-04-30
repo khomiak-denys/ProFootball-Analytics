@@ -64,7 +64,13 @@ public class CqrsDispatcherAndContractsTests
         var countryListItem = new CountryLeagueListItemDto("England", 2);
         var summary = new CountryLeagueSummaryDto(40, 2, 2);
         var leagueCard = new LeagueCountryCardDto(1, "Premier League", "2025/26", 20, 380, 20, "Top division");
-        var snapshot = new CountryLeagueSnapshotDto([leagueCard], summary, "Top division");
+        var snapshot = new CountryLeagueSnapshotDto(
+            [leagueCard],
+            summary,
+            "Top division",
+            "Premier League",
+            "2024/2025",
+            []);
         var league = new LeagueDto(1, "Premier League", "England");
 
         var team = new TeamListItemDto(100, "Arsenal", "ARS", 1000);

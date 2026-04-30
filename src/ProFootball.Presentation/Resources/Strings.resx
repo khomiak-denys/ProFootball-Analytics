@@ -856,5 +856,29 @@
   </data>
   <data name="Analytics_Competitiveness_AvgDiff" xml:space="preserve">
     <value>avg goal diff</value>
-  </data></root>
-
+  </data>
+  <data name="CountriesLeagues_Standings_Title" xml:space="preserve">
+    <value>Standings</value>
+  </data>
+  <data name="CountriesLeagues_Standings_Team" xml:space="preserve">
+    <value>Team</value>
+  </data>
+  <data name="CountriesLeagues_Standings_W" xml:space="preserve">
+    <value>W</value>
+  </data>
+  <data name="CountriesLeagues_Standings_D" xml:space="preserve">
+    <value>D</value>
+  </data>
+  <data name="CountriesLeagues_Standings_L" xml:space="preserve">
+    <value>L</value>
+  </data>
+  <data name="CountriesLeagues_Standings_GF" xml:space="preserve">
+    <value>GF</value>
+  </data>
+  <data name="CountriesLeagues_Standings_GA" xml:space="preserve">
+    <value>GA</value>
+  </data>
+  <data name="CountriesLeagues_Standings_PTS" xml:space="preserve">
+    <value>PTS</value>
+  </data>
+</root>

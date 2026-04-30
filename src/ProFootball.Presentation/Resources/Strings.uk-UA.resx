@@ -856,6 +856,31 @@
   </data>
   <data name="Analytics_Competitiveness_AvgDiff" xml:space="preserve">
     <value>���. ������ ����</value>
-  </data></root>
+  </data>
+  <data name="CountriesLeagues_Standings_Title" xml:space="preserve">
+    <value>Турнірна таблиця</value>
+  </data>
+  <data name="CountriesLeagues_Standings_Team" xml:space="preserve">
+    <value>Команда</value>
+  </data>
+  <data name="CountriesLeagues_Standings_W" xml:space="preserve">
+    <value>В</value>
+  </data>
+  <data name="CountriesLeagues_Standings_D" xml:space="preserve">
+    <value>Н</value>
+  </data>
+  <data name="CountriesLeagues_Standings_L" xml:space="preserve">
+    <value>П</value>
+  </data>
+  <data name="CountriesLeagues_Standings_GF" xml:space="preserve">
+    <value>ЗМ</value>
+  </data>
+  <data name="CountriesLeagues_Standings_GA" xml:space="preserve">
+    <value>ПМ</value>
+  </data>
+  <data name="CountriesLeagues_Standings_PTS" xml:space="preserve">
+    <value>О</value>
+  </data>
+</root>
 
 
