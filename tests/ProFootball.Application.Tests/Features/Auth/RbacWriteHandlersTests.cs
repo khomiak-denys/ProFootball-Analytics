@@ -109,7 +109,7 @@ public class RbacWriteHandlersTests
         var repo = new InMemoryTeamRepository();
         var handler = new CreateTeamCommandHandler(repo, store);
 
-        var result = await handler.HandleAsync(new CreateTeamCommand("FC Test", "FCT"));
+        var result = await handler.HandleAsync(new CreateTeamCommand("FC Test", "FCT", null));
 
         Assert.Equal(shouldSucceed, result.IsSuccess);
         Assert.Equal(shouldSucceed ? 1 : 0, repo.Teams.Count);
