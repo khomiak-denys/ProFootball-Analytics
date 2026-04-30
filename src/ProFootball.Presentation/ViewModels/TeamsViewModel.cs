@@ -480,7 +480,7 @@ public sealed class TeamsViewModel : ObservableObject, IDisposable
             ? BuildShortCode(NewTeamName)
             : normalizedShortName.ToUpperInvariant();
         var result = await _commandDispatcher.DispatchAsync<CreateTeamCommand, Result>(
-            new CreateTeamCommand(NewTeamName.Trim(), shortName));
+            new CreateTeamCommand(NewTeamName.Trim(), shortName, SelectedLeague.Id));
         if (result.IsFailure)
         {
             ErrorMessage = result.Error.Message;
