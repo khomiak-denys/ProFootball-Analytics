@@ -780,6 +780,18 @@
   <data name="Players_Add_Confirm" xml:space="preserve">
     <value>Додати гравця</value>
   </data>
+  <data name="Players_Edit_Button" xml:space="preserve">
+    <value>Редагувати гравця</value>
+  </data>
+  <data name="Players_Edit_Title" xml:space="preserve">
+    <value>Редагування гравця</value>
+  </data>
+  <data name="Players_Edit_Subtitle" xml:space="preserve">
+    <value>Оновіть дані вибраного гравця.</value>
+  </data>
+  <data name="Players_Edit_Confirm" xml:space="preserve">
+    <value>Зберегти зміни</value>
+  </data>
   <data name="CountriesLeagues_Add_Button" xml:space="preserve">
     <value>Додати лігу</value>
   </data>
