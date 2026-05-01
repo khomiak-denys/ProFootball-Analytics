@@ -19,6 +19,7 @@ public sealed class TeamSeasonStatConfiguration : IEntityTypeConfiguration<TeamS
         builder.HasIndex(x => new { x.Season, x.LeagueId, x.TeamId }).IsUnique();
         builder.HasIndex(x => x.LeagueId);
         builder.HasIndex(x => x.TeamId);
+        builder.HasIndex(x => new { x.LeagueId, x.Season, x.Points });
 
         builder.HasOne<League>()
             .WithMany()

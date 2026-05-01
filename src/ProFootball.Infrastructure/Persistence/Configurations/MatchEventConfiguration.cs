@@ -24,6 +24,7 @@ public sealed class MatchEventConfiguration : IEntityTypeConfiguration<MatchEven
         builder.HasIndex(x => x.TeamId);
         builder.HasIndex(x => x.PlayerId);
         builder.HasIndex(x => x.EventType);
+        builder.HasIndex(x => new { x.MatchId, x.TeamId, x.EventType });
 
         builder.HasOne<FootballMatch>()
             .WithMany()
