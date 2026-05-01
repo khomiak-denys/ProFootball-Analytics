@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProFootball.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using ProFootball.Infrastructure.Persistence;
 namespace ProFootball.Infrastructure.Migrations
 {
     [DbContext(typeof(ProFootballDbContext))]
-    partial class ProFootballDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260501085227_AddPerformanceIndexesForMatchesAndStandings")]
+    partial class AddPerformanceIndexesForMatchesAndStandings
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
