@@ -15,7 +15,6 @@ public sealed class ProFootballDbContext(DbContextOptions<ProFootballDbContext> 
     public DbSet<PlayerAttribute> PlayerAttributes => Set<PlayerAttribute>();
     public DbSet<FootballMatch> Matches => Set<FootballMatch>();
     public DbSet<MatchEvent> MatchEvents => Set<MatchEvent>();
-    public DbSet<PlayerMatchStat> PlayerMatchStats => Set<PlayerMatchStat>();
     public DbSet<TeamSeasonStat> TeamSeasonStats => Set<TeamSeasonStat>();
     public DbSet<DashboardOverviewReadModel> DashboardOverview => Set<DashboardOverviewReadModel>();
     public DbSet<MatchOutcomeStatsReadModel> MatchOutcomeStats => Set<MatchOutcomeStatsReadModel>();
