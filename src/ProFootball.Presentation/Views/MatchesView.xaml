@@ -125,7 +125,6 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock FontSize="24"
                                    FontWeight="SemiBold"
@@ -142,32 +141,6 @@
                                 Content="&#xE710;"
                                 ToolTip="{loc:Loc Key=Matches_Add_Button}"
                                 Command="{Binding Matches.OpenAddMatchModalCommand}" />
-                        <Button Grid.Column="2"
-                                Width="42"
-                                Height="42"
-                                Margin="10,0,0,0"
-                                Background="{DynamicResource SelectionSurfaceBrush}"
-                                Foreground="{DynamicResource TitleForegroundBrush}"
-                                FontFamily="Segoe MDL2 Assets"
-                                FontSize="16"
-                                Content="&#xE70F;"
-                                ToolTip="{loc:Loc Key=Matches_Edit_Button}"
-                                Command="{Binding Matches.OpenEditMatchModalCommand}">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                    <Style.Triggers>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding CanManageData}" Value="True" />
-                                                <Condition Binding="{Binding Matches.HasSelectedMatch}" Value="True" />
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="Visibility" Value="Visible" />
-                                        </MultiDataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
                     </Grid>
                     <TextBlock Margin="0,6,0,0"
                                FontSize="13"
