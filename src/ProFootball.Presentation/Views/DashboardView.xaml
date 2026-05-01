@@ -77,25 +77,60 @@
                     <StackPanel>
                         <TextBlock Style="{StaticResource DashboardSectionTitleStyle}" Text="{loc:Loc Key=Dashboard_Trend_Title}" />
                         <Border Height="300" Margin="0,18,0,0" Background="{DynamicResource SurfaceMutedBrush}" BorderBrush="{DynamicResource SubtleBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
-                            <StackPanel>
-                                <ItemsControl ItemsSource="{Binding Dashboard.SeasonTrend}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <ItemsControl Grid.Row="0" ItemsSource="{Binding Dashboard.SeasonTrend}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Rows="1" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Grid Margin="0,0,0,8">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="56" />
-                                                    <ColumnDefinition Width="*" />
-                                                    <ColumnDefinition Width="56" />
-                                                </Grid.ColumnDefinitions>
-                                                <TextBlock Grid.Column="0" Foreground="{DynamicResource MutedForegroundBrush}" Text="{Binding Label}" />
-                                                <ProgressBar Grid.Column="1" Height="10" Margin="10,0" Minimum="0" Maximum="100" Value="{Binding Value}" />
-                                                <TextBlock Grid.Column="2" HorizontalAlignment="Right" Text="{Binding Value, StringFormat={}{0:0.0}}" />
+                                            <Grid Margin="8,0" VerticalAlignment="Bottom">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+                                                <TextBlock Grid.Row="0"
+                                                           HorizontalAlignment="Center"
+                                                           Foreground="{DynamicResource TitleForegroundBrush}"
+                                                           FontSize="12"
+                                                           Text="{Binding Value, StringFormat={}{0:0.0}}" />
+                                                <Border Grid.Row="1"
+                                                        Margin="0,6,0,0"
+                                                        VerticalAlignment="Bottom"
+                                                        Width="28"
+                                                        Height="{Binding Value, Converter={StaticResource DashboardValueToHeightConverter}}"
+                                                        Background="{DynamicResource SuccessForegroundBrush}"
+                                                        CornerRadius="4,4,0,0" />
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
-                                <TextBlock Margin="0,8,0,0" HorizontalAlignment="Center" FontSize="16" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{loc:Loc Key=Dashboard_Trend_Legend}" />
-                            </StackPanel>
+
+                                <ItemsControl Grid.Row="1" Margin="0,8,0,0" ItemsSource="{Binding Dashboard.SeasonTrend}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Rows="1" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock HorizontalAlignment="Center"
+                                                       Foreground="{DynamicResource MutedForegroundBrush}"
+                                                       Text="{Binding Label}" />
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+
+                                <TextBlock Grid.Row="2" Margin="0,8,0,0" HorizontalAlignment="Center" FontSize="16" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{loc:Loc Key=Dashboard_Trend_Legend}" />
+                            </Grid>
                         </Border>
                     </StackPanel>
                 </Border>
