@@ -104,20 +104,20 @@
                     <StackPanel>
                         <TextBlock Style="{StaticResource DashboardSectionTitleStyle}" Text="{loc:Loc Key=Dashboard_Stats_Title}" />
                         <Border Height="300" Margin="0,18,0,0" Background="{DynamicResource SurfaceMutedBrush}" BorderBrush="{DynamicResource SubtleBorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
-                            <UniformGrid Columns="4">
-                                <StackPanel HorizontalAlignment="Center">
+                            <UniformGrid Columns="4" VerticalAlignment="Center">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock HorizontalAlignment="Center" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Dashboard.HomeWins}" />
                                     <TextBlock HorizontalAlignment="Center" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Dashboard_Stat_HomeWins}" />
                                 </StackPanel>
-                                <StackPanel HorizontalAlignment="Center">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock HorizontalAlignment="Center" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Dashboard.Draws}" />
                                     <TextBlock HorizontalAlignment="Center" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Dashboard_Stat_Draws}" />
                                 </StackPanel>
-                                <StackPanel HorizontalAlignment="Center">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock HorizontalAlignment="Center" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Dashboard.AwayWins}" />
                                     <TextBlock HorizontalAlignment="Center" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Dashboard_Stat_AwayWins}" />
                                 </StackPanel>
-                                <StackPanel HorizontalAlignment="Center">
+                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                                     <TextBlock HorizontalAlignment="Center" FontSize="28" FontWeight="SemiBold" Foreground="{DynamicResource SuccessForegroundBrush}" Text="{Binding Dashboard.AverageGoalsPerMatchLabel}" />
                                     <TextBlock HorizontalAlignment="Center" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Dashboard_Stat_AvgGoals}" />
                                 </StackPanel>
