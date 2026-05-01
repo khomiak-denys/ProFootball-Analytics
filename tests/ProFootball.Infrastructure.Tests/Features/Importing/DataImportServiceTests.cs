@@ -73,7 +73,7 @@ public class DataImportServiceTests
             Assert.Equal(1, result.TeamAttributesImported);
             Assert.Equal(1, result.PlayerAttributesImported);
             Assert.True(result.MatchEventsGenerated > 0);
-            Assert.True(result.PlayerMatchStatsGenerated > 0);
+            Assert.Equal(0, result.PlayerMatchStatsGenerated);
             Assert.True(result.TeamSeasonStatsRebuilt > 0);
             Assert.Equal(0, result.ValidationErrors);
             Assert.Equal(7, result.SkippedRows);
@@ -145,7 +145,7 @@ public class DataImportServiceTests
             Assert.Equal(1, result.TeamAttributesImported);
             Assert.Equal(1, result.PlayerAttributesImported);
             Assert.True(result.MatchEventsGenerated > 0);
-            Assert.True(result.PlayerMatchStatsGenerated > 0);
+            Assert.Equal(0, result.PlayerMatchStatsGenerated);
             Assert.True(result.TeamSeasonStatsRebuilt > 0);
             Assert.Equal(0, result.ValidationErrors);
         }
@@ -176,17 +176,13 @@ public class DataImportServiceTests
 
             await using var contextAfterFirstRun = new ProFootballDbContext(options);
             var firstEvents = await contextAfterFirstRun.MatchEvents.CountAsync();
-            var firstStats = await contextAfterFirstRun.PlayerMatchStats.CountAsync();
-
             var appendResult = await service.HandleAsync(new ImportDataCommand(sourcePath, BatchSize: 2, Profile: "realistic", Mode: "append"));
             Assert.Equal(0, appendResult.ValidationErrors);
 
             await using var contextAfterAppend = new ProFootballDbContext(options);
             var secondEvents = await contextAfterAppend.MatchEvents.CountAsync();
-            var secondStats = await contextAfterAppend.PlayerMatchStats.CountAsync();
 
             Assert.Equal(firstEvents, secondEvents);
-            Assert.Equal(firstStats, secondStats);
         }
         finally
         {

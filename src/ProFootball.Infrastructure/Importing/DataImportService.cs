@@ -91,7 +91,7 @@ public sealed class DataImportService(
             var random = CreateDeterministicRandom(seed);
 
             var matchEvents = await GenerateMatchEventsAsync(dbContext, profile, mode, random, cancellationToken);
-            var playerMatchStats = await GeneratePlayerMatchStatsAsync(dbContext, profile, mode, random, cancellationToken);
+            const int playerMatchStats = 0;
             var teamSeasonStats = await RebuildTeamSeasonStatsAsync(dbContext, cancellationToken);
             var validationErrors = await ValidateGeneratedDataAsync(dbContext, cancellationToken);
 
@@ -177,7 +177,6 @@ public sealed class DataImportService(
     private static async Task ClearExistingDataAsync(ProFootballDbContext dbContext, CancellationToken cancellationToken)
     {
         await dbContext.TeamSeasonStats.ExecuteDeleteAsync(cancellationToken);
-        await dbContext.PlayerMatchStats.ExecuteDeleteAsync(cancellationToken);
         await dbContext.MatchEvents.ExecuteDeleteAsync(cancellationToken);
         await dbContext.PlayerAttributes.ExecuteDeleteAsync(cancellationToken);
         await dbContext.TeamAttributes.ExecuteDeleteAsync(cancellationToken);
@@ -737,120 +736,6 @@ public sealed class DataImportService(
         await dbContext.MatchEvents.AddRangeAsync(events, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
         return events.Count;
-    }
-
-    private async Task<int> GeneratePlayerMatchStatsAsync(
-        ProFootballDbContext dbContext,
-        string profile,
-        string mode,
-        Random random,
-        CancellationToken cancellationToken)
-    {
-        if (mode == "regenerate")
-        {
-            await dbContext.PlayerMatchStats.ExecuteDeleteAsync(cancellationToken);
-        }
-
-        var alreadyGeneratedMatchIds = mode == "append"
-            ? await dbContext.PlayerMatchStats.Select(x => x.MatchId).Distinct().ToHashSetAsync(cancellationToken)
-            : [];
-
-        var allPlayers = await dbContext.Players.Select(x => x.Id).ToListAsync(cancellationToken);
-        if (allPlayers.Count == 0)
-        {
-            return 0;
-        }
-
-        var matches = await dbContext.Matches.AsNoTracking().ToListAsync(cancellationToken);
-        var eventsByMatch = await dbContext.MatchEvents
-            .AsNoTracking()
-            .GroupBy(x => x.MatchId)
-            .ToDictionaryAsync(x => x.Key, x => x.ToList(), cancellationToken);
-
-        var records = new List<PlayerMatchStat>(matches.Count * 30);
-        var playersPerTeam = profile switch
-        {
-            "lite" => 12,
-            "realistic" => 14,
-            _ => 18,
-        };
-
-        foreach (var match in matches)
-        {
-            if (mode == "append" && alreadyGeneratedMatchIds.Contains(match.Id))
-            {
-                continue;
-            }
-
-            var matchEvents = eventsByMatch.GetValueOrDefault(match.Id, []);
-            BuildTeamStats(records, match.Id, match.HomeTeamId, playersPerTeam, allPlayers, matchEvents, random);
-            if (match.AwayTeamId != match.HomeTeamId)
-            {
-                BuildTeamStats(records, match.Id, match.AwayTeamId, playersPerTeam, allPlayers, matchEvents, random);
-            }
-        }
-
-        if (records.Count == 0)
-        {
-            return 0;
-        }
-
-        await dbContext.PlayerMatchStats.AddRangeAsync(records, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
-        return records.Count;
-    }
-
-    private static void BuildTeamStats(
-        List<PlayerMatchStat> target,
-        int matchId,
-        int teamId,
-        int playersPerTeam,
-        IReadOnlyList<int> allPlayers,
-        IReadOnlyList<MatchEvent> matchEvents,
-        Random random)
-    {
-        var usedPlayers = new HashSet<int>();
-        while (usedPlayers.Count < playersPerTeam && usedPlayers.Count < allPlayers.Count)
-        {
-            usedPlayers.Add(allPlayers[random.Next(allPlayers.Count)]);
-        }
-
-        var goalByPlayer = matchEvents
-            .Where(e => e.TeamId == teamId && e.EventType == "goal")
-            .GroupBy(e => e.PlayerId)
-            .ToDictionary(g => g.Key, g => g.Count());
-
-        var assistByPlayer = matchEvents
-            .Where(e => e.TeamId == teamId && e.EventType == "goal" && e.AssistPlayerId.HasValue)
-            .GroupBy(e => e.AssistPlayerId!.Value)
-            .ToDictionary(g => g.Key, g => g.Count());
-
-        var players = usedPlayers.ToList();
-        for (var i = 0; i < players.Count; i++)
-        {
-            var isStarter = i < 11;
-            var minutes = (short)(isStarter ? random.Next(60, 96) : random.Next(5, 46));
-            var shots = (short)random.Next(0, isStarter ? 6 : 3);
-            var passes = (short)random.Next(isStarter ? 12 : 4, isStarter ? 80 : 25);
-            var tackles = (short)random.Next(0, isStarter ? 8 : 4);
-            var playerId = players[i];
-            var goals = (short)goalByPlayer.GetValueOrDefault(playerId, 0);
-            var assists = (short)assistByPlayer.GetValueOrDefault(playerId, 0);
-            var xg = Math.Round((decimal)(shots * (0.08 + random.NextDouble() * 0.08)), 3);
-
-            target.Add(new PlayerMatchStat(
-                id: 0,
-                matchId: matchId,
-                playerId: playerId,
-                teamId: teamId,
-                minutes: minutes,
-                shots: shots,
-                passes: passes,
-                tackles: tackles,
-                goals: goals,
-                assists: assists,
-                xg: xg));
-        }
     }
 
     private async Task<int> RebuildTeamSeasonStatsAsync(ProFootballDbContext dbContext, CancellationToken cancellationToken)
