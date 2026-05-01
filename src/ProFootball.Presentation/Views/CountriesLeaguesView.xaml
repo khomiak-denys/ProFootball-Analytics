@@ -310,7 +310,7 @@
                                                               ScrollViewer.VerticalScrollBarVisibility="Auto"
                                                               ScrollViewer.HorizontalScrollBarVisibility="Auto">
                                                         <DataGrid.Columns>
-                                                            <DataGridTextColumn Width="40" Binding="{Binding Position}" Header="#" />
+                                                            <DataGridTextColumn Width="56" Binding="{Binding Position}" Header="#" />
                                                             <DataGridTextColumn Width="*" Binding="{Binding TeamName}" Header="{loc:Loc Key=CountriesLeagues_Standings_Team}" />
                                                             <DataGridTextColumn Width="56" Binding="{Binding Wins}" Header="{loc:Loc Key=CountriesLeagues_Standings_W}" />
                                                             <DataGridTextColumn Width="56" Binding="{Binding Draws}" Header="{loc:Loc Key=CountriesLeagues_Standings_D}" />
