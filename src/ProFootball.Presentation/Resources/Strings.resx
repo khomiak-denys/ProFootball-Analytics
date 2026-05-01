@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -787,7 +787,7 @@
     <value>Height (cm)</value>
   </data>
   <data name="Players_Add_Weight" xml:space="preserve">
-    <value>Weight (kg)</value>
+    <value>Weight (lbs)</value>
   </data>
   <data name="Players_Add_Confirm" xml:space="preserve">
     <value>Add player</value>
@@ -882,3 +882,5 @@
     <value>PTS</value>
   </data>
 </root>
+
+

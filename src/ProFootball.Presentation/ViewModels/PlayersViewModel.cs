@@ -272,7 +272,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
 
     public string DetailsHeight => FormatMeasure(SelectedPlayer?.Height, "cm");
 
-    public string DetailsWeight => FormatMeasure(SelectedPlayer?.Weight, "kg");
+    public string DetailsWeight => FormatMeasure(SelectedPlayer?.Weight, "lbs");
 
     public string RadarPolygonPoints
     {
