@@ -86,7 +86,8 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
                 string.Empty,
                 null,
                 null,
-                Array.Empty<LeagueStandingRowDto>()));
+                Array.Empty<LeagueStandingRowDto>(),
+                Array.Empty<string>()));
         }
 
         var countryName = query.CountryName.Trim();
@@ -102,12 +103,26 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             .FirstOrDefault(description => !string.IsNullOrWhiteSpace(description))
             ?? string.Empty;
         var featuredLeague = cards.FirstOrDefault();
+        IReadOnlyList<string> featuredLeagueSeasons = featuredLeague is null
+            ? Array.Empty<string>()
+            : await dbContext.Matches
+                .AsNoTracking()
+                .Where(match => match.LeagueId == featuredLeague.LeagueId)
+                .Select(match => match.Season)
+                .Where(season => !string.IsNullOrWhiteSpace(season))
+                .Distinct()
+                .OrderByDescending(season => season)
+                .ToListAsync(cancellationToken);
+        var featuredSeason = featuredLeague is null
+            ? null
+            : featuredLeagueSeasons.FirstOrDefault(season => string.Equals(season, query.FeaturedSeason, StringComparison.Ordinal))
+              ?? featuredLeague.Season;
         var featuredLeagueStandings = featuredLeague is null
             ? Array.Empty<LeagueStandingRowDto>()
             : await GetLeagueStandingsAsync(
                 dbContext,
                 featuredLeague.LeagueId,
-                featuredLeague.Season,
+                featuredSeason!,
                 cancellationToken);
 
         return Result<CountryLeagueSnapshotDto>.Success(new CountryLeagueSnapshotDto(
@@ -115,8 +130,9 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             summary,
             aboutDescription,
             featuredLeague?.LeagueName,
-            featuredLeague?.Season,
-            featuredLeagueStandings));
+            featuredSeason ?? featuredLeague?.Season,
+            featuredLeagueStandings,
+            featuredLeagueSeasons));
     }
 
     private static int CalculateDivisions(IReadOnlyList<LeagueCountryCardDto> cards)
@@ -196,6 +212,25 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             })
             .ToListAsync(cancellationToken);
 
+        var maxTeamMatchesByLeagueSeason = await dbContext.TeamSeasonStats
+            .AsNoTracking()
+            .Where(stat => dbContext.Leagues
+                .Where(league => league.CountryName == countryName)
+                .Select(league => league.Id)
+                .Contains(stat.LeagueId))
+            .GroupBy(stat => new { stat.LeagueId, stat.Season })
+            .Select(grouped => new
+            {
+                grouped.Key.LeagueId,
+                grouped.Key.Season,
+                MaxTeamMatches = grouped.Max(item => item.Matches),
+            })
+            .ToListAsync(cancellationToken);
+
+        var maxTeamMatchesLookup = maxTeamMatchesByLeagueSeason.ToDictionary(
+            item => (item.LeagueId, item.Season),
+            item => item.MaxTeamMatches);
+
         if (leagues.Count == 0)
         {
             return Array.Empty<LeagueCountryCardDto>();
@@ -265,7 +300,9 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
                     league.Name,
                     latestAggregate.Season,
                     Math.Max(latestAggregate.TeamsCount, directTeamCount),
-                    latestAggregate.MatchCount,
+                    maxTeamMatchesLookup.TryGetValue((league.Id, latestAggregate.Season), out var maxTeamMatches)
+                        ? maxTeamMatches
+                        : 0,
                     league.MaxTeams,
                     league.Description);
             })

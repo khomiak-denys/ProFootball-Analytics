@@ -250,17 +250,17 @@
                                                                                    FontSize="34"
                                                                                    FontWeight="SemiBold"
                                                                                    Foreground="{DynamicResource TitleForegroundBrush}"
-                                                                                   Text="{Binding MatchesCount}" />
+                                                                                   Text="{Binding MatchCount}" />
                                                                     </StackPanel>
                                                                     <StackPanel Grid.Column="2">
                                                                         <TextBlock FontSize="24"
                                                                                    Foreground="{DynamicResource MutedForegroundBrush}"
                                                                                     Text="{loc:Loc Key=CountriesLeagues_Metric_Season}" />
-                                                                        <TextBlock Margin="0,2,0,0"
-                                                                                   FontSize="34"
-                                                                                   FontWeight="SemiBold"
-                                                                                   Foreground="{DynamicResource TitleForegroundBrush}"
-                                                                                   Text="{Binding Season}" />
+                                                                        <ComboBox Margin="0,8,0,0"
+                                                                                  MinWidth="180"
+                                                                                  Style="{StaticResource PlayersFilterComboBoxStyle}"
+                                                                                  ItemsSource="{Binding DataContext.CountriesLeagues.FeaturedLeagueSeasons, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                                                  SelectedItem="{Binding DataContext.CountriesLeagues.SelectedFeaturedSeason, RelativeSource={RelativeSource AncestorType=UserControl}, Mode=TwoWay}" />
                                                                     </StackPanel>
                                                                 </Grid>
                                                             </Grid>

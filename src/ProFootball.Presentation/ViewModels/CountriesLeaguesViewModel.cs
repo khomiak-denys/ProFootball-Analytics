@@ -41,6 +41,8 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     private string? _snapshotAboutDescription;
     private string? _featuredLeagueName;
     private string? _featuredLeagueSeason;
+    private bool _isUpdatingFeaturedSeasonOptions;
+    private string? _selectedFeaturedSeason;
     private bool _isAddLeagueModalOpen;
     private string _newLeagueName = string.Empty;
     private int? _newLeagueMaxTeams;
@@ -59,6 +61,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         CountryOptions = new ObservableCollection<CountryLeagueListItemDto>();
         LeagueCards = new ObservableCollection<LeagueCountryCardDto>();
         FeaturedLeagueStandings = new ObservableCollection<LeagueStandingRowDto>();
+        FeaturedLeagueSeasons = new ObservableCollection<string>();
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, CommandExceptionHandler.Handle);
         OpenAddLeagueModalCommand = new RelayCommand(OpenAddLeagueModal);
         CloseAddLeagueModalCommand = new RelayCommand(CloseAddLeagueModal);
@@ -70,6 +73,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
 
     public ObservableCollection<LeagueCountryCardDto> LeagueCards { get; }
     public ObservableCollection<LeagueStandingRowDto> FeaturedLeagueStandings { get; }
+    public ObservableCollection<string> FeaturedLeagueSeasons { get; }
 
     public CountryLeagueListItemDto? SelectedCountry
     {
@@ -166,6 +170,25 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     {
         get => _featuredLeagueSeason ?? "--";
         set => SetProperty(ref _featuredLeagueSeason, value);
+    }
+
+    public string? SelectedFeaturedSeason
+    {
+        get => _selectedFeaturedSeason;
+        set
+        {
+            if (!SetProperty(ref _selectedFeaturedSeason, value))
+            {
+                return;
+            }
+
+            if (_isUpdatingFeaturedSeasonOptions)
+            {
+                return;
+            }
+
+            _ = ReloadCountrySnapshotSafeAsync();
+        }
     }
 
     public int TotalCountries => Countries.Count;
@@ -265,7 +288,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
             }
 
             var snapshot = await _queryDispatcher.DispatchAsync<GetCountrySnapshotQuery, CountryLeagueSnapshotDto>(
-                new GetCountrySnapshotQuery(selectedCountryName),
+                new GetCountrySnapshotQuery(selectedCountryName, SelectedFeaturedSeason),
                 reloadToken);
             var cards = snapshot.LeagueCards;
             var summary = snapshot.Summary;
@@ -284,6 +307,24 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
             Divisions = summary.Divisions;
             FeaturedLeagueName = snapshot.FeaturedLeagueName ?? "--";
             FeaturedLeagueSeason = snapshot.FeaturedLeagueSeason ?? "--";
+            _isUpdatingFeaturedSeasonOptions = true;
+            try
+            {
+                FeaturedLeagueSeasons.Clear();
+                foreach (var season in snapshot.FeaturedLeagueSeasons)
+                {
+                    FeaturedLeagueSeasons.Add(season);
+                }
+
+                SelectedFeaturedSeason = FeaturedLeagueSeasons.FirstOrDefault(season =>
+                    string.Equals(season, snapshot.FeaturedLeagueSeason, StringComparison.Ordinal))
+                    ?? FeaturedLeagueSeasons.FirstOrDefault();
+            }
+            finally
+            {
+                _isUpdatingFeaturedSeasonOptions = false;
+            }
+
             FeaturedLeagueStandings.Clear();
             foreach (var row in snapshot.FeaturedLeagueStandings)
             {
@@ -326,6 +367,8 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         Divisions = 0;
         FeaturedLeagueName = "--";
         FeaturedLeagueSeason = "--";
+        FeaturedLeagueSeasons.Clear();
+        SelectedFeaturedSeason = null;
         FeaturedLeagueStandings.Clear();
         _snapshotAboutDescription = null;
         RaisePropertyChanged(nameof(EffectiveCountryDescription));

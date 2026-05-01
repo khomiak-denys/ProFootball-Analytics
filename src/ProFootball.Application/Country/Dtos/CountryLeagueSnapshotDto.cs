@@ -8,4 +8,5 @@ public sealed record CountryLeagueSnapshotDto(
     string AboutDescription,
     string? FeaturedLeagueName,
     string? FeaturedLeagueSeason,
-    IReadOnlyList<LeagueStandingRowDto> FeaturedLeagueStandings);
+    IReadOnlyList<LeagueStandingRowDto> FeaturedLeagueStandings,
+    IReadOnlyList<string> FeaturedLeagueSeasons);
