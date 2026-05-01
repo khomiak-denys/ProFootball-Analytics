@@ -18,14 +18,15 @@ public sealed class CreatePlayerCommandHandler(
             return Result.Failure("auth.forbidden", "You do not have permission to manage players.");
         }
 
-        if (string.IsNullOrWhiteSpace(command.Name))
+        if (string.IsNullOrWhiteSpace(command.FirstName) || string.IsNullOrWhiteSpace(command.LastName))
         {
-            return Result.Failure("player.validation", "Player name is required.");
+            return Result.Failure("player.validation", "Player first and last names are required.");
         }
 
         var player = new global::ProFootball.Domain.Entities.Player(
             await playerRepository.GetNextIdAsync(cancellationToken),
-            command.Name,
+            command.FirstName,
+            command.LastName,
             command.Birthday,
             command.Height,
             command.Weight);
@@ -46,9 +47,9 @@ public sealed class UpdatePlayerCommandHandler(
             return Result.Failure("auth.forbidden", "You do not have permission to manage players.");
         }
 
-        if (string.IsNullOrWhiteSpace(command.Name))
+        if (string.IsNullOrWhiteSpace(command.FirstName) || string.IsNullOrWhiteSpace(command.LastName))
         {
-            return Result.Failure("player.validation", "Player name is required.");
+            return Result.Failure("player.validation", "Player first and last names are required.");
         }
 
         var player = await playerRepository.GetByIdAsync(command.PlayerId, cancellationToken);
@@ -57,7 +58,7 @@ public sealed class UpdatePlayerCommandHandler(
             return Result.Failure("player.not_found", "Player was not found.");
         }
 
-        player.UpdateProfile(command.Name, command.Birthday, command.Height, command.Weight);
+        player.UpdateProfile(command.FirstName, command.LastName, command.Birthday, command.Height, command.Weight);
         await playerRepository.UpdateAsync(player, cancellationToken);
         return Result.Success();
     }

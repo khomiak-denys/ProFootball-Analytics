@@ -5,4 +5,7 @@ namespace ProFootball.Application.Country.Dtos;
 public sealed record CountryLeagueSnapshotDto(
     IReadOnlyList<LeagueCountryCardDto> LeagueCards,
     CountryLeagueSummaryDto Summary,
-    string AboutDescription);
+    string AboutDescription,
+    string? FeaturedLeagueName,
+    string? FeaturedLeagueSeason,
+    IReadOnlyList<LeagueStandingRowDto> FeaturedLeagueStandings);

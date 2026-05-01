@@ -157,6 +157,60 @@ namespace ProFootball.Infrastructure.Migrations
                     b.ToTable("leagues", (string)null);
                 });
 
+            modelBuilder.Entity("ProFootball.Domain.Entities.MatchEvent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int?>("AssistPlayerId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("EventType")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<int>("MatchId")
+                        .HasColumnType("integer");
+
+                    b.Property<short>("Minute")
+                        .HasColumnType("smallint");
+
+                    b.Property<string>("PayloadJson")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("PlayerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssistPlayerId");
+
+                    b.HasIndex("EventType");
+
+                    b.HasIndex("MatchId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("MatchId", "Minute");
+
+                    b.ToTable("match_events", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_match_events_minute_range", "\"Minute\" >= 1 AND \"Minute\" <= 130");
+                        });
+                });
+
             modelBuilder.Entity("ProFootball.Domain.Entities.Player", b =>
                 {
                     b.Property<int>("Id")
@@ -165,20 +219,25 @@ namespace ProFootball.Infrastructure.Migrations
                     b.Property<DateTime?>("Birthday")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
+
                     b.Property<int?>("Height")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("LastName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
 
                     b.Property<int?>("Weight")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name");
+                    b.HasIndex("LastName", "FirstName");
 
                     b.ToTable("players", (string)null);
                 });
@@ -288,6 +347,197 @@ namespace ProFootball.Infrastructure.Migrations
                     b.ToTable("team_attributes", (string)null);
                 });
 
+            modelBuilder.Entity("ProFootball.Domain.Entities.TeamSeasonStat", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Draws")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("GoalsAgainst")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("GoalsFor")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Losses")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Matches")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Season")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<int>("TeamId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Wins")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeagueId");
+
+                    b.HasIndex("TeamId");
+
+                    b.HasIndex("Season", "LeagueId", "TeamId")
+                        .IsUnique();
+
+                    b.ToTable("team_season_stats", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_team_season_stats_draws_nonnegative", "\"Draws\" >= 0");
+
+                            t.HasCheckConstraint("CK_team_season_stats_goals_against_nonnegative", "\"GoalsAgainst\" >= 0");
+
+                            t.HasCheckConstraint("CK_team_season_stats_goals_for_nonnegative", "\"GoalsFor\" >= 0");
+
+                            t.HasCheckConstraint("CK_team_season_stats_losses_nonnegative", "\"Losses\" >= 0");
+
+                            t.HasCheckConstraint("CK_team_season_stats_matches_nonnegative", "\"Matches\" >= 0");
+
+                            t.HasCheckConstraint("CK_team_season_stats_points_nonnegative", "\"Points\" >= 0");
+
+                            t.HasCheckConstraint("CK_team_season_stats_wins_nonnegative", "\"Wins\" >= 0");
+                        });
+                });
+
+            modelBuilder.Entity("ProFootball.Infrastructure.Querying.ReadModels.DashboardOverviewReadModel", b =>
+                {
+                    b.Property<decimal>("AvgGoalsPerMatch")
+                        .HasColumnType("numeric")
+                        .HasColumnName("avg_goals_per_match");
+
+                    b.Property<int>("AwayWins")
+                        .HasColumnType("integer")
+                        .HasColumnName("away_wins");
+
+                    b.Property<string>("CountryName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("country_name");
+
+                    b.Property<int>("Draws")
+                        .HasColumnType("integer")
+                        .HasColumnName("draws");
+
+                    b.Property<int>("HomeWins")
+                        .HasColumnType("integer")
+                        .HasColumnName("home_wins");
+
+                    b.Property<DateTime?>("LastMatchDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_match_date");
+
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("league_id");
+
+                    b.Property<string>("LeagueName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("league_name");
+
+                    b.Property<int>("MatchCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("match_count");
+
+                    b.Property<string>("Season")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("season");
+
+                    b.Property<int>("TotalClubs")
+                        .HasColumnType("integer")
+                        .HasColumnName("total_clubs");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_dashboard_overview", (string)null);
+                });
+
+            modelBuilder.Entity("ProFootball.Infrastructure.Querying.ReadModels.MatchOutcomeStatsReadModel", b =>
+                {
+                    b.Property<decimal>("AvgGoalsPerMatch")
+                        .HasColumnType("numeric")
+                        .HasColumnName("avg_goals_per_match");
+
+                    b.Property<int>("AwayWins")
+                        .HasColumnType("integer")
+                        .HasColumnName("away_wins");
+
+                    b.Property<string>("CountryName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("country_name");
+
+                    b.Property<int>("Draws")
+                        .HasColumnType("integer")
+                        .HasColumnName("draws");
+
+                    b.Property<int>("HomeWins")
+                        .HasColumnType("integer")
+                        .HasColumnName("home_wins");
+
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("league_id");
+
+                    b.Property<string>("LeagueName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("league_name");
+
+                    b.Property<int>("MatchCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("match_count");
+
+                    b.Property<string>("Season")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("season");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_match_outcome_stats", (string)null);
+                });
+
+            modelBuilder.Entity("ProFootball.Infrastructure.Querying.ReadModels.PlayerRatingTrendMonthlyReadModel", b =>
+                {
+                    b.Property<decimal>("AvgOverallRating")
+                        .HasColumnType("numeric")
+                        .HasColumnName("avg_overall_rating");
+
+                    b.Property<int>("LeagueId")
+                        .HasColumnType("integer")
+                        .HasColumnName("league_id");
+
+                    b.Property<DateTime>("MonthStart")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("month_start");
+
+                    b.Property<string>("Season")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("season");
+
+                    b.ToTable((string)null);
+
+                    b.ToView("vw_player_rating_trend_monthly", (string)null);
+                });
+
             modelBuilder.Entity("ProFootball.Domain.Entities.FootballMatch", b =>
                 {
                     b.HasOne("ProFootball.Domain.Entities.League", "League")
@@ -297,6 +547,32 @@ namespace ProFootball.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("League");
+                });
+
+            modelBuilder.Entity("ProFootball.Domain.Entities.MatchEvent", b =>
+                {
+                    b.HasOne("ProFootball.Domain.Entities.Player", null)
+                        .WithMany()
+                        .HasForeignKey("AssistPlayerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("ProFootball.Domain.Entities.FootballMatch", null)
+                        .WithMany()
+                        .HasForeignKey("MatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ProFootball.Domain.Entities.Player", null)
+                        .WithMany()
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ProFootball.Domain.Entities.Team", null)
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ProFootball.Domain.Entities.PlayerAttribute", b =>
@@ -319,6 +595,21 @@ namespace ProFootball.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Team");
+                });
+
+            modelBuilder.Entity("ProFootball.Domain.Entities.TeamSeasonStat", b =>
+                {
+                    b.HasOne("ProFootball.Domain.Entities.League", null)
+                        .WithMany()
+                        .HasForeignKey("LeagueId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("ProFootball.Domain.Entities.Team", null)
+                        .WithMany()
+                        .HasForeignKey("TeamId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

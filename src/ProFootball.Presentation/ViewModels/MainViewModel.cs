@@ -25,6 +25,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private bool _isAuthenticated;
     private bool _isSessionResolved;
     private bool _isUserMenuOpen;
+    private bool _returnToMatchDetailsAfterEdit;
 
     public MainViewModel(
         ICommandDispatcher commandDispatcher,
@@ -61,6 +62,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ToggleUserMenuCommand = new RelayCommand(ToggleUserMenu, () => IsAuthenticated);
         OpenSettingsCommand = new RelayCommand(OpenSettings, () => IsAuthenticated);
         LogoutCommand = new AsyncRelayCommand(LogoutAsync, OnBackgroundCommandException, () => IsAuthenticated);
+        BackToMatchesCommand = new RelayCommand(BackToMatches);
+        OpenMatchEditCommand = new RelayCommand(OpenMatchEdit, () => CanEditSelectedMatch);
+        Matches.PropertyChanged += OnMatchesPropertyChanged;
         _localizationService.PropertyChanged += OnLocalizationPropertyChanged;
     }
 
@@ -143,6 +147,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public RelayCommand OpenSettingsCommand { get; }
 
     public AsyncRelayCommand LogoutCommand { get; }
+    
+    public RelayCommand BackToMatchesCommand { get; }
+
+    public RelayCommand OpenMatchEditCommand { get; }
 
     public bool IsDarkTheme => _themeService.CurrentTheme == AppThemeMode.Dark;
 
@@ -209,6 +217,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             {
                 RaisePropertyChanged(nameof(CanManageData));
                 RaisePropertyChanged(nameof(IsReadOnlyUser));
+                RaisePropertyChanged(nameof(CanEditSelectedMatch));
+                OpenMatchEditCommand.RaiseCanExecuteChanged();
             }
         }
     }
@@ -218,6 +228,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         string.Equals(CurrentUserRole, "Manager", StringComparison.OrdinalIgnoreCase);
 
     public bool IsReadOnlyUser => !CanManageData;
+
+    public bool CanEditSelectedMatch => CanManageData && Matches.HasSelectedMatch;
 
     public async Task LoadInitialDataAsync()
     {
@@ -280,6 +292,23 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         SelectedTab = AppTab.MatchDetails;
     }
 
+    private void BackToMatches()
+    {
+        SelectedTab = AppTab.Matches;
+    }
+
+    private void OpenMatchEdit()
+    {
+        if (!CanEditSelectedMatch)
+        {
+            return;
+        }
+
+        _returnToMatchDetailsAfterEdit = true;
+        SelectedTab = AppTab.Matches;
+        Matches.OpenEditMatchModalCommand.Execute(null);
+    }
+
     private void OnBackgroundCommandException(Exception exception)
     {
         _logger.LogError(exception, "Main view model command failed.");
@@ -336,8 +365,32 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RaisePropertyChanged(nameof(CurrentSectionTitle));
     }
 
+    private void OnMatchesPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (string.Equals(e.PropertyName, nameof(MatchesViewModel.HasSelectedMatch), StringComparison.Ordinal))
+        {
+            RaisePropertyChanged(nameof(CanEditSelectedMatch));
+            OpenMatchEditCommand.RaiseCanExecuteChanged();
+            return;
+        }
+
+        if (!string.Equals(e.PropertyName, nameof(MatchesViewModel.IsEditMatchModalOpen), StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (!_returnToMatchDetailsAfterEdit || Matches.IsEditMatchModalOpen)
+        {
+            return;
+        }
+
+        _returnToMatchDetailsAfterEdit = false;
+        SelectedTab = AppTab.MatchDetails;
+    }
+
     public void Dispose()
     {
+        Matches.PropertyChanged -= OnMatchesPropertyChanged;
         _localizationService.PropertyChanged -= OnLocalizationPropertyChanged;
         Analytics.Dispose();
         Teams.Dispose();

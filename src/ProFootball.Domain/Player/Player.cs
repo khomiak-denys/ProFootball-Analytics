@@ -8,15 +8,18 @@ public sealed class Player
 
     public Player(
         int id,
-        string name,
+        string firstName,
+        string lastName,
         DateTime? birthday,
         int? height,
         int? weight)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(firstName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(lastName);
 
         Id = id;
-        Name = name.Trim();
+        FirstName = firstName.Trim();
+        LastName = lastName.Trim();
         Birthday = birthday;
         Height = height;
         Weight = weight;
@@ -24,7 +27,11 @@ public sealed class Player
 
     public int Id { get; private set; }
 
-    public string Name { get; private set; } = string.Empty;
+    public string FirstName { get; private set; } = string.Empty;
+
+    public string LastName { get; private set; } = string.Empty;
+
+    public string FullName => string.Create(System.Globalization.CultureInfo.InvariantCulture, $"{FirstName} {LastName}").Trim();
 
     public DateTime? Birthday { get; private set; }
 
@@ -33,14 +40,17 @@ public sealed class Player
     public int? Weight { get; private set; }
 
     public void UpdateProfile(
-        string name,
+        string firstName,
+        string lastName,
         DateTime? birthday,
         int? height,
         int? weight)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        ArgumentException.ThrowIfNullOrWhiteSpace(firstName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(lastName);
 
-        Name = name.Trim();
+        FirstName = firstName.Trim();
+        LastName = lastName.Trim();
         Birthday = birthday;
         Height = height;
         Weight = weight;

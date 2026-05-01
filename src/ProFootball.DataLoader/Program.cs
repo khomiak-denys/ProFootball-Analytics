@@ -51,6 +51,9 @@ try
         batchSize = parsedBatchSize;
     }
 
+    var profile = GetArgument(args, "--profile") ?? "realistic";
+    var mode = GetArgument(args, "--mode") ?? "regenerate";
+
     using var host = Host.CreateDefaultBuilder(args)
         .UseSerilog()
         .ConfigureAppConfiguration((_, configurationBuilder) =>
@@ -74,7 +77,7 @@ try
         using var scope = host.Services.CreateScope();
         var commandDispatcher = scope.ServiceProvider.GetRequiredService<ICommandDispatcher>();
         var result = await commandDispatcher.DispatchAsync<ImportDataCommand, DataImportResult>(
-            new ImportDataCommand(sqlitePath, batchSize));
+            new ImportDataCommand(sqlitePath, batchSize, profile, mode));
 
         Console.WriteLine("Import completed.");
         Console.WriteLine($"CountriesResolved: {result.CountriesResolved}");
@@ -84,6 +87,10 @@ try
         Console.WriteLine($"Matches: {result.MatchesImported}");
         Console.WriteLine($"TeamAttributes: {result.TeamAttributesImported}");
         Console.WriteLine($"PlayerAttributes: {result.PlayerAttributesImported}");
+        Console.WriteLine($"MatchEvents: {result.MatchEventsGenerated}");
+        Console.WriteLine($"PlayerMatchStats: {result.PlayerMatchStatsGenerated}");
+        Console.WriteLine($"TeamSeasonStats: {result.TeamSeasonStatsRebuilt}");
+        Console.WriteLine($"ValidationErrors: {result.ValidationErrors}");
         Console.WriteLine($"SkippedRows: {result.SkippedRows}");
         Console.WriteLine($"Duration: {result.Duration}");
 

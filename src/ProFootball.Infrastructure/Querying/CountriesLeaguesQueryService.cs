@@ -83,7 +83,10 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             return Result<CountryLeagueSnapshotDto>.Success(new CountryLeagueSnapshotDto(
                 Array.Empty<LeagueCountryCardDto>(),
                 new CountryLeagueSummaryDto(0, 0, 0),
-                string.Empty));
+                string.Empty,
+                null,
+                null,
+                Array.Empty<LeagueStandingRowDto>()));
         }
 
         var countryName = query.CountryName.Trim();
@@ -98,8 +101,22 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
             .Select(card => card.Description)
             .FirstOrDefault(description => !string.IsNullOrWhiteSpace(description))
             ?? string.Empty;
+        var featuredLeague = cards.FirstOrDefault();
+        var featuredLeagueStandings = featuredLeague is null
+            ? Array.Empty<LeagueStandingRowDto>()
+            : await GetLeagueStandingsAsync(
+                dbContext,
+                featuredLeague.LeagueId,
+                featuredLeague.Season,
+                cancellationToken);
 
-        return Result<CountryLeagueSnapshotDto>.Success(new CountryLeagueSnapshotDto(cards, summary, aboutDescription));
+        return Result<CountryLeagueSnapshotDto>.Success(new CountryLeagueSnapshotDto(
+            cards,
+            summary,
+            aboutDescription,
+            featuredLeague?.LeagueName,
+            featuredLeague?.Season,
+            featuredLeagueStandings));
     }
 
     private static int CalculateDivisions(IReadOnlyList<LeagueCountryCardDto> cards)
@@ -253,5 +270,154 @@ public sealed class CountriesLeaguesQueryService(IDbContextFactory<ProFootballDb
                     league.Description);
             })
             .ToList();
+    }
+
+    private static async Task<IReadOnlyList<LeagueStandingRowDto>> GetLeagueStandingsAsync(
+        ProFootballDbContext dbContext,
+        int leagueId,
+        string season,
+        CancellationToken cancellationToken)
+    {
+        var teamSeasonStatsRows = await dbContext.TeamSeasonStats
+            .AsNoTracking()
+            .Where(stat => stat.LeagueId == leagueId && stat.Season == season)
+            .Join(
+                dbContext.Teams.AsNoTracking(),
+                stat => stat.TeamId,
+                team => team.Id,
+                (stat, team) => new
+                {
+                    stat.TeamId,
+                    TeamName = string.IsNullOrWhiteSpace(team.LongName) ? (team.ShortName ?? team.Id.ToString()) : team.LongName,
+                    stat.Wins,
+                    stat.Draws,
+                    stat.Losses,
+                    stat.GoalsFor,
+                    stat.GoalsAgainst,
+                    stat.Points,
+                })
+            .ToListAsync(cancellationToken);
+
+        if (teamSeasonStatsRows.Count > 0)
+        {
+            return teamSeasonStatsRows
+                .OrderByDescending(row => row.Points)
+                .ThenByDescending(row => row.GoalsFor - row.GoalsAgainst)
+                .ThenByDescending(row => row.GoalsFor)
+                .ThenBy(row => row.TeamName)
+                .Select((row, index) => new LeagueStandingRowDto(
+                    index + 1,
+                    row.TeamId,
+                    row.TeamName,
+                    row.Wins,
+                    row.Draws,
+                    row.Losses,
+                    row.GoalsFor,
+                    row.GoalsAgainst,
+                    row.Points))
+                .ToList();
+        }
+
+        var matchRows = await dbContext.Matches
+            .AsNoTracking()
+            .Where(match => match.LeagueId == leagueId && match.Season == season)
+            .Select(match => new
+            {
+                match.HomeTeamId,
+                match.AwayTeamId,
+                match.HomeTeamGoal,
+                match.AwayTeamGoal,
+            })
+            .ToListAsync(cancellationToken);
+
+        if (matchRows.Count == 0)
+        {
+            return Array.Empty<LeagueStandingRowDto>();
+        }
+
+        var table = new Dictionary<int, StandingAccumulator>();
+        foreach (var match in matchRows)
+        {
+            if (!table.TryGetValue(match.HomeTeamId, out var home))
+            {
+                home = new StandingAccumulator();
+                table[match.HomeTeamId] = home;
+            }
+
+            if (!table.TryGetValue(match.AwayTeamId, out var away))
+            {
+                away = new StandingAccumulator();
+                table[match.AwayTeamId] = away;
+            }
+
+            var homeGoals = match.HomeTeamGoal ?? 0;
+            var awayGoals = match.AwayTeamGoal ?? 0;
+
+            home.GoalsFor += homeGoals;
+            home.GoalsAgainst += awayGoals;
+            away.GoalsFor += awayGoals;
+            away.GoalsAgainst += homeGoals;
+
+            if (homeGoals > awayGoals)
+            {
+                home.Wins++;
+                away.Losses++;
+                home.Points += 3;
+            }
+            else if (homeGoals < awayGoals)
+            {
+                away.Wins++;
+                home.Losses++;
+                away.Points += 3;
+            }
+            else
+            {
+                home.Draws++;
+                away.Draws++;
+                home.Points++;
+                away.Points++;
+            }
+        }
+
+        var teamNames = await dbContext.Teams
+            .AsNoTracking()
+            .Where(team => table.Keys.Contains(team.Id))
+            .ToDictionaryAsync(
+                team => team.Id,
+                team => string.IsNullOrWhiteSpace(team.LongName) ? (team.ShortName ?? team.Id.ToString()) : team.LongName,
+                cancellationToken);
+
+        return table
+            .Select(entry =>
+            {
+                var teamId = entry.Key;
+                var stat = entry.Value;
+                return new LeagueStandingRowDto(
+                    0,
+                    teamId,
+                    teamNames.GetValueOrDefault(teamId, teamId.ToString()),
+                    stat.Wins,
+                    stat.Draws,
+                    stat.Losses,
+                    stat.GoalsFor,
+                    stat.GoalsAgainst,
+                    stat.Points);
+            })
+            .OrderByDescending(row => row.Points)
+            .ThenByDescending(row => row.GoalsFor - row.GoalsAgainst)
+            .ThenByDescending(row => row.GoalsFor)
+            .ThenBy(row => row.TeamName)
+            .Select((row, index) => row with { Position = index + 1 })
+            .ToList();
+    }
+
+    private sealed class StandingAccumulator
+    {
+        public int Wins { get; set; }
+        public int Draws { get; set; }
+        public int Losses { get; set; }
+        public int GoalsFor { get; set; }
+        public int GoalsAgainst { get; set; }
+        public int Points { get; set; }
     }
 }

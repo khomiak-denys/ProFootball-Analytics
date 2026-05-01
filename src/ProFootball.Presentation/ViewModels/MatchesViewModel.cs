@@ -28,6 +28,7 @@ public sealed class MatchesViewModel : ObservableObject
     private int _page = 1;
     private int _pageSize = 20;
     private int _totalCount;
+    private bool _suppressAutoOpenDetails;
     private bool _isUpdatingSeasonOptions;
     private bool _isUpdatingTeamOptions;
     private string _editorCountryName = string.Empty;
@@ -105,6 +106,11 @@ public sealed class MatchesViewModel : ObservableObject
             RaiseSelectedMatchPropertiesChanged();
             RaisePropertyChanged(nameof(HasSelectedMatch));
             SyncEditorWithSelection();
+
+            if (value is not null && !_suppressAutoOpenDetails)
+            {
+                OpenDetails();
+            }
         }
     }
 
@@ -480,9 +486,17 @@ public sealed class MatchesViewModel : ObservableObject
         }
 
         var selectedMatchId = SelectedMatch?.MatchApiId;
-        SelectedMatch = selectedMatchId.HasValue
-            ? Matches.FirstOrDefault(item => item.MatchApiId == selectedMatchId.Value)
-            : null;
+        _suppressAutoOpenDetails = true;
+        try
+        {
+            SelectedMatch = selectedMatchId.HasValue
+                ? Matches.FirstOrDefault(item => item.MatchApiId == selectedMatchId.Value)
+                : null;
+        }
+        finally
+        {
+            _suppressAutoOpenDetails = false;
+        }
 
         NextPageCommand.RaiseCanExecuteChanged();
         PreviousPageCommand.RaiseCanExecuteChanged();

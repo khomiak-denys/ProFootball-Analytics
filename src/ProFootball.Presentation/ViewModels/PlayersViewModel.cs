@@ -48,12 +48,14 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     private string _radarPolygonPoints = string.Empty;
     private long _searchVersion;
     private long _detailsVersion;
-    private string _editorName = string.Empty;
+    private string _editorFirstName = string.Empty;
+    private string _editorLastName = string.Empty;
     private DateTime? _editorBirthday;
     private int? _editorHeight;
     private int? _editorWeight;
     private bool _isAddPlayerModalOpen;
-    private string _newPlayerName = string.Empty;
+    private string _newPlayerFirstName = string.Empty;
+    private string _newPlayerLastName = string.Empty;
     private DateTime? _newPlayerBirthday;
     private int? _newPlayerHeight;
     private int? _newPlayerWeight;
@@ -254,7 +256,9 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
 
     public bool HasNextPage => Page * PageSize < TotalCount;
 
-    public string DetailsPlayerName => _selectedPlayerDetails?.Name ?? SelectedPlayer?.Name ?? "Select a player";
+    public string DetailsPlayerName => _selectedPlayerDetails is null
+        ? SelectedPlayer?.FullName ?? "Select a player"
+        : string.Create(CultureInfo.InvariantCulture, $"{_selectedPlayerDetails.FirstName} {_selectedPlayerDetails.LastName}").Trim();
 
     public string DetailsPosition => SelectedPlayer is null ? "--" : ResolvePosition(SelectedPlayer.PlayerApiId);
 
@@ -268,7 +272,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
 
     public string DetailsHeight => FormatMeasure(SelectedPlayer?.Height, "cm");
 
-    public string DetailsWeight => FormatMeasure(SelectedPlayer?.Weight, "kg");
+    public string DetailsWeight => FormatMeasure(SelectedPlayer?.Weight, "lbs");
 
     public string RadarPolygonPoints
     {
@@ -324,10 +328,16 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         private set => SetProperty(ref _isAddPlayerModalOpen, value);
     }
 
-    public string NewPlayerName
+    public string NewPlayerFirstName
     {
-        get => _newPlayerName;
-        set => SetProperty(ref _newPlayerName, value);
+        get => _newPlayerFirstName;
+        set => SetProperty(ref _newPlayerFirstName, value);
+    }
+
+    public string NewPlayerLastName
+    {
+        get => _newPlayerLastName;
+        set => SetProperty(ref _newPlayerLastName, value);
     }
 
     public DateTime? NewPlayerBirthday
@@ -354,10 +364,16 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         private set => SetProperty(ref _isEditPlayerModalOpen, value);
     }
 
-    public string EditorName
+    public string EditorFirstName
     {
-        get => _editorName;
-        set => SetProperty(ref _editorName, value);
+        get => _editorFirstName;
+        set => SetProperty(ref _editorFirstName, value);
+    }
+
+    public string EditorLastName
+    {
+        get => _editorLastName;
+        set => SetProperty(ref _editorLastName, value);
     }
 
     public DateTime? EditorBirthday
@@ -414,15 +430,16 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
             {
                 Players.Add(new PlayerListEntryViewModel(
                     item.PlayerApiId,
-                    item.Name,
+                    item.FirstName,
+                    item.LastName,
                     ResolvePosition(item.PlayerApiId),
                     ResolveAge(item.Birthday, item.PlayerApiId),
                     item.OverallRating,
                     item.Potential,
                     NormalizeText(item.PreferredFoot, "--") ?? "--",
-                    item.Weight,
                     item.Height,
-                    FormatMeasure(item.Weight, "cm")));
+                    item.Weight,
+                    FormatMeasure(item.Height, "cm")));
             }
 
             SelectedPlayer = selectedPlayerId.HasValue
@@ -591,7 +608,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     private async Task CreatePlayerAsync()
     {
         var result = await _commandDispatcher.DispatchAsync<CreatePlayerCommand, Result>(
-            new CreatePlayerCommand(EditorName, EditorBirthday, EditorHeight, EditorWeight));
+            new CreatePlayerCommand(EditorFirstName, EditorLastName, EditorBirthday, EditorHeight, EditorWeight));
         if (result.IsFailure)
         {
             ErrorMessage = result.Error.Message;
@@ -605,7 +622,8 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     private void OpenAddPlayerModal()
     {
         ErrorMessage = null;
-        NewPlayerName = string.Empty;
+        NewPlayerFirstName = string.Empty;
+        NewPlayerLastName = string.Empty;
         NewPlayerBirthday = null;
         NewPlayerHeight = null;
         NewPlayerWeight = null;
@@ -620,7 +638,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     private async Task AddPlayerAsync()
     {
         var result = await _commandDispatcher.DispatchAsync<CreatePlayerCommand, Result>(
-            new CreatePlayerCommand(NewPlayerName, NewPlayerBirthday, NewPlayerHeight, NewPlayerWeight));
+            new CreatePlayerCommand(NewPlayerFirstName, NewPlayerLastName, NewPlayerBirthday, NewPlayerHeight, NewPlayerWeight));
         if (result.IsFailure)
         {
             ErrorMessage = result.Error.Message;
@@ -656,7 +674,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         }
 
         var result = await _commandDispatcher.DispatchAsync<UpdatePlayerCommand, Result>(
-            new UpdatePlayerCommand(SelectedPlayer.PlayerApiId, EditorName, EditorBirthday, EditorHeight, EditorWeight));
+            new UpdatePlayerCommand(SelectedPlayer.PlayerApiId, EditorFirstName, EditorLastName, EditorBirthday, EditorHeight, EditorWeight));
         if (result.IsFailure)
         {
             ErrorMessage = result.Error.Message;
@@ -676,7 +694,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         }
 
         var result = await _commandDispatcher.DispatchAsync<UpdatePlayerCommand, Result>(
-            new UpdatePlayerCommand(SelectedPlayer.PlayerApiId, EditorName, EditorBirthday, EditorHeight, EditorWeight));
+            new UpdatePlayerCommand(SelectedPlayer.PlayerApiId, EditorFirstName, EditorLastName, EditorBirthday, EditorHeight, EditorWeight));
         if (result.IsFailure)
         {
             ErrorMessage = result.Error.Message;
@@ -710,14 +728,16 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     {
         if (SelectedPlayer is null)
         {
-            EditorName = string.Empty;
+            EditorFirstName = string.Empty;
+            EditorLastName = string.Empty;
             EditorBirthday = null;
             EditorHeight = null;
             EditorWeight = null;
             return;
         }
 
-        EditorName = SelectedPlayer.Name;
+        EditorFirstName = SelectedPlayer.FirstName;
+        EditorLastName = SelectedPlayer.LastName;
         EditorBirthday = _selectedPlayerDetails?.Birthday;
         EditorHeight = SelectedPlayer.Height;
         EditorWeight = SelectedPlayer.Weight;
@@ -881,7 +901,8 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
 
 public sealed record PlayerListEntryViewModel(
     int PlayerApiId,
-    string Name,
+    string FirstName,
+    string LastName,
     string Position,
     int Age,
     int? OverallRating,
@@ -889,4 +910,7 @@ public sealed record PlayerListEntryViewModel(
     string PreferredFoot,
     int? Height,
     int? Weight,
-    string HeightDisplay);
+    string HeightDisplay)
+{
+    public string FullName => string.Create(CultureInfo.InvariantCulture, $"{FirstName} {LastName}").Trim();
+}

@@ -235,6 +235,9 @@ public class QueryServicesTests
         Assert.Equal(4, snapshot.Summary.TotalClubs);
         Assert.Equal(2, snapshot.Summary.ActiveLeagues);
         Assert.Equal(2, snapshot.Summary.Divisions);
+        Assert.False(string.IsNullOrWhiteSpace(snapshot.FeaturedLeagueName));
+        Assert.NotEmpty(snapshot.FeaturedLeagueStandings);
+        Assert.All(snapshot.FeaturedLeagueStandings, row => Assert.True(row.Points >= 0));
     }
 
     [Fact]

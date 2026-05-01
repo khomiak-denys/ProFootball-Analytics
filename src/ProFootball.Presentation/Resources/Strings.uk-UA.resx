@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <resheader name="resmimetype">
     <value>text/microsoft-resx</value>
@@ -91,16 +91,16 @@
     <value>ProFootball access</value>
   </data>
   <data name="Auth_Action_Register" xml:space="preserve">
-    <value>���������</value>
+    <value>?????????</value>
   </data>
   <data name="Auth_Action_SignIn" xml:space="preserve">
-    <value>����</value>
+    <value>????</value>
   </data>
   <data name="Auth_Field_ConfirmPassword" xml:space="preserve">
     <value>Confirm password</value>
   </data>
   <data name="Auth_Field_FirstName" xml:space="preserve">
-    <value>��'�</value>
+    <value>??'?</value>
   </data>
   <data name="Auth_Field_LastName" xml:space="preserve">
     <value>Last name</value>
@@ -411,6 +411,12 @@
   <data name="Matches_Column_League" xml:space="preserve">
     <value>Ліга</value>
   </data>
+  <data name="Matches_Column_Country" xml:space="preserve">
+    <value>Країна</value>
+  </data>
+  <data name="Matches_Column_Season" xml:space="preserve">
+    <value>Сезон</value>
+  </data>
   <data name="Matches_Column_Stage" xml:space="preserve">
     <value>Тур</value>
   </data>
@@ -670,181 +676,213 @@
     <value>Samples: </value>
   </data>
   <data name="Common_Action_Create" xml:space="preserve">
-    <value>��������</value>
+    <value>????????</value>
   </data>
   <data name="Common_Action_Update" xml:space="preserve">
-    <value>�������</value>
+    <value>???????</value>
   </data>
   <data name="Common_Action_Delete" xml:space="preserve">
-    <value>��������</value>
+    <value>????????</value>
   </data>
   <data name="Common_Action_Cancel" xml:space="preserve">
-    <value>���������</value>
+    <value>?????????</value>
   </data>
   <data name="Teams_Add_Button" xml:space="preserve">
-    <value>������ �������</value>
+    <value>?????? ???????</value>
   </data>
   <data name="Teams_Add_Title" xml:space="preserve">
-    <value>������ ���� �������</value>
+    <value>?????? ???? ???????</value>
   </data>
   <data name="Teams_Add_Subtitle" xml:space="preserve">
-    <value>������ ��� ��� ���� ��������� �������.</value>
+    <value>?????? ??? ??? ???? ????????? ???????.</value>
   </data>
   <data name="Teams_Add_Name" xml:space="preserve">
-    <value>����� �������</value>
+    <value>????? ???????</value>
   </data>
   <data name="Teams_Add_ShortName" xml:space="preserve">
-    <value>������� �����</value>
+    <value>??????? ?????</value>
   </data>
   <data name="Teams_Add_League" xml:space="preserve">
-    <value>˳��</value>
+    <value>???</value>
   </data>
   <data name="Teams_Add_Confirm" xml:space="preserve">
-    <value>������ �������</value>
+    <value>?????? ???????</value>
   </data>
   <data name="Players_Write_Title" xml:space="preserve">
-    <value>��������� �������</value>
+    <value>????????? ???????</value>
   </data>
   <data name="Matches_Write_Title" xml:space="preserve">
-    <value>��������� ������</value>
+    <value>????????? ??????</value>
   </data>
   <data name="Matches_Add_Button" xml:space="preserve">
-    <value>������ ����</value>
+    <value>?????? ????</value>
   </data>
   <data name="Matches_Add_Title" xml:space="preserve">
-    <value>������ ����� ����</value>
+    <value>?????? ????? ????</value>
   </data>
   <data name="Matches_Add_Subtitle" xml:space="preserve">
-    <value>������ ��� ��� ����� ���������� ����.</value>
+    <value>?????? ??? ??? ????? ?????????? ????.</value>
   </data>
   <data name="Matches_Add_Country" xml:space="preserve">
-    <value>�����</value>
+    <value>?????</value>
   </data>
   <data name="Matches_Add_Season" xml:space="preserve">
-    <value>�����</value>
+    <value>?????</value>
   </data>
   <data name="Matches_Add_LeagueId" xml:space="preserve">
-    <value>ID ���</value>
+    <value>ID ???</value>
   </data>
   <data name="Matches_Add_Date" xml:space="preserve">
-    <value>����</value>
+    <value>????</value>
   </data>
   <data name="Matches_Add_HomeTeamId" xml:space="preserve">
-    <value>ID �������� �������</value>
+    <value>ID ???????? ???????</value>
   </data>
   <data name="Matches_Add_AwayTeamId" xml:space="preserve">
-    <value>ID �������� �������</value>
+    <value>ID ???????? ???????</value>
   </data>
   <data name="Matches_Add_HomeGoals" xml:space="preserve">
-    <value>���� ��������</value>
+    <value>???? ????????</value>
   </data>
   <data name="Matches_Add_AwayGoals" xml:space="preserve">
-    <value>���� ��������</value>
+    <value>???? ????????</value>
   </data>
   <data name="Matches_Add_Confirm" xml:space="preserve">
-    <value>������ ����</value>
+    <value>?????? ????</value>
   </data>
   <data name="Matches_Edit_Button" xml:space="preserve">
-    <value>���������� ����</value>
+    <value>?????????? ????</value>
   </data>
   <data name="Matches_Edit_Title" xml:space="preserve">
-    <value>����������� �����</value>
+    <value>??????????? ?????</value>
   </data>
   <data name="Matches_Edit_Subtitle" xml:space="preserve">
-    <value>������ ��� ��������� �����.</value>
+    <value>?????? ??? ????????? ?????.</value>
   </data>
   <data name="Matches_Edit_Confirm" xml:space="preserve">
-    <value>�������� ����</value>
+    <value>???????? ????</value>
   </data>
   <data name="Players_Add_Button" xml:space="preserve">
-    <value>������ ������</value>
+    <value>?????? ??????</value>
   </data>
   <data name="Players_Add_Title" xml:space="preserve">
-    <value>������ ������ ������</value>
+    <value>?????? ?????? ??????</value>
   </data>
   <data name="Players_Add_Subtitle" xml:space="preserve">
-    <value>������ ��� ��� ������ ������.</value>
+    <value>?????? ??? ??? ?????? ??????.</value>
   </data>
   <data name="Players_Add_Name" xml:space="preserve">
-    <value>��'� ������</value>
+    <value>??'? ??????</value>
+  </data>
+  <data name="Players_Add_FirstName" xml:space="preserve">
+    <value>First name</value>
+  </data>
+  <data name="Players_Add_LastName" xml:space="preserve">
+    <value>Last name</value>
   </data>
   <data name="Players_Add_Birthday" xml:space="preserve">
-    <value>���� ����������</value>
+    <value>???? ??????????</value>
   </data>
   <data name="Players_Add_Height" xml:space="preserve">
-    <value>���� (��)</value>
+    <value>???? (lbs)</value>
   </data>
   <data name="Players_Add_Weight" xml:space="preserve">
-    <value>���� (��)</value>
+    <value>???? (lbs)</value>
   </data>
   <data name="Players_Add_Confirm" xml:space="preserve">
-    <value>������ ������</value>
+    <value>?????? ??????</value>
   </data>
   <data name="Players_Edit_Button" xml:space="preserve">
-    <value>���������� ������</value>
+    <value>?????????? ??????</value>
   </data>
   <data name="Players_Edit_Title" xml:space="preserve">
-    <value>����������� ������</value>
+    <value>??????????? ??????</value>
   </data>
   <data name="Players_Edit_Subtitle" xml:space="preserve">
-    <value>������ ��� ��������� ������.</value>
+    <value>?????? ??? ????????? ??????.</value>
   </data>
   <data name="Players_Edit_Confirm" xml:space="preserve">
-    <value>�������� ����</value>
+    <value>???????? ????</value>
   </data>
   <data name="CountriesLeagues_Add_Button" xml:space="preserve">
-    <value>������ ���</value>
+    <value>?????? ???</value>
   </data>
   <data name="CountriesLeagues_Add_Title" xml:space="preserve">
-    <value>������ ���� ���</value>
+    <value>?????? ???? ???</value>
   </data>
   <data name="CountriesLeagues_Add_Subtitle" xml:space="preserve">
-    <value>������ ��� ��� ���� ��������� ���</value>
+    <value>?????? ??? ??? ???? ????????? ???</value>
   </data>
   <data name="CountriesLeagues_Add_Name" xml:space="preserve">
-    <value>����� ���</value>
+    <value>????? ???</value>
   </data>
   <data name="CountriesLeagues_Add_Country" xml:space="preserve">
-    <value>�����</value>
+    <value>?????</value>
   </data>
   <data name="CountriesLeagues_Add_Confirm" xml:space="preserve">
-    <value>������ ���</value>
+    <value>?????? ???</value>
   </data>
   <data name="CountriesLeagues_Add_MaxTeams" xml:space="preserve">
-    <value>�������� ������</value>
+    <value>???????? ??????</value>
   </data>
   <data name="CountriesLeagues_Add_Description" xml:space="preserve">
-    <value>����</value>
+    <value>????</value>
   </data>
   <data name="Common_Page" xml:space="preserve">
-    <value>�������: </value>
+    <value>???????: </value>
   </data>
   <data name="Dashboard_Stat_HomeWins" xml:space="preserve">
-    <value>�������� �����</value>
+    <value>???????? ?????</value>
   </data>
   <data name="Dashboard_Stat_Draws" xml:space="preserve">
-    <value>ͳ��</value>
+    <value>???</value>
   </data>
   <data name="Dashboard_Stat_AwayWins" xml:space="preserve">
-    <value>�������� � ������</value>
+    <value>???????? ? ??????</value>
   </data>
   <data name="Dashboard_Stat_AvgGoals" xml:space="preserve">
-    <value>���. ���� / ����</value>
+    <value>???. ???? / ????</value>
   </data>
   <data name="Analytics_LeagueCompetitiveness_Title" xml:space="preserve">
-    <value>������������� ��</value>
+    <value>????????????? ??</value>
   </data>
   <data name="Analytics_RatingDelta_Title" xml:space="preserve">
-    <value>������ � ��������� �������� ��������</value>
+    <value>?????? ? ????????? ???????? ????????</value>
   </data>  <data name="Analytics_Competitiveness_Matches" xml:space="preserve">
-    <value>������</value>
+    <value>??????</value>
   </data>
   <data name="Analytics_Competitiveness_DrawRate" xml:space="preserve">
-    <value>������ ����</value>
+    <value>?????? ????</value>
   </data>
   <data name="Analytics_Competitiveness_AvgDiff" xml:space="preserve">
-    <value>���. ������ ����</value>
-  </data></root>
+    <value>???. ?????? ????</value>
+  </data>
+  <data name="CountriesLeagues_Standings_Title" xml:space="preserve">
+    <value>Турнірна таблиця</value>
+  </data>
+  <data name="CountriesLeagues_Standings_Team" xml:space="preserve">
+    <value>Команда</value>
+  </data>
+  <data name="CountriesLeagues_Standings_W" xml:space="preserve">
+    <value>В</value>
+  </data>
+  <data name="CountriesLeagues_Standings_D" xml:space="preserve">
+    <value>Н</value>
+  </data>
+  <data name="CountriesLeagues_Standings_L" xml:space="preserve">
+    <value>П</value>
+  </data>
+  <data name="CountriesLeagues_Standings_GF" xml:space="preserve">
+    <value>ЗМ</value>
+  </data>
+  <data name="CountriesLeagues_Standings_GA" xml:space="preserve">
+    <value>ПМ</value>
+  </data>
+  <data name="CountriesLeagues_Standings_PTS" xml:space="preserve">
+    <value>О</value>
+  </data>
+</root>
+
 
 
 

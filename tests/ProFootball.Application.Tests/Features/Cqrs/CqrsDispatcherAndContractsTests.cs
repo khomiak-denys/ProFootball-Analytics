@@ -64,7 +64,13 @@ public class CqrsDispatcherAndContractsTests
         var countryListItem = new CountryLeagueListItemDto("England", 2);
         var summary = new CountryLeagueSummaryDto(40, 2, 2);
         var leagueCard = new LeagueCountryCardDto(1, "Premier League", "2025/26", 20, 380, 20, "Top division");
-        var snapshot = new CountryLeagueSnapshotDto([leagueCard], summary, "Top division");
+        var snapshot = new CountryLeagueSnapshotDto(
+            [leagueCard],
+            summary,
+            "Top division",
+            "Premier League",
+            "2024/2025",
+            []);
         var league = new LeagueDto(1, "Premier League", "England");
 
         var team = new TeamListItemDto(100, "Arsenal", "ARS", 1000);
@@ -73,9 +79,9 @@ public class CqrsDispatcherAndContractsTests
         var teamSearch = new TeamSearchQuery("ars", "shortname", false, 2, 15);
         var teamDetailsQuery = new GetTeamDetailsQuery(100);
 
-        var player = new PlayerListItemDto(9001, "Kevin", today.AddYears(-30), 181, 76, 91, 92, "Right");
+        var player = new PlayerListItemDto(9001, "Kevin", "De Bruyne", today.AddYears(-30), 181, 76, 91, 92, "Right");
         var playerAttribute = new PlayerAttributeDto(today, 91, 92, "Right", "high", "medium");
-        var playerDetails = new PlayerDetailsDto(9001, 5001, "Kevin", today.AddYears(-30), 181, 76, [playerAttribute]);
+        var playerDetails = new PlayerDetailsDto(9001, 5001, "Kevin", "De Bruyne", today.AddYears(-30), 181, 76, [playerAttribute]);
         var trendPoint = new PlayerTrendPointDto(today, 91, 92);
         var topPlayer = new TopPlayerDto(9001, "Kevin", 90.5, 91.3, 25);
         var playerSearch = new PlayerSearchQuery("kev", 80, null, null, null, null, null, null, "overallrating", true, 1, 20);
@@ -84,7 +90,7 @@ public class CqrsDispatcherAndContractsTests
         var topPlayersQuery = new TopPlayersQuery(10, 85, 88, "Right", "overall", true);
 
         var match = new MatchListItemDto(5001, today, "2025/26", "Premier League", "England", 100, "Arsenal", 200, "Chelsea", 2, 1);
-        var matchDetails = new MatchDetailsDto(5001, today, "2025/26", "Premier League", "England", 100, "Arsenal", 200, "Chelsea", 2, 1);
+        var matchDetails = new MatchDetailsDto(5001, today, "2025/26", "Premier League", "England", 100, "Arsenal", 200, "Chelsea", 2, 1, 18, 3, 0, 6, 17, 2, 13, 87);
         var bySeason = new MatchesBySeasonDto("2025/26", "Premier League", 380);
         var kpi = new DashboardKpiDto(5, 10, 20, 500, 3800);
         var matchSearch = new MatchSearchQuery(1, "2025/26", 100, null, null, "date", true, 1, 25);
@@ -97,7 +103,7 @@ public class CqrsDispatcherAndContractsTests
         var countriesWithCountQuery = new GetCountriesWithLeagueCountQuery();
         var snapshotQuery = new GetCountrySnapshotQuery("England");
         var importCommand = new ImportDataCommand("db.sqlite", 1000);
-        var importResult = new DataImportResult(1, 2, 3, 4, 5, 6, 7, 8, TimeSpan.FromSeconds(1));
+        var importResult = new DataImportResult(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 12, TimeSpan.FromSeconds(1));
 
         Assert.Equal("England", country.Name);
         Assert.Equal(2, countryListItem.LeagueCount);
@@ -126,7 +132,8 @@ public class CqrsDispatcherAndContractsTests
         Assert.Equal(100, teamDetailsQuery.TeamApiId);
 
         Assert.Equal(9001, player.PlayerApiId);
-        Assert.Equal("Kevin", player.Name);
+        Assert.Equal("Kevin", player.FirstName);
+        Assert.Equal("De Bruyne", player.LastName);
         Assert.Equal(181, player.Height);
         Assert.Equal(76, player.Weight);
         Assert.Equal(91, player.OverallRating);
@@ -139,7 +146,8 @@ public class CqrsDispatcherAndContractsTests
         Assert.Equal("high", playerAttribute.AttackingWorkRate);
         Assert.Equal("medium", playerAttribute.DefensiveWorkRate);
         Assert.Equal(5001, playerDetails.PlayerFifaApiId);
-        Assert.Equal("Kevin", playerDetails.Name);
+        Assert.Equal("Kevin", playerDetails.FirstName);
+        Assert.Equal("De Bruyne", playerDetails.LastName);
         Assert.Equal(181, playerDetails.Height);
         Assert.Equal(76, playerDetails.Weight);
         Assert.Single(playerDetails.Attributes);
@@ -218,6 +226,8 @@ public class CqrsDispatcherAndContractsTests
         Assert.Equal("England", snapshotQuery.CountryName);
         Assert.Equal("db.sqlite", importCommand.SqlitePath);
         Assert.Equal(1000, importCommand.BatchSize);
+        Assert.Equal("realistic", importCommand.Profile);
+        Assert.Equal("regenerate", importCommand.Mode);
         Assert.Equal(1, importResult.CountriesResolved);
         Assert.Equal(2, importResult.LeaguesImported);
         Assert.Equal(3, importResult.TeamsImported);
@@ -225,7 +235,11 @@ public class CqrsDispatcherAndContractsTests
         Assert.Equal(5, importResult.MatchesImported);
         Assert.Equal(6, importResult.TeamAttributesImported);
         Assert.Equal(7, importResult.PlayerAttributesImported);
-        Assert.Equal(8, importResult.SkippedRows);
+        Assert.Equal(8, importResult.MatchEventsGenerated);
+        Assert.Equal(9, importResult.PlayerMatchStatsGenerated);
+        Assert.Equal(10, importResult.TeamSeasonStatsRebuilt);
+        Assert.Equal(0, importResult.ValidationErrors);
+        Assert.Equal(12, importResult.SkippedRows);
         Assert.Equal(TimeSpan.FromSeconds(1), importResult.Duration);
 
         var paged = new PagedResult<int>([1, 2], 2, 1, 20);

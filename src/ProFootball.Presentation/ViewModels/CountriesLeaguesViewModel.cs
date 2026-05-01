@@ -39,6 +39,8 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     private int _activeLeagues;
     private int _divisions;
     private string? _snapshotAboutDescription;
+    private string? _featuredLeagueName;
+    private string? _featuredLeagueSeason;
     private bool _isAddLeagueModalOpen;
     private string _newLeagueName = string.Empty;
     private int? _newLeagueMaxTeams;
@@ -56,6 +58,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         Countries = new ObservableCollection<CountryLeagueListItemDto>();
         CountryOptions = new ObservableCollection<CountryLeagueListItemDto>();
         LeagueCards = new ObservableCollection<LeagueCountryCardDto>();
+        FeaturedLeagueStandings = new ObservableCollection<LeagueStandingRowDto>();
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, CommandExceptionHandler.Handle);
         OpenAddLeagueModalCommand = new RelayCommand(OpenAddLeagueModal);
         CloseAddLeagueModalCommand = new RelayCommand(CloseAddLeagueModal);
@@ -66,6 +69,7 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
     public ObservableCollection<CountryLeagueListItemDto> CountryOptions { get; }
 
     public ObservableCollection<LeagueCountryCardDto> LeagueCards { get; }
+    public ObservableCollection<LeagueStandingRowDto> FeaturedLeagueStandings { get; }
 
     public CountryLeagueListItemDto? SelectedCountry
     {
@@ -151,6 +155,18 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         LeagueCards.Count == 0
             ? "No leagues found"
             : string.Join(", ", LeagueCards.Select(card => card.LeagueName));
+
+    public string FeaturedLeagueName
+    {
+        get => _featuredLeagueName ?? "--";
+        set => SetProperty(ref _featuredLeagueName, value);
+    }
+
+    public string FeaturedLeagueSeason
+    {
+        get => _featuredLeagueSeason ?? "--";
+        set => SetProperty(ref _featuredLeagueSeason, value);
+    }
 
     public int TotalCountries => Countries.Count;
 
@@ -266,6 +282,13 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
             TotalClubs = summary.TotalClubs;
             ActiveLeagues = summary.ActiveLeagues;
             Divisions = summary.Divisions;
+            FeaturedLeagueName = snapshot.FeaturedLeagueName ?? "--";
+            FeaturedLeagueSeason = snapshot.FeaturedLeagueSeason ?? "--";
+            FeaturedLeagueStandings.Clear();
+            foreach (var row in snapshot.FeaturedLeagueStandings)
+            {
+                FeaturedLeagueStandings.Add(row);
+            }
         }
         catch (OperationCanceledException)
         {
@@ -301,6 +324,9 @@ public sealed class CountriesLeaguesViewModel : ObservableObject, IDisposable
         TotalClubs = 0;
         ActiveLeagues = 0;
         Divisions = 0;
+        FeaturedLeagueName = "--";
+        FeaturedLeagueSeason = "--";
+        FeaturedLeagueStandings.Clear();
         _snapshotAboutDescription = null;
         RaisePropertyChanged(nameof(EffectiveCountryDescription));
     }

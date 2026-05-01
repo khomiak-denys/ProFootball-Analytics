@@ -69,9 +69,9 @@ internal sealed class QueryingTestHost : IAsyncDisposable
             new Team(4, "Wolves", "WOL"));
 
         dbContext.Players.AddRange(
-            new Player(1, "Kevin De Bruyne", new DateTime(1991, 6, 28, 0, 0, 0, DateTimeKind.Utc), 181, 70),
-            new Player(2, "Erling Haaland", new DateTime(2000, 7, 21, 0, 0, 0, DateTimeKind.Utc), 194, 88),
-            new Player(3, "Unrated Player", null, null, null));
+            new Player(1, "Kevin", "De Bruyne", new DateTime(1991, 6, 28, 0, 0, 0, DateTimeKind.Utc), 181, 70),
+            new Player(2, "Erling", "Haaland", new DateTime(2000, 7, 21, 0, 0, 0, DateTimeKind.Utc), 194, 88),
+            new Player(3, "Unrated", "Player", null, null, null));
 
         dbContext.PlayerAttributes.AddRange(
             new PlayerAttribute(1, 1, new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc), 90, 91, "right", "high", "medium"),

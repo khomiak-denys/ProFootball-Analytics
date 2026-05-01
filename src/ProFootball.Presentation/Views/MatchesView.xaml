@@ -11,8 +11,6 @@
             <ColumnDefinition Width="300" />
             <ColumnDefinition Width="16" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="16" />
-            <ColumnDefinition Width="380" />
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column="0"
@@ -100,12 +98,6 @@
                             <Run Text="{Binding Path=Matches.TotalCount, Mode=OneWay}" />
                             <Run Text="{loc:Loc Key=Matches_Info_MatchesSuffix}" />
                         </TextBlock>
-                        <TextBlock Margin="0,6,0,0"
-                                   FontSize="13"
-                                   Foreground="{DynamicResource DangerForegroundBrush}">
-                            <Run Text="{loc:Loc Key=Matches_Info_SelectedDate}" />
-                            <Run Text="{Binding Path=Matches.SelectedMatchDate, Mode=OneWay}" />
-                        </TextBlock>
                     </StackPanel>
                 </Border>
 
@@ -133,7 +125,6 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock FontSize="24"
                                    FontWeight="SemiBold"
@@ -149,44 +140,7 @@
                                 FontSize="18"
                                 Content="&#xE710;"
                                 ToolTip="{loc:Loc Key=Matches_Add_Button}"
-                                Command="{Binding Matches.OpenAddMatchModalCommand}">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding CanManageData}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
-                        <Button Grid.Column="2"
-                                Width="42"
-                                Height="42"
-                                Margin="10,0,0,0"
-                                Background="{DynamicResource SelectionSurfaceBrush}"
-                                Foreground="{DynamicResource TitleForegroundBrush}"
-                                FontFamily="Segoe MDL2 Assets"
-                                FontSize="16"
-                                Content="&#xE70F;"
-                                ToolTip="{loc:Loc Key=Matches_Edit_Button}"
-                                Command="{Binding Matches.OpenEditMatchModalCommand}">
-                            <Button.Style>
-                                <Style TargetType="Button">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                    <Style.Triggers>
-                                        <MultiDataTrigger>
-                                            <MultiDataTrigger.Conditions>
-                                                <Condition Binding="{Binding CanManageData}" Value="True" />
-                                                <Condition Binding="{Binding Matches.HasSelectedMatch}" Value="True" />
-                                            </MultiDataTrigger.Conditions>
-                                            <Setter Property="Visibility" Value="Visible" />
-                                        </MultiDataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                        </Button>
+                                Command="{Binding Matches.OpenAddMatchModalCommand}" />
                     </Grid>
                     <TextBlock Margin="0,6,0,0"
                                FontSize="13"
@@ -200,246 +154,34 @@
                         BorderBrush="{DynamicResource SubtleBorderBrush}"
                         BorderThickness="1"
                         CornerRadius="10">
-                    <Grid>
-                        <DataGrid ItemsSource="{Binding Matches.Matches}"
-                                  SelectedItem="{Binding Matches.SelectedMatch, Mode=TwoWay}"
-                                  AutoGenerateColumns="False"
-                                  RowHeaderWidth="0"
-                                  HeadersVisibility="Column"
-                                  CanUserAddRows="False"
-                                  CanUserDeleteRows="False"
-                                  GridLinesVisibility="Horizontal"
-                                  IsReadOnly="True"
-                                  BorderThickness="0"
-                                  Background="Transparent"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                  CellStyle="{StaticResource MatchesTableCellStyle}"
-                                  RowStyle="{StaticResource MatchesTableRowStyle}">
-                            <DataGrid.Style>
-                                <Style TargetType="DataGrid">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Matches.HasSelectedMatch}" Value="True">
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGrid.Style>
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="{loc:Loc Key=Matches_Column_Date}" Binding="{Binding Date, StringFormat=\{0:yyyy-MM-dd\}}" Width="120" />
-                                <DataGridTextColumn Header="{loc:Loc Key=Matches_Column_League}" Binding="{Binding LeagueName}" Width="220" />
-                                <DataGridTextColumn Header="{loc:Loc Key=Matches_Column_HomeTeam}" Binding="{Binding HomeTeamName}" Width="220" />
-                                <DataGridTextColumn Header="{loc:Loc Key=Matches_Column_AwayTeam}" Binding="{Binding AwayTeamName}" Width="220" />
-                                <DataGridTextColumn Header="{loc:Loc Key=Matches_Column_Stage}" Binding="{Binding MatchApiId}" Width="100" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-
-                        <DataGrid ItemsSource="{Binding Matches.Matches}"
-                                  SelectedItem="{Binding Matches.SelectedMatch, Mode=TwoWay}"
-                                  AutoGenerateColumns="False"
-                                  RowHeaderWidth="0"
-                                  HeadersVisibility="Column"
-                                  CanUserAddRows="False"
-                                  CanUserDeleteRows="False"
-                                  GridLinesVisibility="Horizontal"
-                                  IsReadOnly="True"
-                                  BorderThickness="0"
-                                  Background="Transparent"
-                                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                                  CellStyle="{StaticResource MatchesTableCellStyle}"
-                                  RowStyle="{StaticResource MatchesTableRowStyle}">
-                            <DataGrid.Style>
-                                <Style TargetType="DataGrid">
-                                    <Setter Property="Visibility" Value="Collapsed" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding Matches.HasSelectedMatch}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </DataGrid.Style>
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="{loc:Loc Key=Matches_Column_Date}" Binding="{Binding Date, StringFormat=\{0:yyyy-MM-dd\}}" Width="120" />
-                                <DataGridTextColumn Header="{loc:Loc Key=Matches_Column_HomeTeam}" Binding="{Binding HomeTeamName}" Width="260" />
-                                <DataGridTextColumn Header="{loc:Loc Key=Matches_Column_AwayTeam}" Binding="{Binding AwayTeamName}" Width="260" />
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Grid>
+                    <DataGrid ItemsSource="{Binding Matches.Matches}"
+                              SelectedItem="{Binding Matches.SelectedMatch, Mode=TwoWay}"
+                              AutoGenerateColumns="False"
+                              RowHeaderWidth="0"
+                              HeadersVisibility="Column"
+                              CanUserAddRows="False"
+                              CanUserDeleteRows="False"
+                              GridLinesVisibility="Horizontal"
+                              IsReadOnly="True"
+                              BorderThickness="0"
+                              Background="Transparent"
+                              ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                              CellStyle="{StaticResource MatchesTableCellStyle}"
+                              RowStyle="{StaticResource MatchesTableRowStyle}">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="{loc:Loc Key=Matches_Column_Date}" Binding="{Binding Date, StringFormat=\{0:yyyy-MM-dd\}}" Width="1.1*" MinWidth="110" />
+                            <DataGridTextColumn Header="{loc:Loc Key=Matches_Column_Country}" Binding="{Binding CountryName}" Width="1.2*" MinWidth="120" />
+                            <DataGridTextColumn Header="{loc:Loc Key=Matches_Column_League}" Binding="{Binding LeagueName}" Width="2.0*" MinWidth="180" />
+                            <DataGridTextColumn Header="{loc:Loc Key=Matches_Column_Season}" Binding="{Binding Season}" Width="1.1*" MinWidth="110" />
+                            <DataGridTextColumn Header="{loc:Loc Key=Matches_Column_HomeTeam}" Binding="{Binding HomeTeamName}" Width="1.8*" MinWidth="170" />
+                            <DataGridTextColumn Header="{loc:Loc Key=Matches_Column_AwayTeam}" Binding="{Binding AwayTeamName}" Width="1.8*" MinWidth="170" />
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Border>
             </Grid>
         </Border>
 
-        <Grid Grid.Column="4">
-            <Grid.Style>
-                <Style TargetType="Grid">
-                    <Setter Property="Visibility" Value="Visible" />
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Matches.HasSelectedMatch}" Value="False">
-                            <Setter Property="Visibility" Value="Collapsed" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Grid.Style>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="16" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="16" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-
-            <Border Padding="16"
-                    Background="{DynamicResource CardBackgroundBrush}"
-                    BorderBrush="{DynamicResource CardBorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="12">
-                <StackPanel>
-                    <TextBlock FontSize="20"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource TitleForegroundBrush}"
-                               Text="{loc:Loc Key=Matches_Details_Title}" />
-
-                    <StackPanel Margin="0,14,0,0">
-                        <TextBlock FontSize="12" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Matches_Details_Competition}" />
-                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchCompetition}" />
-                    </StackPanel>
-
-                    <StackPanel Margin="0,10,0,0">
-                        <TextBlock FontSize="12" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Matches_Details_Country}" />
-                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchCountry}" />
-                    </StackPanel>
-
-                    <StackPanel Margin="0,10,0,0">
-                        <TextBlock FontSize="12" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Matches_Details_Season}" />
-                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchSeason}" />
-                    </StackPanel>
-
-                    <StackPanel Margin="0,10,0,0">
-                        <TextBlock FontSize="12" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Matches_Details_Stage}" />
-                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchStage}" />
-                    </StackPanel>
-
-                    <StackPanel Margin="0,10,0,0">
-                        <TextBlock FontSize="12" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Matches_Details_Date}" />
-                        <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchDate}" />
-                    </StackPanel>
-                </StackPanel>
-            </Border>
-
-            <Border Grid.Row="2"
-                    Padding="16"
-                    Background="{DynamicResource CardBackgroundBrush}"
-                    BorderBrush="{DynamicResource CardBorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="12">
-                <StackPanel>
-                    <TextBlock FontSize="20"
-                               FontWeight="SemiBold"
-                               HorizontalAlignment="Center"
-                               Foreground="{DynamicResource TitleForegroundBrush}"
-                               Text="{loc:Loc Key=Matches_Score_Title}" />
-
-                    <Border Margin="0,14,0,0"
-                            Padding="12"
-                            Background="{DynamicResource SurfaceMutedBrush}"
-                            CornerRadius="8">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel>
-                                <TextBlock FontSize="12" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Matches_Score_Home}" />
-                                <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchHomeTeam}" />
-                            </StackPanel>
-                            <TextBlock Grid.Column="1"
-                                       VerticalAlignment="Center"
-                                       FontSize="30"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource SuccessForegroundBrush}"
-                                       Text="{Binding Matches.SelectedMatchHomeScore}" />
-                        </Grid>
-                    </Border>
-
-                    <Border Margin="0,10,0,0"
-                            Padding="12"
-                            Background="{DynamicResource SurfaceMutedBrush}"
-                            CornerRadius="8">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel>
-                                <TextBlock FontSize="12" Foreground="{DynamicResource MutedForegroundBrush}" Text="{loc:Loc Key=Matches_Score_Away}" />
-                                <TextBlock FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource TitleForegroundBrush}" Text="{Binding Matches.SelectedMatchAwayTeam}" />
-                            </StackPanel>
-                            <TextBlock Grid.Column="1"
-                                       VerticalAlignment="Center"
-                                       FontSize="30"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource SuccessForegroundBrush}"
-                                       Text="{Binding Matches.SelectedMatchAwayScore}" />
-                        </Grid>
-                    </Border>
-                </StackPanel>
-            </Border>
-
-            <Border Grid.Row="4"
-                    Padding="16"
-                    Background="{DynamicResource CardBackgroundBrush}"
-                    BorderBrush="{DynamicResource CardBorderBrush}"
-                    BorderThickness="1"
-                    CornerRadius="12">
-                <StackPanel>
-                    <TextBlock FontSize="20"
-                               FontWeight="SemiBold"
-                               Foreground="{DynamicResource TitleForegroundBrush}"
-                               Text="{loc:Loc Key=Matches_Statistics_Title}" />
-
-                    <ItemsControl Margin="0,14,0,0" ItemsSource="{Binding Matches.MatchStatistics}">
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Grid Margin="0,0,0,10">
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition Height="Auto" />
-                                        <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <TextBlock FontSize="13"
-                                               Foreground="{DynamicResource TitleForegroundBrush}"
-                                               Text="{Binding Label}" />
-                                    <TextBlock Grid.Column="1"
-                                               FontSize="13"
-                                               FontWeight="SemiBold"
-                                               Foreground="{DynamicResource TitleForegroundBrush}"
-                                               Text="{Binding Value}" />
-
-                                    <Grid Grid.Row="1"
-                                          Grid.ColumnSpan="2"
-                                          Margin="0,7,0,0">
-                                        <Border Height="8"
-                                                Background="{DynamicResource SurfaceMutedBrush}"
-                                                CornerRadius="4" />
-                                        <Border Width="{Binding BarWidth}"
-                                                HorizontalAlignment="Left"
-                                                Height="8"
-                                                Background="#22c55e"
-                                                CornerRadius="4" />
-                                    </Grid>
-                                </Grid>
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
-                    </ItemsControl>
-                </StackPanel>
-            </Border>
-        </Grid>
-
-        <Grid Grid.ColumnSpan="5"
+        <Grid Grid.ColumnSpan="3"
               Panel.ZIndex="1000"
               Background="#99000000"
               Visibility="{Binding Matches.IsAddMatchModalOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -577,7 +319,7 @@
             </Border>
         </Grid>
 
-        <Grid Grid.ColumnSpan="5"
+        <Grid Grid.ColumnSpan="3"
               Panel.ZIndex="1001"
               Background="#99000000"
               Visibility="{Binding Matches.IsEditMatchModalOpen, Converter={StaticResource BooleanToVisibilityConverter}}">
