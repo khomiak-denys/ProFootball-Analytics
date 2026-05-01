@@ -96,7 +96,10 @@
                                 </Grid>
                             </Border>
 
-                            <StackPanel Grid.Column="2">
+                            <ScrollViewer Grid.Column="2"
+                                          VerticalScrollBarVisibility="Auto"
+                                          HorizontalScrollBarVisibility="Disabled">
+                            <StackPanel>
                                 <Border Style="{StaticResource SectionPanelStyle}">
                                     <Grid>
                                         <Grid.RowDefinitions>
@@ -175,13 +178,12 @@
                                                    Text="{Binding CountriesLeagues.LeagueNamesLine}" />
 
                                         <Grid Grid.Row="2" Margin="0,16,0,0">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="1.1*" />
-                                                <ColumnDefinition Width="12" />
-                                                <ColumnDefinition Width="0.9*" />
-                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
 
-                                            <ItemsControl Grid.Column="0"
+                                            <ItemsControl Grid.Row="0"
                                                           ItemsSource="{Binding CountriesLeagues.LeagueCards}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
@@ -267,7 +269,7 @@
                                                 </ItemsControl.ItemTemplate>
                                             </ItemsControl>
 
-                                            <Border Grid.Column="2"
+                                            <Border Grid.Row="1"
                                                     Padding="12"
                                                     Margin="0,0,0,12"
                                                     Background="{DynamicResource SelectionSurfaceBrush}"
@@ -294,6 +296,7 @@
                                                     </TextBlock>
 
                                                     <DataGrid Grid.Row="2"
+                                                              Height="340"
                                                               AutoGenerateColumns="False"
                                                               CanUserAddRows="False"
                                                               CanUserDeleteRows="False"
@@ -303,13 +306,15 @@
                                                               HeadersVisibility="Column"
                                                               ItemsSource="{Binding CountriesLeagues.FeaturedLeagueStandings}"
                                                               GridLinesVisibility="None"
-                                                              RowHeaderWidth="0">
+                                                              RowHeaderWidth="0"
+                                                              ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                              ScrollViewer.HorizontalScrollBarVisibility="Auto">
                                                         <DataGrid.Columns>
                                                             <DataGridTextColumn Width="40" Binding="{Binding Position}" Header="#" />
                                                             <DataGridTextColumn Width="*" Binding="{Binding TeamName}" Header="{loc:Loc Key=CountriesLeagues_Standings_Team}" />
-                                                            <DataGridTextColumn Width="42" Binding="{Binding Wins}" Header="{loc:Loc Key=CountriesLeagues_Standings_W}" />
-                                                            <DataGridTextColumn Width="42" Binding="{Binding Draws}" Header="{loc:Loc Key=CountriesLeagues_Standings_D}" />
-                                                            <DataGridTextColumn Width="42" Binding="{Binding Losses}" Header="{loc:Loc Key=CountriesLeagues_Standings_L}" />
+                                                            <DataGridTextColumn Width="56" Binding="{Binding Wins}" Header="{loc:Loc Key=CountriesLeagues_Standings_W}" />
+                                                            <DataGridTextColumn Width="56" Binding="{Binding Draws}" Header="{loc:Loc Key=CountriesLeagues_Standings_D}" />
+                                                            <DataGridTextColumn Width="56" Binding="{Binding Losses}" Header="{loc:Loc Key=CountriesLeagues_Standings_L}" />
                                                             <DataGridTextColumn Width="66" Binding="{Binding GoalsFor}" Header="{loc:Loc Key=CountriesLeagues_Standings_GF}" />
                                                             <DataGridTextColumn Width="66" Binding="{Binding GoalsAgainst}" Header="{loc:Loc Key=CountriesLeagues_Standings_GA}" />
                                                             <DataGridTextColumn Width="56" Binding="{Binding Points}" Header="{loc:Loc Key=CountriesLeagues_Standings_PTS}" />
@@ -401,6 +406,7 @@
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
+                            </ScrollViewer>
 
                             <Grid Grid.ColumnSpan="3"
                                   Panel.ZIndex="1000"
