@@ -262,25 +262,28 @@
                                         BorderBrush="{DynamicResource CardBorderBrush}"
                                         BorderThickness="1"
                                         CornerRadius="12">
-                                    <StackPanel>
-                                        <TextBlock FontSize="40"
-                                                   FontWeight="SemiBold"
-                                                   Foreground="{DynamicResource TitleForegroundBrush}"
-                                                   Text="{loc:Loc Key=Teams_AttributeTrends_Title}" />
-                                        <Viewbox Height="220" Margin="0,16,0,0" Stretch="Fill" StretchDirection="Both">
-                                            <Canvas Width="742" Height="220" Background="{DynamicResource SurfaceMutedBrush}">
-                                                <Line X1="30" Y1="20" X2="30" Y2="196" Stroke="{DynamicResource ChartAxisBrush}" StrokeThickness="1" />
-                                                <Line X1="30" Y1="196" X2="742" Y2="196" Stroke="{DynamicResource ChartAxisBrush}" StrokeThickness="1" />
-                                                <Polyline Stroke="{DynamicResource SuccessForegroundBrush}"
-                                                          StrokeThickness="3"
-                                                          Points="{Binding Teams.TeamTrendPolylinePoints}" />
-                                            </Canvas>
-                                        </Viewbox>
-                                        <TextBlock Margin="0,8,0,0"
-                                                   FontSize="16"
-                                                   Foreground="{DynamicResource DangerForegroundBrush}"
-                                                   Text="{Binding Teams.ErrorMessage}" />
-                                    </StackPanel>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                                  HorizontalScrollBarVisibility="Disabled">
+                                        <StackPanel>
+                                            <TextBlock FontSize="40"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{DynamicResource TitleForegroundBrush}"
+                                                       Text="{loc:Loc Key=Teams_AttributeTrends_Title}" />
+                                            <Viewbox Height="220" Margin="0,16,0,0" Stretch="Fill" StretchDirection="Both">
+                                                <Canvas Width="742" Height="220" Background="{DynamicResource SurfaceMutedBrush}">
+                                                    <Line X1="30" Y1="20" X2="30" Y2="196" Stroke="{DynamicResource ChartAxisBrush}" StrokeThickness="1" />
+                                                    <Line X1="30" Y1="196" X2="742" Y2="196" Stroke="{DynamicResource ChartAxisBrush}" StrokeThickness="1" />
+                                                    <Polyline Stroke="{DynamicResource SuccessForegroundBrush}"
+                                                              StrokeThickness="3"
+                                                              Points="{Binding Teams.TeamTrendPolylinePoints}" />
+                                                </Canvas>
+                                            </Viewbox>
+                                            <TextBlock Margin="0,8,0,0"
+                                                       FontSize="16"
+                                                       Foreground="{DynamicResource DangerForegroundBrush}"
+                                                       Text="{Binding Teams.ErrorMessage}" />
+                                        </StackPanel>
+                                    </ScrollViewer>
                                 </Border>
                             </Grid>
 
