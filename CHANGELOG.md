@@ -1,8 +1,28 @@
-## Changelog (latest 5 pull requests)
+## Changelog
 
-**Update 28/04/2026 - Localization + Auth About System + Input Style Reuse**  
+**Update 01/05/2026 - Analytics Synthetic Data Pipeline (#18)**  
+**Goal.** Add deterministic synthetic data generation and streamline analytics data flow for development/demo environments.  
+**Description.** Added synthetic generation profiles and modes for import, refreshed dashboard/match/league presentation flows, removed obsolete analytics daily and run entities, and introduced maintenance scripts/migrations for rebuilt season statistics and improved query performance.
+
+**Update 30/04/2026 - Analytics Expansion (#17)**  
+**Goal.** Expand analytics backend and connect dashboard/analytics views to real aggregate data.  
+**Description.** Added aggregate query contracts and handlers, introduced analytics SQL objects and integrity constraints in migrations, improved translatable aggregate queries, and updated leagues/teams/auth-related behaviors needed by the expanded analytics pipeline.
+
+**Update 30/04/2026 - RBAC Write Flow for Matches & Players (#16)**  
+**Goal.** Enable role-aware write operations for core reference entities in UI and application flow.  
+**Description.** Added command-driven create/edit flows for players, teams, and leagues with RBAC enforcement, introduced management modals and pagination improvements, and extended localization/resources to support new write interactions.
+
+**Update 28/04/2026 - Settings Page User Menu (#15)**  
+**Goal.** Add user-facing settings and account actions entry points in the shell.  
+**Description.** Introduced a settings page and integrated user-menu navigation/actions in presentation flow, aligning session-related UX behavior with the authenticated shell.
+
+**Update 27/04/2026 - Localization + Auth About System + Input Style Reuse (#14)**  
 **Goal.** Finalize runtime UI localization and improve authentication screen usability/consistency.  
 **Description.** Added RESX-based localization wiring for presentation views, fixed runtime text refresh/label rendering issues, introduced a localized "About system" dialog from the login screen, and refactored auth input styling to reuse shared TextBox/PasswordBox styles with consistent focus behavior.
+
+**Update 27/04/2026 - Persistent Session Auto-login (#13)**  
+**Goal.** Keep users signed in across app restarts with secure session restoration.  
+**Description.** Implemented persistent auth session storage/restoration, wired startup auto-login behavior, and aligned logout/session invalidation handling across application and presentation layers.
 
 **Update 27/04/2026 - Result Pattern Flow (#12)**  
 **Goal.** Replace exception-driven control flow with a result-based approach in core app paths.  
