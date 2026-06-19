@@ -1,4 +1,4 @@
-﻿using ProFootball.Presentation.Localization;
+using ProFootball.Presentation.Localization;
 using ProFootball.Presentation.Services;
 
 namespace ProFootball.Presentation.ViewModels;
