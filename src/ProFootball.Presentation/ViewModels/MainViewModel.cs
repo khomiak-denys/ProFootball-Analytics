@@ -147,7 +147,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public RelayCommand OpenSettingsCommand { get; }
 
     public AsyncRelayCommand LogoutCommand { get; }
-    
+
     public RelayCommand BackToMatchesCommand { get; }
 
     public RelayCommand OpenMatchEditCommand { get; }
