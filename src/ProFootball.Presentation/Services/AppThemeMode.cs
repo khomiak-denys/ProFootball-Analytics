@@ -1,4 +1,4 @@
-﻿namespace ProFootball.Presentation.Services;
+namespace ProFootball.Presentation.Services;
 
 public enum AppThemeMode
 {

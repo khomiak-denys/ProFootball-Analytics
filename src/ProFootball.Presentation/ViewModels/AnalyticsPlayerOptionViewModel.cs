@@ -12,4 +12,6 @@ public sealed record AnalyticsPlayerOptionViewModel(
     public string DisplayName => string.Create(
         CultureInfo.InvariantCulture,
         $"{PlayerName} ({Math.Round(AverageOverallRating, MidpointRounding.AwayFromZero):0})");
+
+    public override string ToString() => DisplayName;
 }

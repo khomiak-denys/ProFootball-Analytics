@@ -21,6 +21,10 @@ public sealed class TeamConfiguration : IEntityTypeConfiguration<Team>
         builder.Property(team => team.ShortName)
             .HasMaxLength(20);
 
+        builder.Property(team => team.LeagueId)
+            .HasColumnName("league_id");
+
         builder.HasIndex(team => team.LongName);
+        builder.HasIndex(team => team.LeagueId);
     }
 }

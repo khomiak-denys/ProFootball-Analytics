@@ -5,6 +5,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <converters:TrendToPointCollectionConverter x:Key="TrendToPointsConverter" />
+            <converters:DashboardValueToHeightConverter x:Key="DashboardValueToHeightConverter" />
             <converters:NullableIntTextConverter x:Key="NullableIntTextConverter" />
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />

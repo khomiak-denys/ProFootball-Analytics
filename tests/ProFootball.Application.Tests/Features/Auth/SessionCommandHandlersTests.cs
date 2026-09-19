@@ -38,7 +38,7 @@ public class SessionCommandHandlersTests
         var registerResult = await registerHandler.HandleAsync(new RegisterUserCommand("Test", "Admin", "admin", "Password1", "Password1"));
         Assert.True(registerResult.IsSuccess);
 
-        var user = await repository.FindByNormalizedLoginAsync("ADMIN");
+        var user = await repository.FindByLoginAsync("admin");
         Assert.NotNull(user);
         Assert.Equal(AppUserRole.Admin, user!.Role);
         Assert.StartsWith("hashed:", user.PasswordHash, StringComparison.Ordinal);
@@ -56,7 +56,7 @@ public class SessionCommandHandlersTests
         Assert.True(first.IsSuccess);
         Assert.True(second.IsSuccess);
 
-        var user = await repository.FindByNormalizedLoginAsync("ANALYST");
+        var user = await repository.FindByLoginAsync("analyst");
         Assert.NotNull(user);
         Assert.Equal(AppUserRole.Analyst, user!.Role);
     }
@@ -217,11 +217,17 @@ public class SessionCommandHandlersTests
     {
         private readonly List<AppUser> _users = [];
 
-        public Task<AppUser?> FindByNormalizedLoginAsync(string normalizedLogin, CancellationToken cancellationToken = default)
-            => Task.FromResult(_users.SingleOrDefault(user => user.NormalizedLogin == normalizedLogin));
+        public Task<AppUser?> FindByLoginAsync(string login, CancellationToken cancellationToken = default)
+        {
+            var normalizedLogin = login.Trim().ToLowerInvariant();
+            return Task.FromResult(_users.SingleOrDefault(user => user.Login == normalizedLogin));
+        }
 
-        public Task<bool> ExistsByNormalizedLoginAsync(string normalizedLogin, CancellationToken cancellationToken = default)
-            => Task.FromResult(_users.Any(user => user.NormalizedLogin == normalizedLogin));
+        public Task<bool> ExistsByLoginAsync(string login, CancellationToken cancellationToken = default)
+        {
+            var normalizedLogin = login.Trim().ToLowerInvariant();
+            return Task.FromResult(_users.Any(user => user.Login == normalizedLogin));
+        }
 
         public Task<int> CountAsync(CancellationToken cancellationToken = default)
             => Task.FromResult(_users.Count);

@@ -1,0 +1,76 @@
+<Window x:Class="ProFootball.Presentation.AboutSystemWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:ProFootball.Presentation.Localization"
+        Title="{loc:Loc Key=Auth_AboutSystem_WindowTitle}"
+        Width="920"
+        Height="680"
+        MinWidth="920"
+        MinHeight="680"
+        ResizeMode="NoResize"
+        Background="{DynamicResource ShellMainBackgroundBrush}">
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock FontSize="30"
+                   FontWeight="SemiBold"
+                   Foreground="{DynamicResource TitleForegroundBrush}"
+                   Text="{loc:Loc Key=Auth_AboutSystem_Title}" />
+
+        <StackPanel Grid.Row="1" Margin="0,16,0,0">
+            <TextBlock FontSize="18"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource TitleForegroundBrush}"
+                       Text="{loc:Loc Key=Auth_AboutSystem_SectionConcept_Title}" />
+            <TextBlock Margin="0,8,0,0"
+                       FontSize="15"
+                       Foreground="{DynamicResource MutedForegroundBrush}"
+                       TextWrapping="Wrap"
+                       Text="{loc:Loc Key=Auth_AboutSystem_SectionConcept_Body}" />
+
+            <TextBlock Margin="0,16,0,0"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource TitleForegroundBrush}"
+                       Text="{loc:Loc Key=Auth_AboutSystem_SectionData_Title}" />
+            <TextBlock Margin="0,8,0,0"
+                       FontSize="15"
+                       Foreground="{DynamicResource MutedForegroundBrush}"
+                       TextWrapping="Wrap"
+                       Text="{loc:Loc Key=Auth_AboutSystem_SectionData_Body}" />
+
+            <TextBlock Margin="0,16,0,0"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource TitleForegroundBrush}"
+                       Text="{loc:Loc Key=Auth_AboutSystem_SectionArchitecture_Title}" />
+            <TextBlock Margin="0,8,0,0"
+                       FontSize="15"
+                       Foreground="{DynamicResource MutedForegroundBrush}"
+                       TextWrapping="Wrap"
+                       Text="{loc:Loc Key=Auth_AboutSystem_SectionArchitecture_Body}" />
+
+            <TextBlock Margin="0,16,0,0"
+                       FontSize="18"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource TitleForegroundBrush}"
+                       Text="{loc:Loc Key=Auth_AboutSystem_SectionRoles_Title}" />
+            <TextBlock Margin="0,8,0,0"
+                       FontSize="15"
+                       Foreground="{DynamicResource MutedForegroundBrush}"
+                       TextWrapping="Wrap"
+                       Text="{loc:Loc Key=Auth_AboutSystem_SectionRoles_Body}" />
+        </StackPanel>
+
+        <Button Grid.Row="2"
+                Margin="0,18,0,0"
+                Width="140"
+                HorizontalAlignment="Right"
+                Content="{loc:Loc Key=Common_Action_Close}"
+                Click="OnCloseClick" />
+    </Grid>
+</Window>

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Globalization;
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.League.Dtos;
 using ProFootball.Application.League.Queries;
@@ -21,6 +22,10 @@ public sealed class DashboardViewModel : ObservableObject
     private int _teams;
     private int _players;
     private int _matches;
+    private string _averageGoalsPerMatchLabel = "0.00";
+    private int _homeWins;
+    private int _draws;
+    private int _awayWins;
 
     public DashboardViewModel(IQueryDispatcher queryDispatcher)
     {
@@ -28,6 +33,7 @@ public sealed class DashboardViewModel : ObservableObject
         SeasonOptions = new ObservableCollection<string>();
         LeagueOptions = new ObservableCollection<LeagueDto>();
         RecentMatches = new ObservableCollection<MatchListItemDto>();
+        SeasonTrend = new ObservableCollection<DashboardTrendPointViewModel>();
         RefreshCommand = new AsyncRelayCommand(RefreshAsync, CommandExceptionHandler.Handle);
     }
 
@@ -37,7 +43,33 @@ public sealed class DashboardViewModel : ObservableObject
 
     public ObservableCollection<MatchListItemDto> RecentMatches { get; }
 
+    public ObservableCollection<DashboardTrendPointViewModel> SeasonTrend { get; }
+
     public string CurrentDateLabel => _lastUpdatedAt.ToString("dd MMM yyyy HH:mm");
+
+    public string AverageGoalsPerMatchLabel
+    {
+        get => _averageGoalsPerMatchLabel;
+        private set => SetProperty(ref _averageGoalsPerMatchLabel, value);
+    }
+
+    public int HomeWins
+    {
+        get => _homeWins;
+        private set => SetProperty(ref _homeWins, value);
+    }
+
+    public int Draws
+    {
+        get => _draws;
+        private set => SetProperty(ref _draws, value);
+    }
+
+    public int AwayWins
+    {
+        get => _awayWins;
+        private set => SetProperty(ref _awayWins, value);
+    }
 
     public int CurrentYear => DateTime.Now.Year;
 
@@ -122,6 +154,7 @@ public sealed class DashboardViewModel : ObservableObject
 
         RaisePropertyChanged(nameof(CurrentDateLabel));
         RaisePropertyChanged(nameof(CurrentYear));
+        await LoadChartsAsync();
     }
 
     private async Task LoadSeasonOptionsAsync()
@@ -182,6 +215,7 @@ public sealed class DashboardViewModel : ObservableObject
         {
             await LoadSeasonOptionsAsync();
             await LoadRecentMatchesAsync();
+            await LoadChartsAsync();
         }
         catch (Exception exception)
         {
@@ -194,6 +228,7 @@ public sealed class DashboardViewModel : ObservableObject
         try
         {
             await LoadRecentMatchesAsync();
+            await LoadChartsAsync();
         }
         catch (Exception exception)
         {
@@ -223,5 +258,33 @@ public sealed class DashboardViewModel : ObservableObject
         {
             RecentMatches.Add(match);
         }
+    }
+
+    private async Task LoadChartsAsync()
+    {
+        int? selectedLeagueId = SelectedLeague is { Id: > 0 } league ? league.Id : null;
+        var season = string.IsNullOrWhiteSpace(SelectedSeason) ? null : SelectedSeason;
+
+        var trendTask = _queryDispatcher.DispatchAsync<GetSeasonRatingTrendQuery, IReadOnlyList<SeasonRatingTrendPointDto>>(
+            new GetSeasonRatingTrendQuery(season, selectedLeagueId));
+        var outcomeTask = _queryDispatcher.DispatchAsync<GetMatchOutcomeDistributionQuery, MatchOutcomeDistributionDto>(
+            new GetMatchOutcomeDistributionQuery(season, selectedLeagueId));
+
+        await Task.WhenAll(trendTask, outcomeTask);
+        var trend = await trendTask;
+        var outcome = await outcomeTask;
+
+        SeasonTrend.Clear();
+        foreach (var point in trend.TakeLast(6))
+        {
+            SeasonTrend.Add(new DashboardTrendPointViewModel(
+                point.Month.ToString("MMM", CultureInfo.InvariantCulture),
+                Math.Round(point.AverageOverallRating, 2)));
+        }
+
+        HomeWins = outcome.HomeWins;
+        Draws = outcome.Draws;
+        AwayWins = outcome.AwayWins;
+        AverageGoalsPerMatchLabel = outcome.AverageGoalsPerMatch.ToString("0.00", CultureInfo.InvariantCulture);
     }
 }

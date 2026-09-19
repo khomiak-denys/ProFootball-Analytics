@@ -72,6 +72,10 @@ public class DataImportServiceTests
             Assert.Equal(1, result.MatchesImported);
             Assert.Equal(1, result.TeamAttributesImported);
             Assert.Equal(1, result.PlayerAttributesImported);
+            Assert.True(result.MatchEventsGenerated > 0);
+            Assert.Equal(0, result.PlayerMatchStatsGenerated);
+            Assert.True(result.TeamSeasonStatsRebuilt > 0);
+            Assert.Equal(0, result.ValidationErrors);
             Assert.Equal(7, result.SkippedRows);
 
             Assert.Equal(1, await destinationContext.Leagues.CountAsync());
@@ -140,6 +144,45 @@ public class DataImportServiceTests
             Assert.Equal(1, result.MatchesImported);
             Assert.Equal(1, result.TeamAttributesImported);
             Assert.Equal(1, result.PlayerAttributesImported);
+            Assert.True(result.MatchEventsGenerated > 0);
+            Assert.Equal(0, result.PlayerMatchStatsGenerated);
+            Assert.True(result.TeamSeasonStatsRebuilt > 0);
+            Assert.Equal(0, result.ValidationErrors);
+        }
+        finally
+        {
+            await DeleteFileWithRetryAsync(sourcePath);
+        }
+    }
+
+    [Fact]
+    public async Task ImportAsync_AppendMode_ShouldNotDuplicateGeneratedRows()
+    {
+        var sourcePath = Path.Combine(Path.GetTempPath(), $"profootball-source-{Guid.NewGuid():N}.sqlite");
+
+        try
+        {
+            await CreateSourceSqliteAsync(sourcePath);
+
+            await using var destinationConnection = new SqliteConnection("Data Source=:memory:");
+            await destinationConnection.OpenAsync();
+
+            var options = new DbContextOptionsBuilder<ProFootballDbContext>()
+                .UseSqlite(destinationConnection)
+                .Options;
+
+            var service = new DataImportService(new TestDbContextFactory(options), NullLogger<DataImportService>.Instance);
+            await service.HandleAsync(new ImportDataCommand(sourcePath, BatchSize: 2, Profile: "realistic", Mode: "regenerate"));
+
+            await using var contextAfterFirstRun = new ProFootballDbContext(options);
+            var firstEvents = await contextAfterFirstRun.MatchEvents.CountAsync();
+            var appendResult = await service.HandleAsync(new ImportDataCommand(sourcePath, BatchSize: 2, Profile: "realistic", Mode: "append"));
+            Assert.Equal(0, appendResult.ValidationErrors);
+
+            await using var contextAfterAppend = new ProFootballDbContext(options);
+            var secondEvents = await contextAfterAppend.MatchEvents.CountAsync();
+
+            Assert.Equal(firstEvents, secondEvents);
         }
         finally
         {

@@ -14,10 +14,14 @@ public sealed class PlayerConfiguration : IEntityTypeConfiguration<Player>
 
         builder.Property(player => player.Id).ValueGeneratedNever();
 
-        builder.Property(player => player.Name)
-            .HasMaxLength(200)
+        builder.Property(player => player.FirstName)
+            .HasMaxLength(120)
             .IsRequired();
 
-        builder.HasIndex(player => player.Name);
+        builder.Property(player => player.LastName)
+            .HasMaxLength(120)
+            .IsRequired();
+
+        builder.HasIndex(player => new { player.LastName, player.FirstName });
     }
 }

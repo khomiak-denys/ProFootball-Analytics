@@ -78,7 +78,9 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
             select new
             {
                 player.Id,
-                player.Name,
+                player.FirstName,
+                player.LastName,
+                FullName = (player.FirstName + " " + player.LastName).Trim(),
                 player.Birthday,
                 player.Height,
                 player.Weight,
@@ -90,7 +92,7 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
         if (!string.IsNullOrWhiteSpace(query.Name))
         {
             var pattern = LikePattern.Contains(query.Name.Trim());
-            projectedQuery = projectedQuery.Where(player => EF.Functions.ILike(player.Name, pattern, "\\"));
+            projectedQuery = projectedQuery.Where(player => EF.Functions.ILike(player.FullName, pattern, "\\"));
         }
 
         if (query.MinHeight.HasValue)
@@ -144,29 +146,35 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
             ("overallrating", true) => projectedQuery
                 .OrderByDescending(player => player.OverallRating.HasValue)
                 .ThenByDescending(player => player.OverallRating)
-                .ThenBy(player => player.Name),
+                .ThenBy(player => player.LastName)
+                .ThenBy(player => player.FirstName),
             ("overallrating", false) => projectedQuery
                 .OrderByDescending(player => player.OverallRating.HasValue)
                 .ThenBy(player => player.OverallRating)
-                .ThenBy(player => player.Name),
+                .ThenBy(player => player.LastName)
+                .ThenBy(player => player.FirstName),
             ("potential", true) => projectedQuery
                 .OrderByDescending(player => player.Potential.HasValue)
                 .ThenByDescending(player => player.Potential)
-                .ThenBy(player => player.Name),
+                .ThenBy(player => player.LastName)
+                .ThenBy(player => player.FirstName),
             ("potential", false) => projectedQuery
                 .OrderByDescending(player => player.Potential.HasValue)
                 .ThenBy(player => player.Potential)
-                .ThenBy(player => player.Name),
+                .ThenBy(player => player.LastName)
+                .ThenBy(player => player.FirstName),
             ("height", true) => projectedQuery
                 .OrderByDescending(player => player.Height.HasValue)
                 .ThenByDescending(player => player.Height)
-                .ThenBy(player => player.Name),
+                .ThenBy(player => player.LastName)
+                .ThenBy(player => player.FirstName),
             ("height", false) => projectedQuery
                 .OrderByDescending(player => player.Height.HasValue)
                 .ThenBy(player => player.Height)
-                .ThenBy(player => player.Name),
-            (_, true) => projectedQuery.OrderByDescending(player => player.Name),
-            _ => projectedQuery.OrderBy(player => player.Name),
+                .ThenBy(player => player.LastName)
+                .ThenBy(player => player.FirstName),
+            (_, true) => projectedQuery.OrderByDescending(player => player.LastName).ThenByDescending(player => player.FirstName),
+            _ => projectedQuery.OrderBy(player => player.LastName).ThenBy(player => player.FirstName),
         };
 
         var totalCount = await projectedQuery.CountAsync(cancellationToken);
@@ -175,7 +183,8 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
             .Take(pageSize)
             .Select(player => new PlayerListItemDto(
                 player.Id,
-                player.Name,
+                player.FirstName,
+                player.LastName,
                 player.Birthday,
                 player.Height,
                 player.Weight,
@@ -238,7 +247,9 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
             select new
             {
                 player.Id,
-                player.Name,
+                player.FirstName,
+                player.LastName,
+                FullName = (player.FirstName + " " + player.LastName).Trim(),
                 player.Birthday,
                 player.Height,
                 player.Weight,
@@ -251,7 +262,7 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
         {
             var pattern = LikePattern.Contains(query.Name.Trim());
             projectedQuery = projectedQuery.Where(player =>
-                EF.Functions.Like(EF.Functions.Collate(player.Name, "NOCASE"), pattern, "\\"));
+                EF.Functions.Like(EF.Functions.Collate(player.FullName, "NOCASE"), pattern, "\\"));
         }
 
         if (query.MinHeight.HasValue)
@@ -305,29 +316,35 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
             ("overallrating", true) => projectedQuery
                 .OrderByDescending(player => player.OverallRating.HasValue)
                 .ThenByDescending(player => player.OverallRating)
-                .ThenBy(player => player.Name),
+                .ThenBy(player => player.LastName)
+                .ThenBy(player => player.FirstName),
             ("overallrating", false) => projectedQuery
                 .OrderByDescending(player => player.OverallRating.HasValue)
                 .ThenBy(player => player.OverallRating)
-                .ThenBy(player => player.Name),
+                .ThenBy(player => player.LastName)
+                .ThenBy(player => player.FirstName),
             ("potential", true) => projectedQuery
                 .OrderByDescending(player => player.Potential.HasValue)
                 .ThenByDescending(player => player.Potential)
-                .ThenBy(player => player.Name),
+                .ThenBy(player => player.LastName)
+                .ThenBy(player => player.FirstName),
             ("potential", false) => projectedQuery
                 .OrderByDescending(player => player.Potential.HasValue)
                 .ThenBy(player => player.Potential)
-                .ThenBy(player => player.Name),
+                .ThenBy(player => player.LastName)
+                .ThenBy(player => player.FirstName),
             ("height", true) => projectedQuery
                 .OrderByDescending(player => player.Height.HasValue)
                 .ThenByDescending(player => player.Height)
-                .ThenBy(player => player.Name),
+                .ThenBy(player => player.LastName)
+                .ThenBy(player => player.FirstName),
             ("height", false) => projectedQuery
                 .OrderByDescending(player => player.Height.HasValue)
                 .ThenBy(player => player.Height)
-                .ThenBy(player => player.Name),
-            (_, true) => projectedQuery.OrderByDescending(player => player.Name),
-            _ => projectedQuery.OrderBy(player => player.Name),
+                .ThenBy(player => player.LastName)
+                .ThenBy(player => player.FirstName),
+            (_, true) => projectedQuery.OrderByDescending(player => player.LastName).ThenByDescending(player => player.FirstName),
+            _ => projectedQuery.OrderBy(player => player.LastName).ThenBy(player => player.FirstName),
         };
 
         var totalCount = await projectedQuery.CountAsync(cancellationToken);
@@ -336,7 +353,8 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
             .Take(pageSize)
             .Select(player => new PlayerListItemDto(
                 player.Id,
-                player.Name,
+                player.FirstName,
+                player.LastName,
                 player.Birthday,
                 player.Height,
                 player.Weight,
@@ -360,7 +378,8 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
             .Select(item => new
             {
                 item.Id,
-                item.Name,
+                item.FirstName,
+                item.LastName,
                 item.Birthday,
                 item.Height,
                 item.Weight,
@@ -390,7 +409,8 @@ public sealed class PlayersQueryService(IDbContextFactory<ProFootballDbContext> 
         return Result<PlayerDetailsDto?>.Success(new PlayerDetailsDto(
             player.Id,
             null,
-            player.Name,
+            player.FirstName,
+            player.LastName,
             player.Birthday,
             player.Height,
             player.Weight,

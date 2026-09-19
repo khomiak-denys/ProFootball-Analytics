@@ -5,4 +5,6 @@ public sealed record AnalyticsTeamOptionViewModel(
     string TeamName)
 {
     public string DisplayName => TeamName;
+
+    public override string ToString() => DisplayName;
 }

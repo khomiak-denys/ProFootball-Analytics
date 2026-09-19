@@ -5,4 +5,6 @@ public sealed record LeagueCountryCardDto(
     string LeagueName,
     string Season,
     int TeamsCount,
-    int MatchCount);
+    int MatchCount,
+    int? MaxTeams,
+    string? Description);

@@ -68,6 +68,8 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         TopPerformerBars = new ObservableCollection<AnalyticsTopPerformerBarViewModel>();
         GoalsAssistsBars = new ObservableCollection<AnalyticsGoalsAssistsBarViewModel>();
         TopPerformerCards = new ObservableCollection<AnalyticsTopPerformerCardViewModel>();
+        LeagueCompetitiveness = new ObservableCollection<LeagueCompetitivenessItemViewModel>();
+        TopRatingDeltas = new ObservableCollection<RatingDeltaItemViewModel>();
 
         RefreshAllCommand = new AsyncRelayCommand(RefreshAllAsync, CommandExceptionHandler.Handle);
         ComparePlayersModeCommand = new RelayCommand(() => CompareMode = AnalyticsCompareMode.Players);
@@ -85,6 +87,10 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
     public ObservableCollection<AnalyticsGoalsAssistsBarViewModel> GoalsAssistsBars { get; }
 
     public ObservableCollection<AnalyticsTopPerformerCardViewModel> TopPerformerCards { get; }
+
+    public ObservableCollection<LeagueCompetitivenessItemViewModel> LeagueCompetitiveness { get; }
+
+    public ObservableCollection<RatingDeltaItemViewModel> TopRatingDeltas { get; }
 
     public IReadOnlyList<string> MetricOptions => _metricOptions;
 
@@ -481,10 +487,18 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
             : _queryDispatcher.DispatchAsync<GetPlayerTrendQuery, IReadOnlyList<PlayerTrendPointDto>>(
                 new GetPlayerTrendQuery(SelectedPlayer2.PlayerApiId),
                 cancellationToken);
-        await Task.WhenAll(trendTask1, trendTask2);
+        var competitivenessTask = _queryDispatcher.DispatchAsync<GetLeagueCompetitivenessQuery, IReadOnlyList<LeagueCompetitivenessDto>>(
+            new GetLeagueCompetitivenessQuery(null, 6),
+            cancellationToken);
+        var ratingDeltaTask = _queryDispatcher.DispatchAsync<GetTopRatingDeltaPlayersQuery, IReadOnlyList<PlayerRatingDeltaDto>>(
+            new GetTopRatingDeltaPlayersQuery(6, 3),
+            cancellationToken);
+        await Task.WhenAll(trendTask1, trendTask2, competitivenessTask, ratingDeltaTask);
 
         var playerOneTrend = await trendTask1;
         var playerTwoTrend = await trendTask2;
+        var competitiveness = await competitivenessTask;
+        var ratingDeltas = await ratingDeltaTask;
         cancellationToken.ThrowIfCancellationRequested();
 
         if (version != Volatile.Read(ref _visualStateVersion))
@@ -499,6 +513,8 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
         BuildTopPerformerCards(orderedPlayers);
         BuildRadar(ResolvePlayerById(SelectedPlayer1?.PlayerApiId), ResolvePlayerById(SelectedPlayer2?.PlayerApiId));
         BuildTrend(playerOneTrend, playerTwoTrend);
+        BuildCompetitiveness(competitiveness);
+        BuildRatingDeltas(ratingDeltas);
 
     }
 
@@ -966,6 +982,33 @@ public sealed class AnalyticsViewModel : ObservableObject, IDisposable
 
         var leader = teamOneValue > teamTwoValue ? teamOneName : teamTwoName;
         return $"{metric}: {leader} leads by {delta:0.0} points.";
+    }
+
+    private void BuildCompetitiveness(IReadOnlyList<LeagueCompetitivenessDto> rows)
+    {
+        LeagueCompetitiveness.Clear();
+        foreach (var row in rows)
+        {
+            LeagueCompetitiveness.Add(new LeagueCompetitivenessItemViewModel(
+                row.LeagueName,
+                row.CountryName,
+                row.MatchCount,
+                Math.Round(row.DrawRate * 100, 1),
+                row.AverageGoalDifference));
+        }
+    }
+
+    private void BuildRatingDeltas(IReadOnlyList<PlayerRatingDeltaDto> rows)
+    {
+        TopRatingDeltas.Clear();
+        foreach (var row in rows)
+        {
+            TopRatingDeltas.Add(new RatingDeltaItemViewModel(
+                row.PlayerName,
+                row.OverallRating,
+                row.Potential,
+                row.Delta));
+        }
     }
 
     private static PointCollection BuildTeamRadarPolygonPoints(TeamDetailsDto? teamDetails)

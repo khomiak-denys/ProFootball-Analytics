@@ -10,7 +10,6 @@ public sealed class AppUser
         string firstName,
         string lastName,
         string login,
-        string normalizedLogin,
         string passwordHash,
         AppUserRole role,
         bool isActive,
@@ -19,13 +18,11 @@ public sealed class AppUser
         ArgumentException.ThrowIfNullOrWhiteSpace(firstName);
         ArgumentException.ThrowIfNullOrWhiteSpace(lastName);
         ArgumentException.ThrowIfNullOrWhiteSpace(login);
-        ArgumentException.ThrowIfNullOrWhiteSpace(normalizedLogin);
         ArgumentException.ThrowIfNullOrWhiteSpace(passwordHash);
 
         FirstName = firstName.Trim();
         LastName = lastName.Trim();
-        Login = login.Trim();
-        NormalizedLogin = normalizedLogin.Trim();
+        Login = login.Trim().ToLowerInvariant();
         PasswordHash = passwordHash.Trim();
         Role = role;
         IsActive = isActive;
@@ -39,8 +36,6 @@ public sealed class AppUser
     public string LastName { get; private set; } = string.Empty;
 
     public string Login { get; private set; } = string.Empty;
-
-    public string NormalizedLogin { get; private set; } = string.Empty;
 
     public string PasswordHash { get; private set; } = string.Empty;
 

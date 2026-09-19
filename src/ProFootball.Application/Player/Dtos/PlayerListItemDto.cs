@@ -2,7 +2,8 @@ namespace ProFootball.Application.Player.Dtos;
 
 public sealed record PlayerListItemDto(
     int PlayerApiId,
-    string Name,
+    string FirstName,
+    string LastName,
     DateTime? Birthday,
     int? Height,
     int? Weight,

@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -14,6 +16,9 @@ public sealed class DataImportService(
     IDbContextFactory<ProFootballDbContext> dbContextFactory,
     ILogger<DataImportService> logger) : ICommandHandler<ImportDataCommand, DataImportResult>
 {
+    private const string GeneratorVersion = "v1";
+    private static readonly string[] EventTypes = ["goal", "yellow_card", "red_card", "substitution", "shot"];
+
     public async Task<DataImportResult> HandleAsync(
         ImportDataCommand request,
         CancellationToken cancellationToken = default)
@@ -26,6 +31,8 @@ public sealed class DataImportService(
         }
 
         ArgumentOutOfRangeException.ThrowIfLessThan(request.BatchSize, 1);
+        var profile = NormalizeProfile(request.Profile);
+        var mode = NormalizeMode(request.Mode);
         var batchSize = request.BatchSize;
         var stopwatch = Stopwatch.StartNew();
         await using var dbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken);
@@ -36,7 +43,11 @@ public sealed class DataImportService(
 
         try
         {
-            await ClearExistingDataAsync(dbContext, cancellationToken);
+            if (mode == "regenerate")
+            {
+                await ClearExistingDataAsync(dbContext, cancellationToken);
+            }
+            var shouldImportBaseData = mode == "regenerate" || !await dbContext.Matches.AnyAsync(cancellationToken);
 
             var sqliteConnectionString = new SqliteConnectionStringBuilder
             {
@@ -50,26 +61,61 @@ public sealed class DataImportService(
             await sqliteConnection.OpenAsync(cancellationToken);
 
             var skipped = 0;
-            var countryLookup = await ReadCountryLookupAsync(sqliteConnection, value => skipped += value, cancellationToken);
-            var leagues = await ImportLeaguesAsync(dbContext, sqliteConnection, countryLookup, batchSize, value => skipped += value, cancellationToken);
-            var (teams, teamIdMap) = await ImportTeamsAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-            var (players, playerIdMap) = await ImportPlayersAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
-            var matches = await ImportMatchesAsync(dbContext, sqliteConnection, countryLookup, teamIdMap, batchSize, value => skipped += value, cancellationToken);
-            var teamAttributes = await ImportTeamAttributesAsync(dbContext, sqliteConnection, teamIdMap, batchSize, value => skipped += value, cancellationToken);
-            var playerAttributes = await ImportPlayerAttributesAsync(dbContext, sqliteConnection, playerIdMap, batchSize, value => skipped += value, cancellationToken);
+            var countriesResolved = 0;
+            var leagues = 0;
+            var teams = 0;
+            var players = 0;
+            var matches = 0;
+            var teamAttributes = 0;
+            var playerAttributes = 0;
+
+            if (shouldImportBaseData)
+            {
+                var countryLookup = await ReadCountryLookupAsync(sqliteConnection, value => skipped += value, cancellationToken);
+                countriesResolved = countryLookup.Count;
+                leagues = await ImportLeaguesAsync(dbContext, sqliteConnection, countryLookup, batchSize, value => skipped += value, cancellationToken);
+                var teamsResult = await ImportTeamsAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+                teams = teamsResult.Imported;
+                var teamIdMap = teamsResult.TeamIdMap;
+                var playersResult = await ImportPlayersAsync(dbContext, sqliteConnection, batchSize, value => skipped += value, cancellationToken);
+                players = playersResult.Imported;
+                var playerIdMap = playersResult.PlayerIdMap;
+                matches = await ImportMatchesAsync(dbContext, sqliteConnection, countryLookup, teamIdMap, batchSize, value => skipped += value, cancellationToken);
+                teamAttributes = await ImportTeamAttributesAsync(dbContext, sqliteConnection, teamIdMap, batchSize, value => skipped += value, cancellationToken);
+                playerAttributes = await ImportPlayerAttributesAsync(dbContext, sqliteConnection, playerIdMap, batchSize, value => skipped += value, cancellationToken);
+
+                await BackfillTeamLeagueLinksAsync(dbContext, cancellationToken);
+            }
+
+            var seed = BuildSeed(dbContext.Database.ProviderName ?? "unknown", GeneratorVersion);
+            var random = CreateDeterministicRandom(seed);
+
+            var matchEvents = await GenerateMatchEventsAsync(dbContext, profile, mode, random, cancellationToken);
+            const int playerMatchStats = 0;
+            var teamSeasonStats = await RebuildTeamSeasonStatsAsync(dbContext, cancellationToken);
+            var validationErrors = await ValidateGeneratedDataAsync(dbContext, cancellationToken);
+
+            if (validationErrors > 0)
+            {
+                throw new InvalidOperationException($"Synthetic generation failed with {validationErrors} validation errors.");
+            }
 
             await importTransaction.CommitAsync(cancellationToken);
 
             stopwatch.Stop();
 
             return new DataImportResult(
-                countryLookup.Count,
+                countriesResolved,
                 leagues,
                 teams,
                 players,
                 matches,
                 teamAttributes,
                 playerAttributes,
+                matchEvents,
+                playerMatchStats,
+                teamSeasonStats,
+                validationErrors,
                 skipped,
                 stopwatch.Elapsed);
         }
@@ -91,8 +137,47 @@ public sealed class DataImportService(
         }
     }
 
+    private static string NormalizeProfile(string profile)
+    {
+        var normalized = profile.Trim().ToLowerInvariant();
+        return normalized switch
+        {
+            "lite" => normalized,
+            "realistic" => normalized,
+            "stress" => normalized,
+            _ => throw new ArgumentOutOfRangeException(nameof(profile), "Profile must be one of: lite, realistic, stress."),
+        };
+    }
+
+    private static string NormalizeMode(string mode)
+    {
+        var normalized = mode.Trim().ToLowerInvariant();
+        return normalized switch
+        {
+            "regenerate" => normalized,
+            "append" => normalized,
+            _ => throw new ArgumentOutOfRangeException(nameof(mode), "Mode must be one of: regenerate, append."),
+        };
+    }
+
+    private static string BuildSeed(string environmentName, string generatorVersion)
+    {
+        var raw = $"{environmentName}|{generatorVersion}";
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(raw));
+        return Convert.ToHexString(hash);
+    }
+
+    private static Random CreateDeterministicRandom(string seed)
+    {
+        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(seed));
+        var value = BitConverter.ToInt32(hash, 0);
+        return new Random(value);
+    }
+
     private static async Task ClearExistingDataAsync(ProFootballDbContext dbContext, CancellationToken cancellationToken)
     {
+        await dbContext.TeamSeasonStats.ExecuteDeleteAsync(cancellationToken);
+        await dbContext.MatchEvents.ExecuteDeleteAsync(cancellationToken);
         await dbContext.PlayerAttributes.ExecuteDeleteAsync(cancellationToken);
         await dbContext.TeamAttributes.ExecuteDeleteAsync(cancellationToken);
         await dbContext.Matches.ExecuteDeleteAsync(cancellationToken);
@@ -140,7 +225,6 @@ public sealed class DataImportService(
         }
 
         addSkipped(skipped);
-
         logger.LogInformation("Resolved countries from SQLite: {Resolved}, skipped: {Skipped}", countryLookup.Count, skipped);
         return countryLookup;
     }
@@ -185,7 +269,6 @@ public sealed class DataImportService(
 
         imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
         addSkipped(skipped);
-
         logger.LogInformation("Imported leagues: {Imported}, skipped: {Skipped}", imported, skipped);
         return imported;
     }
@@ -220,7 +303,7 @@ public sealed class DataImportService(
                 continue;
             }
 
-            _ = teamFifaApiId; // source field intentionally ignored in normalized model
+            _ = teamFifaApiId;
             teamIdMap[teamApiId.Value] = id.Value;
             batch.Add(new Team(id.Value, longName, shortName));
             if (batch.Count >= batchSize)
@@ -231,7 +314,6 @@ public sealed class DataImportService(
 
         imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
         addSkipped(skipped);
-
         logger.LogInformation("Imported teams: {Imported}, skipped: {Skipped}", imported, skipped);
         return (imported, teamIdMap);
     }
@@ -268,9 +350,10 @@ public sealed class DataImportService(
                 continue;
             }
 
-            _ = playerFifaApiId; // source field intentionally ignored in normalized model
+            _ = playerFifaApiId;
             playerIdMap[playerApiId.Value] = id.Value;
-            batch.Add(new Player(id.Value, name, birthday, height, weight));
+            var (firstName, lastName) = SplitPlayerName(name);
+            batch.Add(new Player(id.Value, firstName, lastName, birthday, height, weight));
             if (batch.Count >= batchSize)
             {
                 imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
@@ -279,7 +362,6 @@ public sealed class DataImportService(
 
         imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
         addSkipped(skipped);
-
         logger.LogInformation("Imported players: {Imported}, skipped: {Skipped}", imported, skipped);
         return (imported, playerIdMap);
     }
@@ -332,7 +414,7 @@ public sealed class DataImportService(
                 continue;
             }
 
-            _ = matchApiId; // source field intentionally ignored in normalized model
+            _ = matchApiId;
             batch.Add(new FootballMatch(
                 id.Value,
                 countryName,
@@ -352,7 +434,6 @@ public sealed class DataImportService(
 
         imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
         addSkipped(skipped);
-
         logger.LogInformation("Imported matches: {Imported}, skipped: {Skipped}", imported, skipped);
         return imported;
     }
@@ -393,7 +474,7 @@ public sealed class DataImportService(
                 continue;
             }
 
-            _ = teamFifaApiId; // source field intentionally ignored in normalized model
+            _ = teamFifaApiId;
             batch.Add(new TeamAttribute(
                 id.Value,
                 teamId,
@@ -411,7 +492,6 @@ public sealed class DataImportService(
 
         imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
         addSkipped(skipped);
-
         logger.LogInformation("Imported team attributes: {Imported}, skipped: {Skipped}", imported, skipped);
         return imported;
     }
@@ -453,7 +533,7 @@ public sealed class DataImportService(
                 continue;
             }
 
-            _ = playerFifaApiId; // source field intentionally ignored in normalized model
+            _ = playerFifaApiId;
             batch.Add(new PlayerAttribute(
                 id.Value,
                 playerId,
@@ -472,9 +552,355 @@ public sealed class DataImportService(
 
         imported += await PersistBatchAsync(dbContext, batch, cancellationToken);
         addSkipped(skipped);
-
         logger.LogInformation("Imported player attributes: {Imported}, skipped: {Skipped}", imported, skipped);
         return imported;
+    }
+
+    private async Task BackfillTeamLeagueLinksAsync(ProFootballDbContext dbContext, CancellationToken cancellationToken)
+    {
+        if (IsNpgsql(dbContext))
+        {
+            await dbContext.Database.ExecuteSqlRawAsync("call public.sp_backfill_team_league_links();", cancellationToken);
+            return;
+        }
+
+        var matches = await dbContext.Matches
+            .AsNoTracking()
+            .Select(x => new { x.HomeTeamId, x.AwayTeamId, x.LeagueId })
+            .ToListAsync(cancellationToken);
+
+        var mapping = matches
+            .SelectMany(match => new[]
+            {
+                new { TeamId = match.HomeTeamId, match.LeagueId },
+                new { TeamId = match.AwayTeamId, match.LeagueId },
+            })
+            .GroupBy(x => new { x.TeamId, x.LeagueId })
+            .Select(group => new { group.Key.TeamId, group.Key.LeagueId, Count = group.Count() })
+            .ToList();
+
+        var bestLeagueByTeam = mapping
+            .GroupBy(x => x.TeamId)
+            .Select(group => group.OrderByDescending(x => x.Count).ThenBy(x => x.LeagueId).First())
+            .ToDictionary(x => x.TeamId, x => x.LeagueId);
+
+        var teams = await dbContext.Teams.ToListAsync(cancellationToken);
+        var teamType = typeof(Team);
+        var leagueIdProperty = teamType.GetProperty("LeagueId");
+
+        foreach (var team in teams)
+        {
+            if (!bestLeagueByTeam.TryGetValue(team.Id, out var leagueId))
+            {
+                continue;
+            }
+
+            leagueIdProperty?.SetValue(team, leagueId);
+        }
+
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<int> GenerateMatchEventsAsync(
+        ProFootballDbContext dbContext,
+        string profile,
+        string mode,
+        Random random,
+        CancellationToken cancellationToken)
+    {
+        if (mode == "regenerate")
+        {
+            await dbContext.MatchEvents.ExecuteDeleteAsync(cancellationToken);
+        }
+
+        var alreadyGeneratedMatchIds = mode == "append"
+            ? await dbContext.MatchEvents.Select(x => x.MatchId).Distinct().ToHashSetAsync(cancellationToken)
+            : [];
+
+        var allPlayers = await dbContext.Players.Select(p => p.Id).ToListAsync(cancellationToken);
+        if (allPlayers.Count == 0)
+        {
+            return 0;
+        }
+
+        var teamIds = await dbContext.Teams.Select(x => x.Id).ToListAsync(cancellationToken);
+        var playersByTeam = teamIds.ToDictionary(x => x, _ => new List<int>());
+
+        var matches = await dbContext.Matches
+            .AsNoTracking()
+            .OrderBy(m => m.Date)
+            .ToListAsync(cancellationToken);
+
+        var events = new List<MatchEvent>(matches.Count * 8);
+        var now = DateTime.UtcNow;
+        var includeShotsMultiplier = profile switch
+        {
+            "lite" => 1,
+            "realistic" => 2,
+            _ => 4,
+        };
+
+        foreach (var match in matches)
+        {
+            if (mode == "append" && alreadyGeneratedMatchIds.Contains(match.Id))
+            {
+                continue;
+            }
+
+            var homePlayers = ResolveTeamPlayers(playersByTeam, allPlayers, match.HomeTeamId);
+            var awayPlayers = ResolveTeamPlayers(playersByTeam, allPlayers, match.AwayTeamId);
+
+            var homeGoals = Math.Max(0, match.HomeTeamGoal ?? 0);
+            var awayGoals = Math.Max(0, match.AwayTeamGoal ?? 0);
+
+            for (var i = 0; i < homeGoals; i++)
+            {
+                events.Add(CreateGoalEvent(match.Id, match.HomeTeamId, homePlayers, random, now));
+            }
+
+            for (var i = 0; i < awayGoals; i++)
+            {
+                events.Add(CreateGoalEvent(match.Id, match.AwayTeamId, awayPlayers, random, now));
+            }
+
+            var cardEvents = profile switch
+            {
+                "lite" => random.Next(0, 3),
+                "realistic" => random.Next(1, 6),
+                _ => random.Next(3, 10),
+            };
+
+            for (var i = 0; i < cardEvents; i++)
+            {
+                var teamId = random.Next(0, 2) == 0 ? match.HomeTeamId : match.AwayTeamId;
+                var pool = teamId == match.HomeTeamId ? homePlayers : awayPlayers;
+                var eventType = random.NextDouble() < 0.9 ? "yellow_card" : "red_card";
+                events.Add(new MatchEvent(
+                    id: 0,
+                    matchId: match.Id,
+                    minute: (short)random.Next(1, 131),
+                    eventType: eventType,
+                    teamId: teamId,
+                    playerId: pool[random.Next(pool.Count)],
+                    assistPlayerId: null,
+                    payloadJson: """{"source":"synthetic"}""",
+                    createdAtUtc: now));
+            }
+
+            var substitutionEvents = profile switch
+            {
+                "lite" => random.Next(2, 5),
+                "realistic" => random.Next(4, 9),
+                _ => random.Next(8, 15),
+            };
+
+            for (var i = 0; i < substitutionEvents; i++)
+            {
+                var teamId = random.Next(0, 2) == 0 ? match.HomeTeamId : match.AwayTeamId;
+                var pool = teamId == match.HomeTeamId ? homePlayers : awayPlayers;
+                events.Add(new MatchEvent(
+                    id: 0,
+                    matchId: match.Id,
+                    minute: (short)random.Next(30, 96),
+                    eventType: "substitution",
+                    teamId: teamId,
+                    playerId: pool[random.Next(pool.Count)],
+                    assistPlayerId: null,
+                    payloadJson: """{"source":"synthetic"}""",
+                    createdAtUtc: now));
+            }
+
+            var shotEvents = Math.Max(0, (homeGoals + awayGoals + 4) * includeShotsMultiplier);
+            for (var i = 0; i < shotEvents; i++)
+            {
+                var teamId = random.Next(0, 2) == 0 ? match.HomeTeamId : match.AwayTeamId;
+                var pool = teamId == match.HomeTeamId ? homePlayers : awayPlayers;
+                events.Add(new MatchEvent(
+                    id: 0,
+                    matchId: match.Id,
+                    minute: (short)random.Next(1, 131),
+                    eventType: "shot",
+                    teamId: teamId,
+                    playerId: pool[random.Next(pool.Count)],
+                    assistPlayerId: null,
+                    payloadJson: """{"source":"synthetic","xg_weight":0.1}""",
+                    createdAtUtc: now));
+            }
+        }
+
+        if (events.Count == 0)
+        {
+            return 0;
+        }
+
+        await dbContext.MatchEvents.AddRangeAsync(events, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return events.Count;
+    }
+
+    private async Task<int> RebuildTeamSeasonStatsAsync(ProFootballDbContext dbContext, CancellationToken cancellationToken)
+    {
+        if (IsNpgsql(dbContext))
+        {
+            await dbContext.Database.ExecuteSqlRawAsync("call public.sp_rebuild_team_season_stats(null, null);", cancellationToken);
+            return await dbContext.TeamSeasonStats.CountAsync(cancellationToken);
+        }
+
+        await dbContext.TeamSeasonStats.ExecuteDeleteAsync(cancellationToken);
+
+        var matches = await dbContext.Matches
+            .AsNoTracking()
+            .ToListAsync(cancellationToken);
+
+        var stats = matches
+            .SelectMany(match => new[]
+            {
+                new
+                {
+                    match.Season,
+                    match.LeagueId,
+                    TeamId = match.HomeTeamId,
+                    GoalsFor = match.HomeTeamGoal ?? 0,
+                    GoalsAgainst = match.AwayTeamGoal ?? 0,
+                    IsWin = (match.HomeTeamGoal ?? 0) > (match.AwayTeamGoal ?? 0),
+                    IsDraw = (match.HomeTeamGoal ?? 0) == (match.AwayTeamGoal ?? 0),
+                },
+                new
+                {
+                    match.Season,
+                    match.LeagueId,
+                    TeamId = match.AwayTeamId,
+                    GoalsFor = match.AwayTeamGoal ?? 0,
+                    GoalsAgainst = match.HomeTeamGoal ?? 0,
+                    IsWin = (match.AwayTeamGoal ?? 0) > (match.HomeTeamGoal ?? 0),
+                    IsDraw = (match.AwayTeamGoal ?? 0) == (match.HomeTeamGoal ?? 0),
+                },
+            })
+            .GroupBy(x => new { x.Season, x.LeagueId, x.TeamId })
+            .Select(group => new TeamSeasonStat(
+                id: 0,
+                season: group.Key.Season,
+                leagueId: group.Key.LeagueId,
+                teamId: group.Key.TeamId,
+                matches: group.Count(),
+                wins: group.Count(x => x.IsWin),
+                draws: group.Count(x => x.IsDraw),
+                losses: group.Count(x => !x.IsWin && !x.IsDraw),
+                goalsFor: group.Sum(x => x.GoalsFor),
+                goalsAgainst: group.Sum(x => x.GoalsAgainst),
+                points: group.Count(x => x.IsWin) * 3 + group.Count(x => x.IsDraw)))
+            .ToList();
+
+        if (stats.Count == 0)
+        {
+            return 0;
+        }
+
+        await dbContext.TeamSeasonStats.AddRangeAsync(stats, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return stats.Count;
+    }
+
+
+    private async Task<int> ValidateGeneratedDataAsync(ProFootballDbContext dbContext, CancellationToken cancellationToken)
+    {
+        var errors = 0;
+
+        var goalsByMatch = await dbContext.MatchEvents
+            .Where(x => x.EventType == "goal")
+            .GroupBy(x => new { x.MatchId, x.TeamId })
+            .Select(group => new { group.Key.MatchId, group.Key.TeamId, Count = group.Count() })
+            .ToListAsync(cancellationToken);
+
+        var goalLookup = goalsByMatch.ToDictionary(x => (x.MatchId, x.TeamId), x => x.Count);
+        var matches = await dbContext.Matches.AsNoTracking().ToListAsync(cancellationToken);
+        foreach (var match in matches)
+        {
+            if (match.HomeTeamId == match.AwayTeamId)
+            {
+                continue;
+            }
+
+            var expectedHome = Math.Max(0, match.HomeTeamGoal ?? 0);
+            var expectedAway = Math.Max(0, match.AwayTeamGoal ?? 0);
+            var actualHome = goalLookup.GetValueOrDefault((match.Id, match.HomeTeamId), 0);
+            var actualAway = goalLookup.GetValueOrDefault((match.Id, match.AwayTeamId), 0);
+
+            if (expectedHome != actualHome || expectedAway != actualAway)
+            {
+                errors++;
+            }
+        }
+
+        var invalidEvents = await dbContext.MatchEvents
+            .CountAsync(x => x.Minute < 1 || x.Minute > 130 || !EventTypes.Contains(x.EventType), cancellationToken);
+        errors += invalidEvents;
+
+        var badTeamSeasonStats = await dbContext.TeamSeasonStats
+            .CountAsync(x => (x.Wins + x.Draws + x.Losses) != x.Matches || x.Points != (x.Wins * 3 + x.Draws), cancellationToken);
+        errors += badTeamSeasonStats;
+
+        return errors;
+    }
+
+    private static MatchEvent CreateGoalEvent(int matchId, int teamId, IReadOnlyList<int> playerPool, Random random, DateTime now)
+    {
+        short minute = random.NextDouble() switch
+        {
+            < 0.1 => (short)random.Next(1, 16),
+            < 0.4 => (short)random.Next(16, 46),
+            < 0.75 => (short)random.Next(46, 76),
+            _ => (short)random.Next(76, 131),
+        };
+
+        var scorer = playerPool[random.Next(playerPool.Count)];
+        int? assist = null;
+        if (random.NextDouble() < 0.65 && playerPool.Count > 1)
+        {
+            assist = scorer;
+            while (assist == scorer)
+            {
+                assist = playerPool[random.Next(playerPool.Count)];
+            }
+        }
+
+        var payload = $$"""{"source":"synthetic","zone":"central","body_part":"foot","set_piece":false}""";
+        return new MatchEvent(0, matchId, minute, "goal", teamId, scorer, assist, payload, now);
+    }
+
+    private static List<int> ResolveTeamPlayers(
+        IReadOnlyDictionary<int, List<int>> playersByTeam,
+        IReadOnlyList<int> allPlayers,
+        int teamId)
+    {
+        if (playersByTeam.TryGetValue(teamId, out var players) && players.Count > 0)
+        {
+            return players;
+        }
+
+        return allPlayers.Take(Math.Min(30, allPlayers.Count)).ToList();
+    }
+
+    private static bool IsNpgsql(ProFootballDbContext dbContext)
+        => (dbContext.Database.ProviderName ?? string.Empty).Contains("Npgsql", StringComparison.OrdinalIgnoreCase);
+
+    private static (string FirstName, string LastName) SplitPlayerName(string name)
+    {
+        var normalized = name.Trim();
+        var separatorIndex = normalized.LastIndexOf(' ');
+        if (separatorIndex <= 0 || separatorIndex >= normalized.Length - 1)
+        {
+            return (normalized, normalized);
+        }
+
+        var firstName = normalized[..separatorIndex].Trim();
+        var lastName = normalized[(separatorIndex + 1)..].Trim();
+        if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName))
+        {
+            return (normalized, normalized);
+        }
+
+        return (firstName, lastName);
     }
 
     private static async Task<int> PersistBatchAsync<TEntity>(
@@ -496,6 +922,4 @@ public sealed class DataImportService(
         batch.Clear();
         return persisted;
     }
-
 }
-

@@ -11,4 +11,12 @@ public sealed record MatchDetailsDto(
     int AwayTeamApiId,
     string AwayTeamName,
     int? HomeTeamGoal,
-    int? AwayTeamGoal);
+    int? AwayTeamGoal,
+    int TotalEvents,
+    int YellowCards,
+    int RedCards,
+    int Substitutions,
+    int Shots,
+    int Assists,
+    int? FirstGoalMinute,
+    int? LastGoalMinute);

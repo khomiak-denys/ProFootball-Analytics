@@ -28,6 +28,16 @@ dotnet run --project .\src\ProFootball.DataLoader\ProFootball.DataLoader.csproj 
 ```
 `DataLoader` resolves `country_id` from SQLite into text `CountryName` fields used by the final model.
 
+With synthetic analytics generation (default profile/mode):
+```powershell
+dotnet run --project .\src\ProFootball.DataLoader\ProFootball.DataLoader.csproj -- --sqlite "C:\path\to\database.sqlite" --batch-size 1000 --profile realistic --mode regenerate
+```
+
+Supported options:
+- `--profile lite|realistic|stress` (`realistic` by default)
+- `--mode regenerate|append` (`regenerate` by default)
+- `--batch-size <positive-int>` (`1000` by default)
+
 ### Test
 ```powershell
 .\scripts\tasks.ps1 test
@@ -95,6 +105,8 @@ To use your own icon in both the window frame and Windows taskbar:
 .\scripts\tasks.ps1 format
 .\scripts\tasks.ps1 clean
 dotnet run --project .\src\ProFootball.DataLoader\ProFootball.DataLoader.csproj -- --sqlite "<path>" --batch-size 1000
+dotnet run --project .\src\ProFootball.DataLoader\ProFootball.DataLoader.csproj -- --sqlite "<path>" --batch-size 1000 --profile realistic --mode regenerate
+dotnet run --project .\src\ProFootball.DataLoader\ProFootball.DataLoader.csproj -- --sqlite "<path>" --profile stress --mode append
 ```
 
 ## Project Structure

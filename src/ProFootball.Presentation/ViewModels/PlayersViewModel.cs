@@ -3,6 +3,7 @@ using System.Globalization;
 using System.Windows.Threading;
 using ProFootball.Application.Abstractions.Cqrs;
 using ProFootball.Application.Common;
+using ProFootball.Application.Player.Commands;
 using ProFootball.Application.Player.Dtos;
 using ProFootball.Application.Player.Queries;
 using ProFootball.Presentation.Commands;
@@ -26,6 +27,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     ];
 
     private readonly IQueryDispatcher _queryDispatcher;
+    private readonly ICommandDispatcher _commandDispatcher;
     private readonly Action<int> _openDetails;
     private readonly DispatcherTimer _nameSearchDebounceTimer;
     private readonly IReadOnlyList<string> _overallRatingOptions;
@@ -46,10 +48,23 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     private string _radarPolygonPoints = string.Empty;
     private long _searchVersion;
     private long _detailsVersion;
+    private string _editorFirstName = string.Empty;
+    private string _editorLastName = string.Empty;
+    private DateTime? _editorBirthday;
+    private int? _editorHeight;
+    private int? _editorWeight;
+    private bool _isAddPlayerModalOpen;
+    private string _newPlayerFirstName = string.Empty;
+    private string _newPlayerLastName = string.Empty;
+    private DateTime? _newPlayerBirthday;
+    private int? _newPlayerHeight;
+    private int? _newPlayerWeight;
+    private bool _isEditPlayerModalOpen;
 
-    public PlayersViewModel(IQueryDispatcher queryDispatcher, Action<int> openDetails)
+    public PlayersViewModel(IQueryDispatcher queryDispatcher, ICommandDispatcher commandDispatcher, Action<int> openDetails)
     {
         _queryDispatcher = queryDispatcher;
+        _commandDispatcher = commandDispatcher;
         _openDetails = openDetails;
 
         _overallRatingOptions = ["All Ratings", "90+", "85+", "80+", "75+"];
@@ -71,6 +86,17 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         OpenDetailsCommand = new RelayCommand(OpenDetails, () => SelectedPlayer is not null);
         ShowOverviewCommand = new RelayCommand(ShowOverview);
         ShowHistoryCommand = new RelayCommand(ShowHistory);
+        CreatePlayerCommand = new AsyncRelayCommand(CreatePlayerAsync, CommandExceptionHandler.Handle);
+        UpdatePlayerCommand = new AsyncRelayCommand(UpdatePlayerAsync, CommandExceptionHandler.Handle, () => SelectedPlayer is not null);
+        DeletePlayerCommand = new AsyncRelayCommand(DeletePlayerAsync, CommandExceptionHandler.Handle, () => SelectedPlayer is not null);
+        NextPageCommand = new AsyncRelayCommand(NextPageAsync, CommandExceptionHandler.Handle, () => HasNextPage);
+        PreviousPageCommand = new AsyncRelayCommand(PreviousPageAsync, CommandExceptionHandler.Handle, () => HasPreviousPage);
+        OpenAddPlayerModalCommand = new RelayCommand(OpenAddPlayerModal);
+        CloseAddPlayerModalCommand = new RelayCommand(CloseAddPlayerModal);
+        AddPlayerCommand = new AsyncRelayCommand(AddPlayerAsync, CommandExceptionHandler.Handle);
+        OpenEditPlayerModalCommand = new RelayCommand(OpenEditPlayerModal, () => SelectedPlayer is not null);
+        CloseEditPlayerModalCommand = new RelayCommand(CloseEditPlayerModal);
+        SaveEditPlayerCommand = new AsyncRelayCommand(SaveEditPlayerAsync, CommandExceptionHandler.Handle, () => SelectedPlayer is not null);
     }
 
     public ObservableCollection<PlayerListEntryViewModel> Players { get; }
@@ -98,10 +124,18 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
             }
 
             OpenDetailsCommand.RaiseCanExecuteChanged();
+            UpdatePlayerCommand.RaiseCanExecuteChanged();
+            DeletePlayerCommand.RaiseCanExecuteChanged();
+            OpenEditPlayerModalCommand.RaiseCanExecuteChanged();
+            SaveEditPlayerCommand.RaiseCanExecuteChanged();
+            RaisePropertyChanged(nameof(HasSelectedPlayer));
             RaiseSelectedPlayerPropertiesChanged();
+            SyncEditorWithSelection();
             _ = LoadSelectedPlayerDetailsSafeAsync();
         }
     }
+
+    public bool HasSelectedPlayer => SelectedPlayer is not null;
 
     public string? NameFilter
     {
@@ -180,7 +214,14 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     public int Page
     {
         get => _page;
-        private set => SetProperty(ref _page, value);
+        private set
+        {
+            if (SetProperty(ref _page, value))
+            {
+                RaisePropertyChanged(nameof(HasPreviousPage));
+                RaisePropertyChanged(nameof(HasNextPage));
+            }
+        }
     }
 
     public int PageSize
@@ -190,6 +231,10 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         {
             if (SetProperty(ref _pageSize, value))
             {
+                RaisePropertyChanged(nameof(HasPreviousPage));
+                RaisePropertyChanged(nameof(HasNextPage));
+                NextPageCommand.RaiseCanExecuteChanged();
+                PreviousPageCommand.RaiseCanExecuteChanged();
                 _ = StartSearchSafeAsync();
             }
         }
@@ -198,10 +243,22 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     public int TotalCount
     {
         get => _totalCount;
-        private set => SetProperty(ref _totalCount, value);
+        private set
+        {
+            if (SetProperty(ref _totalCount, value))
+            {
+                RaisePropertyChanged(nameof(HasNextPage));
+            }
+        }
     }
 
-    public string DetailsPlayerName => _selectedPlayerDetails?.Name ?? SelectedPlayer?.Name ?? "Select a player";
+    public bool HasPreviousPage => Page > 1;
+
+    public bool HasNextPage => Page * PageSize < TotalCount;
+
+    public string DetailsPlayerName => _selectedPlayerDetails is null
+        ? SelectedPlayer?.FullName ?? "Select a player"
+        : string.Create(CultureInfo.InvariantCulture, $"{_selectedPlayerDetails.FirstName} {_selectedPlayerDetails.LastName}").Trim();
 
     public string DetailsPosition => SelectedPlayer is null ? "--" : ResolvePosition(SelectedPlayer.PlayerApiId);
 
@@ -215,7 +272,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
 
     public string DetailsHeight => FormatMeasure(SelectedPlayer?.Height, "cm");
 
-    public string DetailsWeight => FormatMeasure(SelectedPlayer?.Weight, "kg");
+    public string DetailsWeight => FormatMeasure(SelectedPlayer?.Weight, "lbs");
 
     public string RadarPolygonPoints
     {
@@ -242,6 +299,100 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
     public RelayCommand ShowOverviewCommand { get; }
 
     public RelayCommand ShowHistoryCommand { get; }
+
+    public AsyncRelayCommand CreatePlayerCommand { get; }
+
+    public AsyncRelayCommand UpdatePlayerCommand { get; }
+
+    public AsyncRelayCommand DeletePlayerCommand { get; }
+
+    public AsyncRelayCommand NextPageCommand { get; }
+
+    public AsyncRelayCommand PreviousPageCommand { get; }
+
+    public RelayCommand OpenAddPlayerModalCommand { get; }
+
+    public RelayCommand CloseAddPlayerModalCommand { get; }
+
+    public AsyncRelayCommand AddPlayerCommand { get; }
+
+    public RelayCommand OpenEditPlayerModalCommand { get; }
+
+    public RelayCommand CloseEditPlayerModalCommand { get; }
+
+    public AsyncRelayCommand SaveEditPlayerCommand { get; }
+
+    public bool IsAddPlayerModalOpen
+    {
+        get => _isAddPlayerModalOpen;
+        private set => SetProperty(ref _isAddPlayerModalOpen, value);
+    }
+
+    public string NewPlayerFirstName
+    {
+        get => _newPlayerFirstName;
+        set => SetProperty(ref _newPlayerFirstName, value);
+    }
+
+    public string NewPlayerLastName
+    {
+        get => _newPlayerLastName;
+        set => SetProperty(ref _newPlayerLastName, value);
+    }
+
+    public DateTime? NewPlayerBirthday
+    {
+        get => _newPlayerBirthday;
+        set => SetProperty(ref _newPlayerBirthday, value);
+    }
+
+    public int? NewPlayerHeight
+    {
+        get => _newPlayerHeight;
+        set => SetProperty(ref _newPlayerHeight, value);
+    }
+
+    public int? NewPlayerWeight
+    {
+        get => _newPlayerWeight;
+        set => SetProperty(ref _newPlayerWeight, value);
+    }
+
+    public bool IsEditPlayerModalOpen
+    {
+        get => _isEditPlayerModalOpen;
+        private set => SetProperty(ref _isEditPlayerModalOpen, value);
+    }
+
+    public string EditorFirstName
+    {
+        get => _editorFirstName;
+        set => SetProperty(ref _editorFirstName, value);
+    }
+
+    public string EditorLastName
+    {
+        get => _editorLastName;
+        set => SetProperty(ref _editorLastName, value);
+    }
+
+    public DateTime? EditorBirthday
+    {
+        get => _editorBirthday;
+        set => SetProperty(ref _editorBirthday, value);
+    }
+
+    public int? EditorHeight
+    {
+        get => _editorHeight;
+        set => SetProperty(ref _editorHeight, value);
+    }
+
+    public int? EditorWeight
+    {
+        get => _editorWeight;
+        set => SetProperty(ref _editorWeight, value);
+    }
 
     public async Task SearchAsync()
     {
@@ -279,7 +430,8 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
             {
                 Players.Add(new PlayerListEntryViewModel(
                     item.PlayerApiId,
-                    item.Name,
+                    item.FirstName,
+                    item.LastName,
                     ResolvePosition(item.PlayerApiId),
                     ResolveAge(item.Birthday, item.PlayerApiId),
                     item.OverallRating,
@@ -293,6 +445,9 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
             SelectedPlayer = selectedPlayerId.HasValue
                 ? Players.FirstOrDefault(item => item.PlayerApiId == selectedPlayerId.Value) ?? Players.FirstOrDefault()
                 : Players.FirstOrDefault();
+
+            NextPageCommand.RaiseCanExecuteChanged();
+            PreviousPageCommand.RaiseCanExecuteChanged();
         }
         catch (Exception exception)
         {
@@ -355,6 +510,7 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
             }
 
             _selectedPlayerDetails = details;
+            SyncEditorWithSelection();
             SelectedPlayerHistory.Clear();
             if (details is not null)
             {
@@ -425,6 +581,166 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
         }
 
         _openDetails(SelectedPlayer.PlayerApiId);
+    }
+
+    private async Task NextPageAsync()
+    {
+        if (!HasNextPage)
+        {
+            return;
+        }
+
+        Page++;
+        await SearchAsync();
+    }
+
+    private async Task PreviousPageAsync()
+    {
+        if (!HasPreviousPage)
+        {
+            return;
+        }
+
+        Page--;
+        await SearchAsync();
+    }
+
+    private async Task CreatePlayerAsync()
+    {
+        var result = await _commandDispatcher.DispatchAsync<CreatePlayerCommand, Result>(
+            new CreatePlayerCommand(EditorFirstName, EditorLastName, EditorBirthday, EditorHeight, EditorWeight));
+        if (result.IsFailure)
+        {
+            ErrorMessage = result.Error.Message;
+            return;
+        }
+
+        ErrorMessage = null;
+        await StartSearchAsync();
+    }
+
+    private void OpenAddPlayerModal()
+    {
+        ErrorMessage = null;
+        NewPlayerFirstName = string.Empty;
+        NewPlayerLastName = string.Empty;
+        NewPlayerBirthday = null;
+        NewPlayerHeight = null;
+        NewPlayerWeight = null;
+        IsAddPlayerModalOpen = true;
+    }
+
+    private void CloseAddPlayerModal()
+    {
+        IsAddPlayerModalOpen = false;
+    }
+
+    private async Task AddPlayerAsync()
+    {
+        var result = await _commandDispatcher.DispatchAsync<CreatePlayerCommand, Result>(
+            new CreatePlayerCommand(NewPlayerFirstName, NewPlayerLastName, NewPlayerBirthday, NewPlayerHeight, NewPlayerWeight));
+        if (result.IsFailure)
+        {
+            ErrorMessage = result.Error.Message;
+            return;
+        }
+
+        ErrorMessage = null;
+        IsAddPlayerModalOpen = false;
+        await StartSearchAsync();
+    }
+
+    private void OpenEditPlayerModal()
+    {
+        if (SelectedPlayer is null)
+        {
+            return;
+        }
+
+        SyncEditorWithSelection();
+        IsEditPlayerModalOpen = true;
+    }
+
+    private void CloseEditPlayerModal()
+    {
+        IsEditPlayerModalOpen = false;
+    }
+
+    private async Task SaveEditPlayerAsync()
+    {
+        if (SelectedPlayer is null)
+        {
+            return;
+        }
+
+        var result = await _commandDispatcher.DispatchAsync<UpdatePlayerCommand, Result>(
+            new UpdatePlayerCommand(SelectedPlayer.PlayerApiId, EditorFirstName, EditorLastName, EditorBirthday, EditorHeight, EditorWeight));
+        if (result.IsFailure)
+        {
+            ErrorMessage = result.Error.Message;
+            return;
+        }
+
+        ErrorMessage = null;
+        IsEditPlayerModalOpen = false;
+        await SearchAsync();
+    }
+
+    private async Task UpdatePlayerAsync()
+    {
+        if (SelectedPlayer is null)
+        {
+            return;
+        }
+
+        var result = await _commandDispatcher.DispatchAsync<UpdatePlayerCommand, Result>(
+            new UpdatePlayerCommand(SelectedPlayer.PlayerApiId, EditorFirstName, EditorLastName, EditorBirthday, EditorHeight, EditorWeight));
+        if (result.IsFailure)
+        {
+            ErrorMessage = result.Error.Message;
+            return;
+        }
+
+        ErrorMessage = null;
+        await SearchAsync();
+    }
+
+    private async Task DeletePlayerAsync()
+    {
+        if (SelectedPlayer is null)
+        {
+            return;
+        }
+
+        var result = await _commandDispatcher.DispatchAsync<DeletePlayerCommand, Result>(
+            new DeletePlayerCommand(SelectedPlayer.PlayerApiId));
+        if (result.IsFailure)
+        {
+            ErrorMessage = result.Error.Message;
+            return;
+        }
+
+        ErrorMessage = null;
+        await SearchAsync();
+    }
+
+    private void SyncEditorWithSelection()
+    {
+        if (SelectedPlayer is null)
+        {
+            EditorFirstName = string.Empty;
+            EditorLastName = string.Empty;
+            EditorBirthday = null;
+            EditorHeight = null;
+            EditorWeight = null;
+            return;
+        }
+
+        EditorFirstName = SelectedPlayer.FirstName;
+        EditorLastName = SelectedPlayer.LastName;
+        EditorBirthday = _selectedPlayerDetails?.Birthday;
+        EditorHeight = SelectedPlayer.Height;
+        EditorWeight = SelectedPlayer.Weight;
     }
 
     private void RaiseSelectedPlayerPropertiesChanged()
@@ -585,7 +901,8 @@ public sealed class PlayersViewModel : ObservableObject, IDisposable
 
 public sealed record PlayerListEntryViewModel(
     int PlayerApiId,
-    string Name,
+    string FirstName,
+    string LastName,
     string Position,
     int Age,
     int? OverallRating,
@@ -593,4 +910,7 @@ public sealed record PlayerListEntryViewModel(
     string PreferredFoot,
     int? Height,
     int? Weight,
-    string HeightDisplay);
+    string HeightDisplay)
+{
+    public string FullName => string.Create(CultureInfo.InvariantCulture, $"{FirstName} {LastName}").Trim();
+}

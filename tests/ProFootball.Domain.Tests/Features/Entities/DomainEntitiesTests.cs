@@ -68,27 +68,28 @@ public class DomainEntitiesTests
     }
 
     [Fact]
-    public void Player_Constructor_ShouldThrowArgumentNullException_WhenNameIsNull()
+    public void Player_Constructor_ShouldThrowArgumentNullException_WhenFirstNameIsNull()
     {
-        Assert.Throws<ArgumentNullException>(() => new Player(11, null!, DateTime.UtcNow, 182, 78));
+        Assert.Throws<ArgumentNullException>(() => new Player(11, null!, "Name", DateTime.UtcNow, 182, 78));
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public void Player_Constructor_ShouldThrowArgumentException_WhenNameIsWhitespace(string name)
+    public void Player_Constructor_ShouldThrowArgumentException_WhenFirstNameIsWhitespace(string name)
     {
-        Assert.Throws<ArgumentException>(() => new Player(11, name, DateTime.UtcNow, 182, 78));
+        Assert.Throws<ArgumentException>(() => new Player(11, name, "Name", DateTime.UtcNow, 182, 78));
     }
 
     [Fact]
-    public void Player_Constructor_ShouldSetFieldsAndTrimName()
+    public void Player_Constructor_ShouldSetFieldsAndTrimNames()
     {
         var birthday = new DateTime(1993, 6, 24, 0, 0, 0, DateTimeKind.Utc);
-        var player = new Player(11, "  Player Name  ", birthday, 182, 78);
+        var player = new Player(11, "  Player ", " Name  ", birthday, 182, 78);
 
         Assert.Equal(11, player.Id);
-        Assert.Equal("Player Name", player.Name);
+        Assert.Equal("Player", player.FirstName);
+        Assert.Equal("Name", player.LastName);
         Assert.Equal(birthday, player.Birthday);
         Assert.Equal(182, player.Height);
         Assert.Equal(78, player.Weight);

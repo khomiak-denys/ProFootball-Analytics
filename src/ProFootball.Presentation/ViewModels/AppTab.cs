@@ -11,4 +11,5 @@ public enum AppTab
     Matches = 6,
     MatchDetails = 7,
     Analytics = 8,
+    Settings = 9,
 }
